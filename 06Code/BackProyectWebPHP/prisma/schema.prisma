@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String         @id @default(uuid())
+  ruc          String         @unique
+  firstName    String
+  lastName     String
+  email        String         @unique
+  password     String
+  role         String         @default("user")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  
+  invoices     Invoice[]
+  atsFiles     AtsFile[]
+  processSteps ProcessStep[]
+  auditEvents  AuditEvent[]
+}
+
+model Invoice {
+  id         String   @id @default(uuid())
+  number     String
+  issuerName String
+  issuerRuc  String
+  date       String
+  taxBase    Float
+  iva        Float
+  total      Float
+  format     String
+  userId     String
+  createdAt  DateTime @default(now())
+  
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model AtsFile {
+  id               String   @id @default(uuid())
+  name             String
+  format           String
+  periodMonth      Int
+  periodYear       Int
+  invoiceCount     Int
+  validationErrors Int
+  userId           String
+  createdAt        DateTime @default(now())
+
+  user             User     @relation(fields: [userId], references: [id])
+}
+
+model ProcessStep {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  status      String
+  module      String
+  completedAt DateTime?
+  userId      String
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model AuditEvent {
+  id        String   @id @default(uuid())
+  action    String
+  module    String
+  details   String
+  timestamp DateTime @default(now())
+  userId    String
+
+  user      User     @relation(fields: [userId], references: [id])
+}
