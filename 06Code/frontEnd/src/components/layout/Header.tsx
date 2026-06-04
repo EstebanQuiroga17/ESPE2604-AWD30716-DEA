@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, LogOut, ChevronDown, Settings, UserCircle } from 'lucide-react';
+import { Bell, LogOut, ChevronDown, Settings, UserCircle, Link2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import type { Notification } from '../../types';
 import '../../styles/Header.css';
@@ -33,9 +33,15 @@ export default function Header() {
   return (
     <header className="app-header">
       <div className="header-left">
-        <Link to="/sri-connection" className="sri-status-indicator" style={{ cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-          <span className={`status-dot status-dot-${sriConnectionStatus === 'connected' ? 'success' : sriConnectionStatus === 'pending' ? 'warning' : 'danger'} status-dot-pulse`} />
-          <span className="sri-status-label">SRI: {sriStatusLabel}</span>
+        <Link 
+          to="/sri-connection" 
+          className={`sri-connection-btn sri-connection-${sriConnectionStatus}`}
+          title="Conexión con SRI"
+        >
+          <span className={`status-dot status-dot-${sriConnectionStatus === 'connected' ? 'success' : sriConnectionStatus === 'pending' ? 'warning' : 'danger'}`} />
+          <Link2 size={18} />
+          <span className="sri-label">SRI</span>
+          <span className="sri-status-text">{sriStatusLabel}</span>
         </Link>
       </div>
 

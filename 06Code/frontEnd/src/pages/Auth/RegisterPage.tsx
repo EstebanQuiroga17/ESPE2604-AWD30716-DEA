@@ -93,7 +93,7 @@ export default function RegisterPage() {
         email: formState.email,
         password: formState.password
       });
-      if (success) navigate('/dashboard');
+      if (success) navigate('/workspaces');
     } finally {
       setIsLoading(false);
     }

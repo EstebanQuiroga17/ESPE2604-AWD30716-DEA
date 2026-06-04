@@ -114,3 +114,25 @@ export interface DashboardSummary {
   lastSync: string;
   notifications: Notification[];
 }
+
+export interface Workspace {
+  id: string;
+  name: string;
+  description: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  sriConnectionStatus: SriConnectionStatus;
+  lastActivityAt?: string;
+  invoicesCount?: number;
+  atsFilesCount?: number;
+  workSpaceLocation: string;
+  period: TaxPeriod;
+}
+
+export interface WorkspaceTraceability {
+  workspaceId: string;
+  processSteps: ProcessStep[];
+  auditEvents: AuditEvent[];
+  completionPercentage: number;
+}

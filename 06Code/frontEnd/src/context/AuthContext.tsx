@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { User, SriConnectionStatus } from '../types';
+import type { User, SriConnectionStatus, Workspace } from '../types';
+import { MockWorkspaces } from '../data/mockData';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -8,6 +9,8 @@ interface AuthContextValue {
   currentUser: User | null;
   isAuthenticated: boolean;
   sriConnectionStatus: SriConnectionStatus;
+  currentWorkspace: Workspace | null;
+  workspaces: Workspace[];
   login: (identifier: string, password: string) => Promise<boolean>;
   register: (data: any) => Promise<boolean>;
   loginAsAdmin: () => void;
@@ -15,6 +18,10 @@ interface AuthContextValue {
   connectToSri: (username: string, password: string) => Promise<boolean>;
   disconnectFromSri: () => void;
   updateCurrentUser: (data: Partial<User>) => void;
+  createWorkspace: (name: string, description: string, workSpaceLocation: string, period: any) => Promise<Workspace | null>;
+  deleteWorkspace: (workspaceId: string) => Promise<boolean>;
+  selectWorkspace: (workspace: Workspace) => void;
+  loadWorkspaces: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -31,6 +38,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
   const [currentUser, setCurrentUser] = useState<User | null>(initialUser);
   const [sriConnectionStatus, setSriConnectionStatus] = useState<SriConnectionStatus>('disconnected');
+  const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
 
   const login = useCallback(async (identifier: string, password: string): Promise<boolean> => {
     if (!identifier || !password) {
@@ -88,7 +97,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useCallback(() => {
     setCurrentUser(null);
     setSriConnectionStatus('disconnected');
+    setCurrentWorkspace(null);
+    setWorkspaces([]);
     try { localStorage.removeItem('currentUser'); } catch {}
+    try { localStorage.removeItem('currentWorkspace'); } catch {}
     delete axios.defaults.headers.common['X-User-Id'];
   }, []);
 
@@ -111,10 +123,79 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setCurrentUser(prev => prev ? { ...prev, ...data } : null);
   }, []);
 
+  const createWorkspace = useCallback(async (name: string, description: string, workSpaceLocation: string, period: any): Promise<Workspace | null> => {
+    if (!currentUser) return null;
+    try {
+      const newWorkspace: Workspace = {
+        id: `ws-${Date.now()}`,
+        name,
+        description,
+        ownerId: currentUser.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        sriConnectionStatus: 'disconnected',
+        lastActivityAt: new Date().toISOString(),
+        invoicesCount: 0,
+        atsFilesCount: 0,
+        workSpaceLocation,
+        period,
+      };
+      setWorkspaces(prev => [...prev, newWorkspace]);
+      return newWorkspace;
+    } catch (error) {
+      console.error("Error creating workspace:", error);
+      return null;
+    }
+  }, [currentUser]);
+
+  const deleteWorkspace = useCallback(async (workspaceId: string): Promise<boolean> => {
+    try {
+      setWorkspaces(prev => prev.filter(ws => ws.id !== workspaceId));
+      if (currentWorkspace?.id === workspaceId) {
+        setCurrentWorkspace(null);
+      }
+      return true;
+    } catch (error) {
+      console.error("Error deleting workspace:", error);
+      return false;
+    }
+  }, [currentWorkspace]);
+
+  const selectWorkspace = useCallback((workspace: Workspace) => {
+    setCurrentWorkspace(workspace);
+    try {
+      localStorage.setItem('currentWorkspace', JSON.stringify(workspace));
+    } catch {}
+  }, []);
+
+  const loadWorkspaces = useCallback(async () => {
+    if (!currentUser?.id) return;
+    try {
+      const mockWorkspaces = MockWorkspaces.map(ws => ({
+        ...ws,
+        ownerId: currentUser.id,
+      }));
+      setWorkspaces(mockWorkspaces);
+      
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('currentWorkspace') : null;
+      if (stored) {
+        try {
+          const saved = JSON.parse(stored) as Workspace;
+          const found = mockWorkspaces.find(ws => ws.id === saved.id);
+          if (found) setCurrentWorkspace(found);
+        } catch {}
+      }
+    } catch (error) {
+      console.error("Error loading workspaces:", error);
+    }
+  }, [currentUser?.id]);
+
   const contextValue: AuthContextValue = {
     currentUser,
     isAuthenticated: currentUser !== null,
     sriConnectionStatus,
+    currentWorkspace,
+    workspaces,
     login,
     register,
     loginAsAdmin,
@@ -122,6 +203,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     connectToSri,
     disconnectFromSri,
     updateCurrentUser,
+    createWorkspace,
+    deleteWorkspace,
+    selectWorkspace,
+    loadWorkspaces,
   };
 
   return (

@@ -76,7 +76,7 @@ function NotificationIcon({ type }: { type: Notification['type'] }) {
 }
 
 export default function DashboardPage() {
-  const { sriConnectionStatus, currentUser } = useAuth();
+  const { sriConnectionStatus, currentUser, currentWorkspace } = useAuth();
   const [isSyncing, setIsSyncing] = useState(false);
   const [summary, setSummary] = useState({
     invoicesDownloaded: 0,
@@ -112,6 +112,9 @@ export default function DashboardPage() {
       <div className="animate-fade-in">
         <h1 className="page-title">Bienvenido a ATS Express</h1>
         <p className="page-subtitle">
+          {currentWorkspace && (
+            <>Workspace: <strong>{currentWorkspace.name}</strong> - </>
+          )}
           Automatiza la descarga de facturas del SRI y genera tu Anexo Transaccional Simplificado
         </p>
 

@@ -20,6 +20,100 @@
   gap: 16px;
 }
 
+.sri-connection-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--color-gray-50);
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-gray-700);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.sri-connection-btn:hover {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-300);
+}
+
+.sri-connection-btn.sri-connection-connected {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.sri-connection-btn.sri-connection-connected:hover {
+  background: #d1fae5;
+  border-color: #059669;
+}
+
+.sri-connection-btn.sri-connection-disconnected {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #7f1d1d;
+}
+
+.sri-connection-btn.sri-connection-disconnected:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
+.sri-connection-btn.sri-connection-pending {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.sri-connection-btn.sri-connection-pending:hover {
+  background: #fef3c7;
+  border-color: #d97706;
+}
+
+.status-dot {
+  display: inline-flex;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.status-dot.status-dot-success {
+  background: #10b981;
+}
+
+.status-dot.status-dot-danger {
+  background: #ef4444;
+}
+
+.status-dot.status-dot-warning {
+  background: #f59e0b;
+}
+
+.sri-label {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.sri-status-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 .header-right {
   display: flex;
   align-items: center;

@@ -1,4 +1,4 @@
-import type { User, DashboardSummary, Invoice, AtsFile, ProcessStep, AuditEvent, Notification } from '../types';
+import type { User, DashboardSummary, Invoice, AtsFile, ProcessStep, AuditEvent, Notification, Workspace } from '../types';
 
 const MOCK_NOTIFICATIONS: Notification[] = [
   {
@@ -146,14 +146,6 @@ export const MockAtsFiles: AtsFile[] = [
 export const MockProcessSteps: ProcessStep[] = [
   {
     id: 'step1',
-    title: 'Vincular con SRI',
-    description: 'Conectar credenciales del portal SRI en línea',
-    status: 'completed',
-    completedAt: '2025-11-28T09:00:00Z',
-    module: 'Módulo 2',
-  },
-  {
-    id: 'step2',
     title: 'Descargar Facturas',
     description: 'Obtener facturas del período seleccionado desde SRI',
     status: 'completed',
@@ -161,29 +153,14 @@ export const MockProcessSteps: ProcessStep[] = [
     module: 'Módulo 3',
   },
   {
-    id: 'step3',
-    title: 'Cargar Directorio XML',
-    description: 'Validar y cargar directorio de facturas XML',
-    status: 'completed',
-    completedAt: '2025-11-28T10:00:00Z',
-    module: 'Módulo 3',
-  },
-  {
-    id: 'step4',
+    id: 'step2',
     title: 'Generar ATS XLSM',
     description: 'Crear archivo ATS en formato Excel Macro',
     status: 'in-progress',
     module: 'Módulo 4',
   },
   {
-    id: 'step5',
-    title: 'Validar ATS XLSM',
-    description: 'Revisar errores en el archivo XLSM generado',
-    status: 'pending',
-    module: 'Módulo 5',
-  },
-  {
-    id: 'step6',
+    id: 'step3',
     title: 'Generar ATS XML',
     description: 'Exportar ATS final compatible con DIMM del SRI',
     status: 'blocked',
@@ -231,5 +208,36 @@ export const MockAuditEvents: AuditEvent[] = [
     module: 'Generación ATS',
     timestamp: '2025-11-28T10:30:00Z',
     details: 'ATS XLSM generado: ATS_2025_11_v1.xlsm con 247 facturas',
+  },
+];
+
+export const MockWorkspaces: Workspace[] = [
+  {
+    id: 'ws-1',
+    name: 'Workspace Principal',
+    description: 'Mi workspace principal de trabajo',
+    ownerId: 'u001',
+    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    sriConnectionStatus: 'connected',
+    lastActivityAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    invoicesCount: 45,
+    atsFilesCount: 3,
+    workSpaceLocation: '/home/user/ats-data/workspace-principal',
+    period: { type: 'monthly', month: 11, year: 2025 },
+  },
+  {
+    id: 'ws-2',
+    name: 'Proyectos Especiales',
+    description: 'Workspace para proyectos especiales y auditorías',
+    ownerId: 'u001',
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    sriConnectionStatus: 'disconnected',
+    lastActivityAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    invoicesCount: 12,
+    atsFilesCount: 1,
+    workSpaceLocation: '/home/user/ats-data/proyectos-especiales',
+    period: { type: 'semi-annual', semester: 1, year: 2025 },
   },
 ];

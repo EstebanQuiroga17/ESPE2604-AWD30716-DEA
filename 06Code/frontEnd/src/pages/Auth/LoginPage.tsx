@@ -40,7 +40,7 @@ export default function LoginPage() {
     setErrors({});
     try {
       const success = await login(formState.identifier, formState.password);
-      if (success) navigate('/dashboard');
+      if (success) navigate('/workspaces');
       else setErrors({ general: 'Credenciales incorrectas. Verifica tu usuario y contraseña.' });
     } finally {
       setIsLoading(false);

@@ -2,6 +2,7 @@ import { History, CheckCircle2, Clock, Lock, Play, Download } from 'lucide-react
 import { Link } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import { MockProcessSteps, MockAuditEvents } from '../../data/mockData';
+import { useAuth } from '../../context/AuthContext';
 import type { ProcessStep, ProcessStepStatus } from '../../types';
 import '../../styles/Traceability.css';
 
@@ -25,6 +26,7 @@ function buildCompletionPercentage(steps: ProcessStep[]): number {
 }
 
 export default function TraceabilityPage() {
+  const { currentWorkspace } = useAuth();
   const steps = MockProcessSteps;
   const events = MockAuditEvents;
   const completionPercentage = buildCompletionPercentage(steps);
@@ -34,6 +36,9 @@ export default function TraceabilityPage() {
       <div className="animate-fade-in">
         <h1 className="page-title">Trazabilidad del Proceso ATS</h1>
         <p className="page-subtitle">
+          {currentWorkspace && (
+            <>Workspace: <strong>{currentWorkspace.name}</strong> - </>
+          )}
           Visualiza el estado de cada paso del proceso de generación del Anexo Transaccional Simplificado
         </p>
 

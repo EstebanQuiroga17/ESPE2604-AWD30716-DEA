@@ -7,6 +7,7 @@ import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import NoSessionPage from './pages/NoSession/NoSessionPage';
+import WorkspaceManagementPage from './pages/Workspaces/WorkspaceManagementPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import SriConnectionPage from './pages/SriConnection/SriConnectionPage';
 import InvoicesDownloadPage from './pages/Invoices/InvoicesDownloadPage';
@@ -34,14 +35,15 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
+          <Route path="/workspaces" element={<ProtectedRoute><WorkspaceManagementPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/traceability" element={<ProtectedRoute><TraceabilityPage /></ProtectedRoute>} />
           <Route path="/sri-connection" element={<ProtectedRoute><SriConnectionPage /></ProtectedRoute>} />
           <Route path="/invoices/download" element={<ProtectedRoute><InvoicesDownloadPage /></ProtectedRoute>} />
           <Route path="/invoices/manage" element={<ProtectedRoute><InvoicesManagePage /></ProtectedRoute>} />
           <Route path="/ats/generate" element={<ProtectedRoute><AtsGeneratePage /></ProtectedRoute>} />
           <Route path="/ats/validate" element={<ProtectedRoute><AtsValidatePage /></ProtectedRoute>} />
           <Route path="/ats/export" element={<ProtectedRoute><AtsExportPage /></ProtectedRoute>} />
-          <Route path="/traceability" element={<ProtectedRoute><TraceabilityPage /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><SupportPage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/no-session" element={<NoSessionPage />} />

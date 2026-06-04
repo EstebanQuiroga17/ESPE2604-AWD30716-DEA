@@ -1,7 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Link2,
   Download,
   FolderOpen,
   FileSpreadsheet,
@@ -12,8 +11,11 @@ import {
   Users,
   Settings,
   ShieldCheck,
+  Package,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useState } from 'react';
 import '../../styles/Sidebar.css';
 
 interface NavigationItem {
@@ -25,7 +27,6 @@ interface NavigationItem {
 
 const userNavigationItems: NavigationItem[] = [
   { path: '/dashboard', icon: <LayoutDashboard size={20} />, label: 'Inicio' },
-  { path: '/sri-connection', icon: <Link2 size={20} />, label: 'Conectar SRI' },
   { path: '/invoices/download', icon: <Download size={20} />, label: 'Descargar Facturas' },
   { path: '/invoices/manage', icon: <FolderOpen size={20} />, label: 'Gestionar Facturas' },
   { path: '/ats/generate', icon: <FileSpreadsheet size={20} />, label: 'Generar ATS XLSM' },
@@ -43,9 +44,10 @@ const adminNavigationItems: NavigationItem[] = [
 ];
 
 export default function Sidebar() {
-  const { currentUser } = useAuth();
+  const { currentUser, currentWorkspace, workspaces, selectWorkspace } = useAuth();
   const location = useLocation();
   const isAdminSection = location.pathname.startsWith('/admin');
+  const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
 
   const navigationItems = currentUser?.role === 'admin'
     ? (isAdminSection ? adminNavigationItems : userNavigationItems)
@@ -74,6 +76,51 @@ export default function Sidebar() {
           </NavLink>
         </div>
       )}
+
+      {/* Workspace Selector */}
+      <div className="sidebar-workspace-selector">
+        <div className="workspace-selector-header">
+          <span className="workspace-label">Workspace Actual</span>
+          <NavLink to="/workspaces" className="workspace-manage-link">
+            <Package size={16} />
+          </NavLink>
+        </div>
+        <div className="workspace-dropdown-wrapper">
+          <button
+            className="workspace-dropdown-button"
+            onClick={() => setIsWorkspaceDropdownOpen(!isWorkspaceDropdownOpen)}
+          >
+            <span className="workspace-name-display">
+              {currentWorkspace?.name || 'Seleccionar workspace'}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`chevron ${isWorkspaceDropdownOpen ? 'open' : ''}`}
+            />
+          </button>
+          {isWorkspaceDropdownOpen && workspaces.length > 0 && (
+            <div className="workspace-dropdown-menu">
+              {workspaces.map((workspace) => (
+                <button
+                  key={workspace.id}
+                  className={`workspace-dropdown-item ${
+                    currentWorkspace?.id === workspace.id ? 'active' : ''
+                  }`}
+                  onClick={() => {
+                    selectWorkspace(workspace);
+                    setIsWorkspaceDropdownOpen(false);
+                  }}
+                >
+                  <span className="workspace-item-name">{workspace.name}</span>
+                  {currentWorkspace?.id === workspace.id && (
+                    <span className="workspace-item-badge">Activo</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       <nav className="sidebar-nav">
         <ul className="sidebar-nav-list">
