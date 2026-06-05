@@ -8,35 +8,44 @@ export class WorkspaceService {
     });
   }
 
-  public async getWorkspaceById(id: string, userId: string) {
+  public async getWorkspaceById(id: string, userId?: string) {
+    const whereClause: any = { id };
+    if (userId) whereClause.userId = userId;
     return prisma.workspace.findFirst({
-      where: { id, userId }
+      where: whereClause
     });
   }
 
-  public async getWorkspaceInvoices(workspaceId: string, userId: string) {
+  public async getWorkspaceInvoices(workspaceId: string, userId?: string) {
+    const whereClause: any = { workspaceId };
+    if (userId) whereClause.userId = userId;
     return prisma.invoice.findMany({
-      where: { workspaceId, userId },
+      where: whereClause,
       orderBy: { date: 'desc' }
     });
   }
 
-  public async getWorkspaceAtsFiles(workspaceId: string, userId: string) {
+  public async getWorkspaceAtsFiles(workspaceId: string, userId?: string) {
+    const whereClause: any = { workspaceId };
+    if (userId) whereClause.userId = userId;
     return prisma.atsFile.findMany({
-      where: { workspaceId, userId },
+      where: whereClause,
       orderBy: { createdAt: 'desc' }
     });
   }
 
-  public async getWorkspaceSummary(workspaceId: string, userId: string) {
+  public async getWorkspaceSummary(workspaceId: string, userId?: string) {
+    const whereClause: any = { workspaceId };
+    if (userId) whereClause.userId = userId;
+
     const aggregate = await prisma.invoice.aggregate({
-      where: { workspaceId, userId },
+      where: whereClause,
       _count: { id: true },
       _sum: { total: true, taxBase: true, iva: true }
     });
 
     const errorAtsCount = await prisma.atsFile.aggregate({
-      where: { workspaceId, userId },
+      where: whereClause,
       _sum: { validationErrors: true }
     });
 
@@ -49,9 +58,12 @@ export class WorkspaceService {
     };
   }
 
-  public async getWorkspaceProcessStatus(workspaceId: string, userId: string) {
+  public async getWorkspaceProcessStatus(workspaceId: string, userId?: string) {
+    const whereClause: any = { workspaceId };
+    if (userId) whereClause.userId = userId;
+
     const steps = await prisma.processStep.findMany({
-      where: { workspaceId, userId }
+      where: whereClause
     });
 
     // Mapea a estados booleanos requeridos por la vista del frontend
@@ -66,23 +78,27 @@ export class WorkspaceService {
     };
   }
 
-  public async getWorkspaceProcessSteps(workspaceId: string, userId: string) {
+  public async getWorkspaceProcessSteps(workspaceId: string, userId?: string) {
+    const whereClause: any = { workspaceId };
+    if (userId) whereClause.userId = userId;
+
     return prisma.processStep.findMany({
-      where: { workspaceId, userId },
+      where: whereClause,
       orderBy: { createdAt: 'asc' }
     });
   }
 
-  public async getWorkspaceLogs(workspaceId: string, userId: string) {
-    // Audit logs for user that reference the workspace ID in the details or context
+  public async getWorkspaceLogs(workspaceId: string, userId?: string) {
+    const whereClause: any = {
+      OR: [
+        { details: { contains: workspaceId } },
+        { module: { contains: 'Workspace' } }
+      ]
+    };
+    if (userId) whereClause.userId = userId;
+
     const events = await prisma.auditEvent.findMany({
-      where: {
-        userId,
-        OR: [
-          { details: { contains: workspaceId } },
-          { module: { contains: 'Workspace' } }
-        ]
-      },
+      where: whereClause,
       orderBy: { timestamp: 'desc' },
       take: 50
     });

@@ -3,9 +3,9 @@ import { prisma } from '../config/database';
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = (req.headers['x-user-id'] as string) || (req.query.userId as string);
+    const userId = (req.headers['x-user-id'] as string) || req.headers['x-user-id'];
     if (!userId || typeof userId !== 'string') {
-      res.status(401).json({ success: false, message: 'Missing authentication header or userId query parameter' });
+      res.status(401).json({ success: false, message: 'Missing authentication header' });
       return;
     }
 

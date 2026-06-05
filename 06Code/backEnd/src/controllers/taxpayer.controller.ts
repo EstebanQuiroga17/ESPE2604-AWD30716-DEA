@@ -4,9 +4,12 @@ import { prisma } from '../config/database';
 export class TaxpayerController {
   public async getProfile(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
+      const userId = req.params.userId as string;
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
       if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
+        res.status(404).json({ success: false, message: 'User not found' });
         return;
       }
       res.status(200).json({
@@ -28,9 +31,12 @@ export class TaxpayerController {
 
   public async getStats(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
+      const userId = req.params.userId as string;
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
       if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
+        res.status(404).json({ success: false, message: 'User not found' });
         return;
       }
 

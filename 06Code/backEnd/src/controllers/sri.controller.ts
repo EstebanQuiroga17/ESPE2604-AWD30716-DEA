@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { SriService } from '../services/sri.service';
+import { prisma } from '../config/database';
 
 export class SriController {
   private sriService: SriService;
@@ -10,9 +11,12 @@ export class SriController {
 
   public async getSriStatus(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
+      const userId = req.params.userId as string;
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
       if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
+        res.status(404).json({ success: false, message: 'User not found' });
         return;
       }
 
@@ -33,13 +37,8 @@ export class SriController {
 
   public async getSriHistory(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
-      if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-        return;
-      }
-
-      const history = await this.sriService.getSriHistory(user.id);
+      const userId = req.params.userId as string;
+      const history = await this.sriService.getSriHistory(userId);
       res.status(200).json({
         success: true,
         data: history

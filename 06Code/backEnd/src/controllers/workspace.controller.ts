@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { WorkspaceService } from '../services/workspace.service';
+import { prisma } from '../config/database';
 
 export class WorkspaceController {
   private workspaceService: WorkspaceService;
@@ -10,13 +11,8 @@ export class WorkspaceController {
 
   public async getWorkspaces(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
-      if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-        return;
-      }
-
-      const workspaces = await this.workspaceService.getUserWorkspaces(user.id);
+      const userId = req.params.userId as string;
+      const workspaces = await this.workspaceService.getUserWorkspaces(userId);
       res.status(200).json({ success: true, data: workspaces });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -25,15 +21,10 @@ export class WorkspaceController {
 
   public async getWorkspaceDetail(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
-      
-      if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-        return;
-      }
+      const userId = req.headers['x-user-id'] as string;
 
-      const workspace = await this.workspaceService.getWorkspaceById(workspaceId, user.id);
+      const workspace = await this.workspaceService.getWorkspaceById(workspaceId, userId);
       if (!workspace) {
         res.status(404).json({ success: false, message: 'Workspace not found' });
         return;
@@ -47,15 +38,10 @@ export class WorkspaceController {
 
   public async getInvoices(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
+      const userId = req.headers['x-user-id'] as string;
 
-      if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-        return;
-      }
-
-      const invoices = await this.workspaceService.getWorkspaceInvoices(workspaceId, user.id);
+      const invoices = await this.workspaceService.getWorkspaceInvoices(workspaceId, userId);
       res.status(200).json({ success: true, data: invoices });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -64,15 +50,10 @@ export class WorkspaceController {
 
   public async getAtsFiles(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
+      const userId = req.headers['x-user-id'] as string;
 
-      if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-        return;
-      }
-
-      const atsFiles = await this.workspaceService.getWorkspaceAtsFiles(workspaceId, user.id);
+      const atsFiles = await this.workspaceService.getWorkspaceAtsFiles(workspaceId, userId);
       res.status(200).json({ success: true, data: atsFiles });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -81,15 +62,10 @@ export class WorkspaceController {
 
   public async getSummary(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
+      const userId = req.headers['x-user-id'] as string;
 
-      if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-        return;
-      }
-
-      const summary = await this.workspaceService.getWorkspaceSummary(workspaceId, user.id);
+      const summary = await this.workspaceService.getWorkspaceSummary(workspaceId, userId);
       res.status(200).json({ success: true, data: summary });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -98,15 +74,10 @@ export class WorkspaceController {
 
   public async getProcessStatus(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
+      const userId = req.headers['x-user-id'] as string;
 
-      if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-        return;
-      }
-
-      const status = await this.workspaceService.getWorkspaceProcessStatus(workspaceId, user.id);
+      const status = await this.workspaceService.getWorkspaceProcessStatus(workspaceId, userId);
       res.status(200).json({ success: true, data: status });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -115,15 +86,10 @@ export class WorkspaceController {
 
   public async getProcessSteps(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
+      const userId = req.headers['x-user-id'] as string;
 
-      if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-        return;
-      }
-
-      const steps = await this.workspaceService.getWorkspaceProcessSteps(workspaceId, user.id);
+      const steps = await this.workspaceService.getWorkspaceProcessSteps(workspaceId, userId);
       res.status(200).json({ success: true, data: steps });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -132,15 +98,10 @@ export class WorkspaceController {
 
   public async getLogs(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
+      const userId = req.headers['x-user-id'] as string;
 
-      if (!user) {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
-        return;
-      }
-
-      const logs = await this.workspaceService.getWorkspaceLogs(workspaceId, user.id);
+      const logs = await this.workspaceService.getWorkspaceLogs(workspaceId, userId);
       res.status(200).json({ success: true, data: logs });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -149,13 +110,7 @@ export class WorkspaceController {
 
   public async exportInvoices(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
-
-      if (!user) {
-        res.status(401).send('Unauthorized');
-        return;
-      }
 
       // Mock empty zip file buffer (Minimal valid zip file)
       const mockZip = Buffer.from([
@@ -173,17 +128,18 @@ export class WorkspaceController {
 
   public async downloadAtsXml(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
+      const userId = req.headers['x-user-id'] as string;
 
-      if (!user) {
-        res.status(401).send('Unauthorized');
-        return;
+      let ruc = '1790011223002';
+      if (userId) {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (user) ruc = user.ruc;
       }
 
       const mockXml = `<?xml version="1.0" encoding="UTF-8"?>
 <ats>
-  <idInformante>${user.ruc}</idInformante>
+  <idInformante>${ruc}</idInformante>
   <workspaceId>${workspaceId}</workspaceId>
   <info>Reporte ATS generado para fines academicos</info>
 </ats>`;
@@ -198,13 +154,7 @@ export class WorkspaceController {
 
   public async downloadAtsXlsm(req: Request, res: Response): Promise<void> {
     try {
-      const user = (req as any).currentUser;
       const workspaceId = req.params.workspaceId as string;
-
-      if (!user) {
-        res.status(401).send('Unauthorized');
-        return;
-      }
 
       // Mock Excel XLSM binary header structure or empty Excel file
       const mockExcel = Buffer.from([
