@@ -1,6 +1,9 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import userRoutes from './routes/user.routes';
+import taxpayerRoutes from './routes/taxpayer.routes';
+import sriRoutes from './routes/sri.routes';
+import workspaceRoutes from './routes/workspace.routes';
 import invoiceRoutes from './routes/invoice.routes';
 import atsRoutes from './routes/ats.routes';
 import traceabilityRoutes from './routes/traceability.routes';
@@ -24,6 +27,9 @@ class App {
 
   private configureRoutes(): void {
     this.app.use('/api/users', userRoutes);
+    this.app.use('/api/taxpayer', taxpayerRoutes);
+    this.app.use('/api/sri', sriRoutes);
+    this.app.use('/api/workspaces', workspaceRoutes);
     this.app.use('/api/invoices', authMiddleware, invoiceRoutes);
     this.app.use('/api/ats', authMiddleware, atsRoutes);
     this.app.use('/api/traceability', authMiddleware, traceabilityRoutes);
