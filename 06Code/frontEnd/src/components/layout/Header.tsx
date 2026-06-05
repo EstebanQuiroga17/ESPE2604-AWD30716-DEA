@@ -86,11 +86,11 @@ export default function Header() {
             onClick={() => { setShowUserMenu(!showUserMenu); setShowNotifications(false); }}
           >
             <div className="user-avatar">
-              {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
+              {currentUser?.firstName?.[0]}{currentUser?.firstLastName?.[0]}
             </div>
             <div className="user-info">
-              <span className="user-name">{currentUser?.firstName} {currentUser?.lastName}</span>
-              <span className="user-role">{currentUser?.role === 'admin' ? 'Administrador' : 'Contador'}</span>
+              <span className="user-name">{currentUser?.firstName} {currentUser?.firstLastName}</span>
+              <span className="user-role">{currentUser?.isAdmin ? 'Administrador' : 'Contador'}</span>
             </div>
             <ChevronDown size={16} className="text-muted" />
           </button>
@@ -99,12 +99,12 @@ export default function Header() {
             <div className="user-dropdown animate-scale-in">
               <div className="user-dropdown-header">
                 <div className="user-avatar-lg">
-                  {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
+                  {currentUser?.firstName?.[0]}{currentUser?.firstLastName?.[0]}
                 </div>
                 <div>
-                  <p className="font-semibold text-dark">{currentUser?.firstName} {currentUser?.lastName}</p>
+                  <p className="font-semibold text-dark">{currentUser?.firstName} {currentUser?.firstLastName}</p>
                   <p className="text-sm text-muted">{currentUser?.email}</p>
-                  <p className="text-xs text-muted">RUC: {currentUser?.ruc}</p>
+                  <p className="text-xs text-muted">RUC: {currentUser?.RUC}</p>
                 </div>
               </div>
               <div className="user-dropdown-divider" />
@@ -114,7 +114,7 @@ export default function Header() {
                     <UserCircle size={16} /> Mi Perfil
                   </Link>
                 </li>
-                {currentUser?.role === 'admin' && (
+                {currentUser?.isAdmin && (
                   <li>
                     <Link to="/admin/settings" className="user-dropdown-item" onClick={() => setShowUserMenu(false)}>
                       <Settings size={16} /> Configuración

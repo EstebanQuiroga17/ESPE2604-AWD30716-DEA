@@ -1,4 +1,4 @@
-import type { User, DashboardSummary, Invoice, AtsFile, ProcessStep, AuditEvent, Notification, Workspace } from '../types';
+import type { TaxPayer, DashboardSummary, Invoice, AtsFile, ProcessStep, AuditEvent, Notification, Workspace } from '../types';
 
 const MOCK_NOTIFICATIONS: Notification[] = [
   {
@@ -27,25 +27,25 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   },
 ];
 
-export const MockUserData: User = {
+export const MockUserData: TaxPayer = {
   id: 'u001',
-  ruc: '1234567890001',
+  RUC: '1234567890001',
   firstName: 'David',
-  lastName: 'Rodriguez',
+  firstLastName: 'Rodriguez',
   email: 'david2626714@gmail.com',
   birthDate: '1990-05-15',
-  role: 'accountant',
+  isAdmin: false,
   createdAt: '2025-01-10T10:00:00Z',
 };
 
-export const MockAdminData: User = {
+export const MockAdminData: TaxPayer = {
   id: 'u002',
-  ruc: '9876543210001',
+  RUC: '9876543210001',
   firstName: 'Angel',
-  lastName: 'Sabando',
+  firstLastName: 'Sabando',
   email: 'admin@atsexpress.com',
   birthDate: '1985-03-20',
-  role: 'admin',
+  isAdmin: true,
   createdAt: '2024-12-01T08:00:00Z',
 };
 

@@ -6,7 +6,9 @@ import '../../styles/Auth.css';
 
 interface RegisterFormState {
   firstName: string;
-  lastName: string;
+  secondName: string;
+  firstLastName: string;
+  secondLastName: string;
   ruc: string;
   email: string;
   birthDate: string;
@@ -17,7 +19,9 @@ interface RegisterFormState {
 
 interface RegisterFormErrors {
   firstName?: string;
-  lastName?: string;
+  secondName?: string;
+  firstLastName?: string;
+  secondLastName?: string;
   ruc?: string;
   email?: string;
   birthDate?: string;
@@ -47,7 +51,9 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [formState, setFormState] = useState<RegisterFormState>({
     firstName: '',
-    lastName: '',
+    secondName: '',
+    firstLastName: '',
+    secondLastName: '',
     ruc: '',
     email: '',
     birthDate: '',
@@ -62,10 +68,10 @@ export default function RegisterPage() {
 
   const validateForm = (): boolean => {
     const newErrors: RegisterFormErrors = {};
-    if (!formState.firstName.trim()) newErrors.firstName = 'Ingresa tu nombre';
-    else if (!isValidName(formState.firstName)) newErrors.firstName = 'El nombre no debe contener números ni símbolos';
-    if (!formState.lastName.trim()) newErrors.lastName = 'Ingresa tu apellido';
-    else if (!isValidName(formState.lastName)) newErrors.lastName = 'El apellido no debe contener números ni símbolos';
+    if (!formState.firstName.trim()) newErrors.firstName = 'Ingresa tu primer nombre';
+    else if (!isValidName(formState.firstName)) newErrors.firstName = 'El primer nombre no debe contener números ni símbolos';
+    if (!formState.firstLastName.trim()) newErrors.firstLastName = 'Ingresa tu primer apellido';
+    else if (!isValidName(formState.firstLastName)) newErrors.firstLastName = 'El primer apellido no debe contener números ni símbolos';
     if (!formState.ruc.trim()) newErrors.ruc = 'Ingresa tu RUC';
     else if (!isValidRuc(formState.ruc)) newErrors.ruc = `El RUC debe tener ${RUC_LENGTH} dígitos numéricos`;
     if (!formState.email.trim()) newErrors.email = 'Ingresa tu correo electrónico';
@@ -87,10 +93,13 @@ export default function RegisterPage() {
     setErrors({});
     try {
       const success = await register({
-        ruc: formState.ruc,
+        RUC: formState.ruc,
         firstName: formState.firstName,
-        lastName: formState.lastName,
+        secondName: formState.secondName,
+        firstLastName: formState.firstLastName,
+        secondLastName: formState.secondLastName,
         email: formState.email,
+        birthDate: formState.birthDate,
         password: formState.password
       });
       if (success) navigate('/workspaces');
@@ -161,7 +170,7 @@ export default function RegisterPage() {
             <div className="grid-2">
               <div className="form-group">
                 <label htmlFor="register-firstname" className="form-label">
-                  <User size={14} /> Nombres
+                  <User size={14} /> Primer Nombre
                 </label>
                 <input
                   id="register-firstname"
@@ -175,16 +184,44 @@ export default function RegisterPage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="register-lastname" className="form-label">Apellidos</label>
+                <label htmlFor="register-secondname" className="form-label">Segundo Nombre</label>
                 <input
-                  id="register-lastname"
+                  id="register-secondname"
                   type="text"
-                  className={`form-input ${errors.lastName ? 'error' : ''}`}
-                  placeholder="Quiroga"
-                  value={formState.lastName}
-                  onChange={handleChange('lastName')}
+                  className={`form-input ${errors.secondName ? 'error' : ''}`}
+                  placeholder="Alejandro"
+                  value={formState.secondName}
+                  onChange={handleChange('secondName')}
                 />
-                {errors.lastName && <span className="form-error"><AlertCircle size={13} />{errors.lastName}</span>}
+                {errors.secondName && <span className="form-error"><AlertCircle size={13} />{errors.secondName}</span>}
+              </div>
+            </div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label htmlFor="register-firstlastname" className="form-label">Primer Apellido</label>
+                <input
+                  id="register-firstlastname"
+                  type="text"
+                  className={`form-input ${errors.firstLastName ? 'error' : ''}`}
+                  placeholder="Quiroga"
+                  value={formState.firstLastName}
+                  onChange={handleChange('firstLastName')}
+                />
+                {errors.firstLastName && <span className="form-error"><AlertCircle size={13} />{errors.firstLastName}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="register-secondlastname" className="form-label">Segundo Apellido</label>
+                <input
+                  id="register-secondlastname"
+                  type="text"
+                  className={`form-input ${errors.secondLastName ? 'error' : ''}`}
+                  placeholder="Silva"
+                  value={formState.secondLastName}
+                  onChange={handleChange('secondLastName')}
+                />
+                {errors.secondLastName && <span className="form-error"><AlertCircle size={13} />{errors.secondLastName}</span>}
               </div>
             </div>
 

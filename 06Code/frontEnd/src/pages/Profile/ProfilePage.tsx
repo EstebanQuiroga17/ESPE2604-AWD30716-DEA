@@ -18,22 +18,24 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
   const [formState, setFormState] = useState({
     firstName: currentUser?.firstName || '',
-    lastName: currentUser?.lastName || '',
+    secondName: currentUser?.secondName || '',
+    firstLastName: currentUser?.firstLastName || '',
+    secondLastName: currentUser?.secondLastName || '',
     email: currentUser?.email || '',
-    birthDate: currentUser?.birthDate || '',
+    birthDate: typeof currentUser?.birthDate === 'string' ? currentUser.birthDate : '',
   });
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
     
-    if (!formState.firstName.trim() || !formState.lastName.trim() || !formState.email.trim()) {
+    if (!formState.firstName.trim() || !formState.firstLastName.trim() || !formState.email.trim()) {
       setError('Todos los campos son obligatorios');
       return;
     }
     
-    if (!isValidName(formState.firstName) || !isValidName(formState.lastName)) {
-      setError('El nombre y apellido no deben contener números ni símbolos');
+    if (!isValidName(formState.firstName) || !isValidName(formState.firstLastName)) {
+      setError('El primer nombre y primer apellido no deben contener números ni símbolos');
       return;
     }
     
@@ -42,14 +44,18 @@ export default function ProfilePage() {
       const response = await axios.post(`${API_URL}/users/update`, {
         id: currentUser?.id,
         firstName: formState.firstName,
-        lastName: formState.lastName,
+        secondName: formState.secondName,
+        firstLastName: formState.firstLastName,
+        secondLastName: formState.secondLastName,
         email: formState.email
       });
       
       if (response.data.success) {
         updateCurrentUser({
           firstName: formState.firstName,
-          lastName: formState.lastName,
+          secondName: formState.secondName,
+          firstLastName: formState.firstLastName,
+          secondLastName: formState.secondLastName,
           email: formState.email,
           birthDate: formState.birthDate
         });
@@ -81,18 +87,18 @@ export default function ProfilePage() {
             <div className="card">
               <div className="card-body" style={{ textAlign: 'center', padding: '32px' }}>
                 <div className="profile-avatar-large">
-                  {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
+                  {currentUser?.firstName?.[0]}{currentUser?.firstLastName?.[0]}
                 </div>
                 <button id="change-avatar-btn" className="btn btn-secondary btn-sm mt-16">
                   <Camera size={14} />Cambiar foto
                 </button>
                 <div style={{ marginTop: '20px' }}>
-                  <p className="font-semibold">{currentUser?.firstName} {currentUser?.lastName}</p>
-                  <p className="text-sm text-muted">{currentUser?.role === 'admin' ? 'Administrador' : 'Contador'}</p>
+                  <p className="font-semibold">{currentUser?.firstName} {currentUser?.firstLastName}</p>
+                  <p className="text-sm text-muted">{currentUser?.isAdmin ? 'Administrador' : 'Contador'}</p>
                 </div>
                 <div className="profile-ruc-badge">
                   <Hash size={14} />
-                  <span>{currentUser?.ruc}</span>
+                  <span>{currentUser?.RUC}</span>
                 </div>
                 <div className="profile-stats">
                   <div className="profile-stat">
@@ -128,12 +134,22 @@ export default function ProfilePage() {
                 <form id="profile-form" onSubmit={handleSave} className="flex flex-col gap-16">
                   <div className="grid-2">
                     <div className="form-group">
-                      <label htmlFor="profile-firstname" className="form-label"><User size={14} /> Nombres</label>
+                      <label htmlFor="profile-firstname" className="form-label"><User size={14} /> Primer Nombre</label>
                       <input id="profile-firstname" type="text" className="form-input" value={formState.firstName} onChange={handleChange('firstName')} />
                     </div>
                     <div className="form-group">
-                      <label htmlFor="profile-lastname" className="form-label">Apellidos</label>
-                      <input id="profile-lastname" type="text" className="form-input" value={formState.lastName} onChange={handleChange('lastName')} />
+                      <label htmlFor="profile-secondname" className="form-label">Segundo Nombre</label>
+                      <input id="profile-secondname" type="text" className="form-input" value={formState.secondName || ''} onChange={handleChange('secondName')} />
+                    </div>
+                  </div>
+                  <div className="grid-2">
+                    <div className="form-group">
+                      <label htmlFor="profile-firstlastname" className="form-label">Primer Apellido</label>
+                      <input id="profile-firstlastname" type="text" className="form-input" value={formState.firstLastName} onChange={handleChange('firstLastName')} />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="profile-secondlastname" className="form-label">Segundo Apellido</label>
+                      <input id="profile-secondlastname" type="text" className="form-input" value={formState.secondLastName || ''} onChange={handleChange('secondLastName')} />
                     </div>
                   </div>
                   <div className="form-group">
@@ -142,7 +158,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="form-group">
                     <label htmlFor="profile-ruc" className="form-label"><Hash size={14} /> Número de RUC</label>
-                    <input id="profile-ruc" type="text" className="form-input" value={currentUser?.ruc || ''} disabled style={{ background: 'var(--color-gray-50)', color: 'var(--color-gray-500)' }} />
+                    <input id="profile-ruc" type="text" className="form-input" value={currentUser?.RUC || ''} disabled style={{ background: 'var(--color-gray-50)', color: 'var(--color-gray-500)' }} />
                     <span className="form-hint">El RUC no puede modificarse. Es el identificador único de tu cuenta.</span>
                   </div>
                   <div className="form-group">
