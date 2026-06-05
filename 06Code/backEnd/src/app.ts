@@ -26,14 +26,14 @@ class App {
   }
 
   private configureRoutes(): void {
-    this.app.use('/api/users', userRoutes);
-    this.app.use('/api/taxpayer', taxpayerRoutes);
-    this.app.use('/api/sri', sriRoutes);
-    this.app.use('/api/workspaces', workspaceRoutes);
-    this.app.use('/api/invoices', authMiddleware, invoiceRoutes);
-    this.app.use('/api/ats', authMiddleware, atsRoutes);
-    this.app.use('/api/traceability', authMiddleware, traceabilityRoutes);
-    this.app.use('/api/dashboard', authMiddleware, dashboardRoutes);
+    this.app.use('/users', userRoutes);
+    this.app.use('/taxpayer', taxpayerRoutes);
+    this.app.use('/sri', sriRoutes);
+    this.app.use('/workspaces', workspaceRoutes);
+    this.app.use('/invoices', authMiddleware, invoiceRoutes);
+    this.app.use('/ats', authMiddleware, atsRoutes);
+    this.app.use('/traceability', authMiddleware, traceabilityRoutes);
+    this.app.use('/dashboard', authMiddleware, dashboardRoutes);
     
     // Health check endpoint
     this.app.get('/health', (req, res) => {
