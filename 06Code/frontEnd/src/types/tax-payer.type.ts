@@ -1,6 +1,6 @@
-import type { SriSession } from './sri-session.type';
+import type { SriSession } from './sri-session.type'; 
 
-export type TipoContribuyente = 'natural' | 'juridica';
+export type TipoContribuyente = '1' | '2';
 
 export interface TaxPayer {
   id: string;

@@ -1,5 +1,6 @@
 import type { SriConnectionStatus } from './sri-session.type';
 import type { TaxPeriod } from './tax-period.type';
+import type { ProcessTracer } from './process-tracer.type';
 
 export interface Workspace {
   id: string;
@@ -12,6 +13,9 @@ export interface Workspace {
   lastActivityAt?: string;
   invoicesCount?: number;
   atsFilesCount?: number;
-  workSpaceLocation: string;
+  workspaceLocation: string;
+  atsXml?: any;
+  atsXlsm?: any;
   period: TaxPeriod;
+  processTracer: ProcessTracer;
 }

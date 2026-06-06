@@ -7,15 +7,12 @@ import {
   FileCode2,
   RefreshCw,
   AlertTriangle,
-  XCircle,
-  Info,
   CheckCircle2,
   TrendingUp,
   FileText,
 } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
 import { useAuth } from '../../context/AuthContext';
-import type { Notification } from '../../types';
 import axios from 'axios';
 import '../../styles/Dashboard.css';
 
@@ -67,13 +64,6 @@ const buildActionCards = (sriConnected: boolean): ActionCard[] => [
   },
 ];
 
-function NotificationIcon({ type }: { type: Notification['type'] }) {
-  const props = { size: 16 };
-  if (type === 'warning') return <AlertTriangle {...props} />;
-  if (type === 'error') return <XCircle {...props} />;
-  if (type === 'success') return <CheckCircle2 {...props} />;
-  return <Info {...props} />;
-}
 
 export default function DashboardPage() {
   const { sriConnectionStatus, currentUser, currentWorkspace } = useAuth();
@@ -83,7 +73,6 @@ export default function DashboardPage() {
     invoicesDownloadedChange: 0,
     errorsDetected: 0,
     lastSync: 'No sincronizado',
-    notifications: [] as Notification[]
   });
 
   useEffect(() => {
@@ -146,60 +135,6 @@ export default function DashboardPage() {
         </section>
 
         <div className="dashboard-bottom-grid">
-          <div className="dashboard-summary-col">
-            <div className="card mb-24">
-              <div className="card-header">
-                <h2 className="card-title">Resumen del Período Fiscal Actual</h2>
-                <span className="badge badge-info">Noviembre 2025</span>
-              </div>
-              <div className="card-body">
-                <div className="summary-cards">
-                  <div className="summary-stat-card blue">
-                    <div className="stat-card-icon">
-                      <FileText size={24} />
-                    </div>
-                    <div className="stat-card-body">
-                      <span className="stat-card-value">{summary.invoicesDownloaded}</span>
-                      <span className="stat-card-label">Facturas Descargadas</span>
-                      <span className="stat-card-sub">Este mes (Noviembre 2025)</span>
-                      <span className="stat-card-change positive">
-                        <TrendingUp size={12} /> +{summary.invoicesDownloadedChange}% vs mes anterior
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="summary-stat-card orange">
-                    <div className="stat-card-icon">
-                      <AlertTriangle size={24} />
-                    </div>
-                    <div className="stat-card-body">
-                      <span className="stat-card-value">{summary.errorsDetected}</span>
-                      <span className="stat-card-label">Errores Detectados</span>
-                      <span className="stat-card-sub">Requieren atención</span>
-                      <Link to="/ats/validate" className="stat-card-link">
-                        Pendientes de corrección →
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="summary-stat-card green full-width">
-                    <div className="stat-card-icon">
-                      <CheckCircle2 size={24} />
-                    </div>
-                    <div className="stat-card-body">
-                      <span className="stat-card-label">ATS Listo para Generar</span>
-                      <span className="stat-card-sub">Período actual completo</span>
-                      <Link to="/ats/generate" className="stat-card-link">
-                        Validación exitosa →
-                      </Link>
-                    </div>
-                    <CheckCircle2 size={32} className="stat-check-icon" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div className="dashboard-right-col">
             <div className="card mb-16">
               <div className="card-header">
@@ -224,34 +159,11 @@ export default function DashboardPage() {
                 >
                   {isSyncing ? <><span className="spinner" />Sincronizando...</> : <><RefreshCw size={15} />Sincronizar Ahora</>}
                 </button>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card-header">
-                <h2 className="card-title">Notificaciones</h2>
-                <span className="badge badge-danger">
-                  {summary.notifications.filter(n => !n.read).length} nuevas
-                </span>
-              </div>
-              <ul className="notification-feed">
-                {summary.notifications.map((notif) => (
-                  <li key={notif.id} className={`notification-feed-item ${notif.type}`}>
-                    <div className={`notif-icon-wrapper notif-${notif.type}`}>
-                      <NotificationIcon type={notif.type} />
-                    </div>
-                    <div className="notif-content">
-                      <p className="notif-title">{notif.title}</p>
-                      <p className="notif-message">{notif.message}</p>
-                      <p className="notif-time">{notif.timestamp}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>
       </div>
+    </div>
     </AppLayout>
   );
 }

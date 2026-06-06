@@ -18,7 +18,7 @@ interface AuthContextValue {
   connectToSri: (username: string, password: string) => Promise<boolean>;
   disconnectFromSri: () => void;
   updateCurrentUser: (data: Partial<TaxPayer>) => void;
-  createWorkspace: (name: string, description: string, workSpaceLocation: string, period: any) => Promise<Workspace | null>;
+  createWorkspace: (name: string, description: string, workspaceLocation: string, period: any) => Promise<Workspace | null>;
   deleteWorkspace: (workspaceId: string) => Promise<boolean>;
   selectWorkspace: (workspace: Workspace) => void;
   loadWorkspaces: () => Promise<void>;
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setCurrentUser(prev => prev ? { ...prev, ...data } : null);
   }, []);
 
-  const createWorkspace = useCallback(async (name: string, description: string, workSpaceLocation: string, period: any): Promise<Workspace | null> => {
+  const createWorkspace = useCallback(async (name: string, description: string, workspaceLocation: string, period: any): Promise<Workspace | null> => {
     if (!currentUser) return null;
     try {
       const newWorkspace: Workspace = {
@@ -137,8 +137,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         lastActivityAt: new Date().toISOString(),
         invoicesCount: 0,
         atsFilesCount: 0,
-        workSpaceLocation,
+        workspaceLocation,
         period,
+        processTracer: {
+          invoicedDownloadStatus: false,
+          atsXlsmGenerationStatus: false,
+          atsXmlGenerationStatus: false,
+        },
       };
       setWorkspaces(prev => [...prev, newWorkspace]);
       return newWorkspace;
