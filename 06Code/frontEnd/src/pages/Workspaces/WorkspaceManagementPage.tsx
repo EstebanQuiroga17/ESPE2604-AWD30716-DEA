@@ -372,7 +372,7 @@ export default function WorkspaceManagementPage() {
                     </div>
                     <div className="date-info">
                       <span className="text-muted" style={{ fontSize: '12px' }}>
-                        📁 {workspace.workSpaceLocation}
+                        📁 {workspace.workspaceLocation}
                       </span>
                     </div>
                     <div className="date-info">

@@ -97,14 +97,6 @@ export default function InvoicesManagePage() {
                     </>
                   )}
                 </div>
-
-                <div className="alert alert-info mt-16">
-                  <Shield size={16} />
-                  <div>
-                    <p className="font-semibold">Validación RN-02</p>
-                    <p className="text-sm">El sistema verificará que todas las facturas pertenezcan a tu RUC registrado.</p>
-                  </div>
-                </div>
               </div>
             </div>
 

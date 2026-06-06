@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { User, SriConnectionStatus, Workspace } from '../types';
+import type { TaxPayer, SriConnectionStatus, Workspace } from '../types';
 import { MockWorkspaces } from '../data/mockData';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 interface AuthContextValue {
-  currentUser: User | null;
+  currentUser: TaxPayer | null;
   isAuthenticated: boolean;
   sriConnectionStatus: SriConnectionStatus;
   currentWorkspace: Workspace | null;
@@ -17,8 +17,8 @@ interface AuthContextValue {
   logout: () => void;
   connectToSri: (username: string, password: string) => Promise<boolean>;
   disconnectFromSri: () => void;
-  updateCurrentUser: (data: Partial<User>) => void;
-  createWorkspace: (name: string, description: string, workSpaceLocation: string, period: any) => Promise<Workspace | null>;
+  updateCurrentUser: (data: Partial<TaxPayer>) => void;
+  createWorkspace: (name: string, description: string, workspaceLocation: string, period: any) => Promise<Workspace | null>;
   deleteWorkspace: (workspaceId: string) => Promise<boolean>;
   selectWorkspace: (workspace: Workspace) => void;
   loadWorkspaces: () => Promise<void>;
@@ -32,11 +32,11 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const stored = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
-  const initialUser = stored ? JSON.parse(stored) as User : null;
+  const initialUser = stored ? JSON.parse(stored) as TaxPayer : null;
   if (initialUser) {
     axios.defaults.headers.common['X-User-Id'] = initialUser.id;
   }
-  const [currentUser, setCurrentUser] = useState<User | null>(initialUser);
+  const [currentUser, setCurrentUser] = useState<TaxPayer | null>(initialUser);
   const [sriConnectionStatus, setSriConnectionStatus] = useState<SriConnectionStatus>('disconnected');
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -84,10 +84,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     setCurrentUser({
       id: '07787dd8-aafa-4c6d-a49c-07595438199d',
-      ruc: '1790011223002',
-      role: 'admin',
+      RUC: '1790011223002',
+      isAdmin: true,
       firstName: 'David',
-      lastName: 'Admin',
+      firstLastName: 'Admin',
       email: 'david26@gmail.com',
       birthDate: '1990-01-01',
       createdAt: '2026-05-04T02:06:07.024Z'
@@ -119,11 +119,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setSriConnectionStatus('disconnected');
   }, []);
 
-  const updateCurrentUser = useCallback((data: Partial<User>) => {
+  const updateCurrentUser = useCallback((data: Partial<TaxPayer>) => {
     setCurrentUser(prev => prev ? { ...prev, ...data } : null);
   }, []);
 
-  const createWorkspace = useCallback(async (name: string, description: string, workSpaceLocation: string, period: any): Promise<Workspace | null> => {
+  const createWorkspace = useCallback(async (name: string, description: string, workspaceLocation: string, period: any): Promise<Workspace | null> => {
     if (!currentUser) return null;
     try {
       const newWorkspace: Workspace = {
@@ -137,8 +137,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         lastActivityAt: new Date().toISOString(),
         invoicesCount: 0,
         atsFilesCount: 0,
-        workSpaceLocation,
+        workspaceLocation,
         period,
+        processTracer: {
+          invoicedDownloadStatus: false,
+          atsXlsmGenerationStatus: false,
+          atsXmlGenerationStatus: false,
+        },
       };
       setWorkspaces(prev => [...prev, newWorkspace]);
       return newWorkspace;

@@ -39,7 +39,6 @@ const userNavigationItems: NavigationItem[] = [
 const adminNavigationItems: NavigationItem[] = [
   { path: '/admin/dashboard', icon: <ShieldCheck size={20} />, label: 'Panel Admin', adminOnly: true },
   { path: '/admin/users', icon: <Users size={20} />, label: 'Usuarios', adminOnly: true },
-  { path: '/admin/audit', icon: <History size={20} />, label: 'Auditoría', adminOnly: true },
   { path: '/admin/settings', icon: <Settings size={20} />, label: 'Configuración', adminOnly: true },
 ];
 
@@ -49,7 +48,7 @@ export default function Sidebar() {
   const isAdminSection = location.pathname.startsWith('/admin');
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
 
-  const navigationItems = currentUser?.role === 'admin'
+  const navigationItems = currentUser?.isAdmin
     ? (isAdminSection ? adminNavigationItems : userNavigationItems)
     : userNavigationItems;
 
@@ -66,7 +65,7 @@ export default function Sidebar() {
         <span className="sidebar-brand-name">ATS Express</span>
       </div>
 
-      {currentUser?.role === 'admin' && (
+      {currentUser?.isAdmin && (
         <div className="sidebar-role-toggle">
           <NavLink to="/dashboard" className={({ isActive: _isActive }) => `role-tab ${!isAdminSection ? 'active' : ''}`}>
             Usuario

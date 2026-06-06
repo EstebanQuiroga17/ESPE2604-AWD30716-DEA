@@ -20,7 +20,6 @@ import SupportPage from './pages/Support/SupportPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
 import AdminUsersPage from './pages/Admin/AdminUsersPage';
-import AdminAuditPage from './pages/Admin/AdminAuditPage';
 import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
 
 import './styles/global.css';
@@ -50,7 +49,6 @@ export default function App() {
 
           <Route path="/admin/dashboard" element={<ProtectedRoute requireAdmin><AdminDashboardPage /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute requireAdmin><AdminUsersPage /></ProtectedRoute>} />
-          <Route path="/admin/audit" element={<ProtectedRoute requireAdmin><AdminAuditPage /></ProtectedRoute>} />
           <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettingsPage /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
