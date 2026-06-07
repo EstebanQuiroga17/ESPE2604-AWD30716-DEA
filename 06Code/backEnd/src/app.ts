@@ -9,6 +9,7 @@ import atsRoutes from './routes/ats.routes';
 import traceabilityRoutes from './routes/traceability.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
+import supportRoutes from './routes/support.routes';
 import { authMiddleware } from './middlewares/auth.middleware';
 
 class App {
@@ -36,6 +37,7 @@ class App {
     this.app.use('/traceability', authMiddleware, traceabilityRoutes);
     this.app.use('/dashboard', authMiddleware, dashboardRoutes);
     this.app.use('/admin', adminRoutes);
+    this.app.use('/support', supportRoutes);
     
     // Health check endpoint
     this.app.get('/health', (req, res) => {

@@ -24,4 +24,7 @@ router.get('/:workspaceId/ats/download-xlsm', (req, res) => workspaceController.
 router.post('/:workspaceId/ats/generate', (req, res) => workspaceController.generateAtsAsync(req, res));
 router.get('/:workspaceId/logs', (req, res) => workspaceController.getLogs(req, res));
 
+// DELETE endpoint
+router.delete('/:workspaceId', (req, res) => workspaceController.deleteWorkspace(req, res));
+
 export default router;

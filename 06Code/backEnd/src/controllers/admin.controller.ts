@@ -27,6 +27,19 @@ export class AdminController {
     }
   }
 
+  public async deleteUser(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.userId as string;
+      await prisma.user.delete({
+        where: { id: userId }
+      });
+      res.status(200).json({ success: true, message: 'User deleted successfully' });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+
   public async getAuditLogs(req: Request, res: Response): Promise<void> {
     try {
       const logs = await prisma.auditEvent.findMany({
@@ -49,6 +62,40 @@ export class AdminController {
         data: { sriTargetUrl, maxDownloadThreads }
       });
     } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+
+  public async getTickets(req: Request, res: Response): Promise<void> {
+    try {
+      const tickets = await prisma.ticket.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: { user: { select: { firstName: true, lastName: true, email: true } } }
+      });
+      res.status(200).json({ success: true, data: tickets });
+    } catch (error) {
+      console.error('Error fetching global tickets:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+
+  public async updateTicketStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const ticketId = req.params.ticketId as string;
+      const { status } = req.body;
+      if (!status) {
+        res.status(400).json({ success: false, message: 'Status is required' });
+        return;
+      }
+
+      const updatedTicket = await prisma.ticket.update({
+        where: { id: ticketId },
+        data: { status }
+      });
+
+      res.status(200).json({ success: true, message: `Ticket status updated to ${status}`, data: updatedTicket });
+    } catch (error) {
+      console.error('Error updating ticket status:', error);
       res.status(500).json({ success: false, message: 'Internal server error' });
     }
   }

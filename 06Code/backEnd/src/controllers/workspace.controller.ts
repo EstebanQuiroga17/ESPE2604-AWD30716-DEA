@@ -217,4 +217,19 @@ export class WorkspaceController {
       res.status(500).json({ success: false, message: 'Internal server error' });
     }
   }
+
+  public async deleteWorkspace(req: Request, res: Response): Promise<void> {
+    try {
+      const workspaceId = req.params.workspaceId as string;
+      // In a real application, you would also need to delete related records
+      // like invoices, atsFiles, processSteps if onDelete: Cascade is not set in Prisma
+      await prisma.workspace.delete({
+        where: { id: workspaceId }
+      });
+      res.status(200).json({ success: true, message: 'Workspace deleted successfully' });
+    } catch (error) {
+      console.error("Error deleting workspace:", error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
 }
