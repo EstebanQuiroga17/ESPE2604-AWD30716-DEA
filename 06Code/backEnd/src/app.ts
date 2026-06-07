@@ -8,6 +8,7 @@ import invoiceRoutes from './routes/invoice.routes';
 import atsRoutes from './routes/ats.routes';
 import traceabilityRoutes from './routes/traceability.routes';
 import dashboardRoutes from './routes/dashboard.routes';
+import adminRoutes from './routes/admin.routes';
 import { authMiddleware } from './middlewares/auth.middleware';
 
 class App {
@@ -34,6 +35,7 @@ class App {
     this.app.use('/ats', authMiddleware, atsRoutes);
     this.app.use('/traceability', authMiddleware, traceabilityRoutes);
     this.app.use('/dashboard', authMiddleware, dashboardRoutes);
+    this.app.use('/admin', adminRoutes);
     
     // Health check endpoint
     this.app.get('/health', (req, res) => {
