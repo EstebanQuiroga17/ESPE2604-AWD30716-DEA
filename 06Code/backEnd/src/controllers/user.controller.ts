@@ -81,4 +81,28 @@ export class UserController {
       res.status(500).json({ success: false, message: 'Internal server error' });
     }
   }
+
+  public async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, newPassword } = req.body;
+
+      if (!email || !newPassword) {
+        res.status(400).json({ success: false, message: 'Email and newPassword are required' });
+        return;
+      }
+
+      const user = await this.userService.getLoginUser(email);
+      if (!user) {
+        res.status(404).json({ success: false, message: 'User not found' });
+        return;
+      }
+
+      await this.userService.updatePassword(email, newPassword);
+
+      res.status(200).json({ success: true, message: 'Password updated successfully' });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
 }
