@@ -9,15 +9,19 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(uuid())
-  ruc          String         @unique
-  firstName    String
-  lastName     String
-  email        String         @unique
-  password     String
-  role         String         @default("user")
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id               String         @id @default(uuid())
+  ruc              String         @unique
+  firstName        String
+  middleName       String?
+  lastName         String
+  secondLastName   String?
+  email            String         @unique
+  password         String?
+  birthDate        DateTime?
+  role             String         @default("user")
+  profileCompleted Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
   
   invoices     Invoice[]
   atsFiles     AtsFile[]
@@ -48,21 +52,43 @@ model Workspace {
 }
 
 model Invoice {
-  id          String     @id @default(uuid())
-  number      String
-  issuerName  String
-  issuerRuc   String
-  date        String
-  taxBase     Float
-  iva         Float
-  total       Float
-  format      String
-  userId      String
-  workspaceId String?
-  createdAt   DateTime   @default(now())
+  id                   String     @id @default(uuid())
   
-  user        User       @relation(fields: [userId], references: [id])
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+
+  issuerName           String
+  issuerCommercialName String?
+  issuerAddress        String?
+  issuerRuc            String
+  
+
+  number               String
+  authorizationNumber  String
+  emissionType         String     @default("Normal")
+  accessKey            String
+  
+
+  customerName         String
+  customerId           String
+  customerDate         String
+  customerAddress      String?
+  customerPhone        String?
+  customerEmail        String?
+  
+
+  products             Json
+  
+
+  subtotal             Float
+  iva                  Float
+  total                Float
+
+  format               String     @default("XML")
+  userId               String
+  workspaceId          String?
+  createdAt            DateTime   @default(now())
+  
+  user                 User       @relation(fields: [userId], references: [id])
+  workspace            Workspace? @relation(fields: [workspaceId], references: [id])
 }
 
 model AtsFile {
