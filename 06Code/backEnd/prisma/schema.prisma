@@ -47,21 +47,41 @@ model Workspace {
 }
 
 model Invoice {
-  id          String     @id @default(uuid())
-  number      String
-  issuerName  String
-  issuerRuc   String
-  date        String
-  taxBase     Float
-  iva         Float
-  total       Float
-  format      String
-  userId      String
-  workspaceId String?
-  createdAt   DateTime   @default(now())
+  id                   String     @id @default(uuid())
+  number               String     // Nº (Establecimiento-PuntoEmisión-Secuencial)
+  issuerName           String     // Razón Social / Nombre Emisor
+  issuerTradeName      String?    // Nombre Comercial Emisor
+  issuerAddress        String?    // Dirección Emisor
+  issuerRuc            String     // RUC Emisor
+  date                 String     // Fecha de Emisión
+  authorizationNumber  String?    // Número de Autorización (49 dígitos)
+  emissionType         String     @default("Normal") // Tipo de Emisión
+  accessKey            String?    // Clave de Acceso (49 dígitos)
   
-  user        User       @relation(fields: [userId], references: [id])
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  // Datos del Cliente
+  clientName           String?    // Razón Social / Nombre Cliente
+  clientIdentification String?    // RUC / C.I. / Pasaporte Cliente
+  clientAddress        String?    // Dirección Cliente
+  clientPhone          String?    // Teléfono Cliente
+  clientEmail          String?    // Correo Cliente
+  
+  // Detalles de Productos (Matriz)
+  // Formato: [{ code: string, description: string, quantity: number, unitPrice: number, total: number }]
+  products             Json?
+  
+  // Resumen Financiero
+  taxBase              Float      // Subtotal
+  iva                  Float      // IVA
+  total                Float      // Total
+  
+  type                 String     @default("COMPRA") // "VENTA" o "COMPRA"
+  format               String     @default("XML")
+  userId               String
+  workspaceId          String?
+  createdAt            DateTime   @default(now())
+  
+  user                 User       @relation(fields: [userId], references: [id])
+  workspace            Workspace? @relation(fields: [workspaceId], references: [id])
 }
 
 model AtsFile {

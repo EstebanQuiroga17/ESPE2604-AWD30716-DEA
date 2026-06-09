@@ -9,17 +9,41 @@ export class InvoiceService {
   }
 
   public async saveInvoices(userId: string, invoicesData: any[]) {
-    const invoices = invoicesData.map(data => ({
-      number: data.number || '',
-      issuerName: data.issuerName || '',
-      issuerRuc: data.issuerRuc || '',
-      date: data.date || '',
-      taxBase: Number(data.taxBase) || 0,
-      iva: Number(data.iva) || 0,
-      total: Number(data.total) || 0,
-      format: data.format || 'XML',
-      userId,
-    }));
+    const invoices = invoicesData.map(data => {
+      let parsedProducts = null;
+      if (data.products) {
+        try {
+          parsedProducts = typeof data.products === 'string' ? JSON.parse(data.products) : data.products;
+        } catch (e) {
+          console.error('Error parsing products JSON:', e);
+        }
+      }
+
+      return {
+        number: data.number || '',
+        issuerName: data.issuerName || '',
+        issuerTradeName: data.issuerTradeName || null,
+        issuerAddress: data.issuerAddress || null,
+        issuerRuc: data.issuerRuc || '',
+        date: data.date || '',
+        authorizationNumber: data.authorizationNumber || null,
+        emissionType: data.emissionType || 'Normal',
+        accessKey: data.accessKey || null,
+        clientName: data.clientName || null,
+        clientIdentification: data.clientIdentification || null,
+        clientAddress: data.clientAddress || null,
+        clientPhone: data.clientPhone || null,
+        clientEmail: data.clientEmail || null,
+        products: parsedProducts,
+        taxBase: Number(data.taxBase) || 0,
+        iva: Number(data.iva) || 0,
+        total: Number(data.total) || 0,
+        type: data.type || 'COMPRA',
+        format: data.format || 'XML',
+        userId,
+        workspaceId: data.workspaceId || null,
+      };
+    });
 
     await prisma.invoice.createMany({
       data: invoices,
