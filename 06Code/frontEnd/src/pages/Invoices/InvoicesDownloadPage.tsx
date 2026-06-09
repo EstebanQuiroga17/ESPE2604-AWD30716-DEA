@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Download, Filter, Calendar, CheckCircle2 } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
-import { MockInvoices } from '../../data/mockData';
 import type { Invoice, TaxPeriodType } from '../../types';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 import '../../styles/InvoicesDownload.css';
 
 interface DownloadFilterState {
@@ -28,16 +29,43 @@ export default function InvoicesDownloadPage() {
     year: String(CURRENT_YEAR),
   });
   const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadedInvoices, setDownloadedInvoices] = useState<Invoice[]>([]);
+  const [downloadedInvoices, setDownloadedInvoices] = useState<any[]>([]);
   const [downloadComplete, setDownloadComplete] = useState(false);
+  const { currentUser } = useAuth();
+  
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
   const handleDownload = async () => {
+    if (!currentUser || !currentUser.RUC) {
+      alert('Debes completar tu perfil y tener un RUC para descargar facturas.');
+      return;
+    }
+
     setIsDownloading(true);
     setDownloadComplete(false);
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    setDownloadedInvoices(MockInvoices);
-    setDownloadComplete(true);
-    setIsDownloading(false);
+    
+    try {
+      const response = await axios.get(`${API_URL}/invoices/download/${currentUser.RUC}`, {
+        params: {
+          periodType: filterState.periodType,
+          month: filterState.month,
+          semester: filterState.semester,
+          year: filterState.year
+        }
+      });
+      
+      if (response.data.success) {
+        // Mock a slight delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setDownloadedInvoices(response.data.data);
+        setDownloadComplete(true);
+      }
+    } catch (error) {
+      console.error('Error downloading invoices:', error);
+      alert('Error al descargar facturas desde el servidor.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const handleFilterChange = (field: keyof DownloadFilterState) => (
@@ -190,30 +218,28 @@ export default function InvoicesDownloadPage() {
                       <thead>
                         <tr>
                           <th>Número</th>
-                          <th>Proveedor</th>
+                          <th>Proveedor (Nombre Comercial)</th>
                           <th>RUC Emisor</th>
-                          <th>Fecha</th>
-                          <th>Base Imponible</th>
+                          <th>Clave de Acceso</th>
+                          <th>Fecha Emisión</th>
+                          <th>Subtotal</th>
                           <th>IVA</th>
                           <th>Total</th>
-                          <th>Formato</th>
                         </tr>
                       </thead>
                       <tbody>
                         {downloadedInvoices.map((invoice) => (
                           <tr key={invoice.id}>
                             <td className="font-medium">{invoice.number}</td>
-                            <td>{invoice.issuerName}</td>
+                            <td>{invoice.issuerCommercialName || invoice.issuerName}</td>
                             <td className="text-muted text-sm">{invoice.issuerRuc}</td>
-                            <td>{invoice.date}</td>
-                            <td>${invoice.taxBase.toFixed(2)}</td>
-                            <td>${invoice.iva.toFixed(2)}</td>
-                            <td className="font-semibold">${invoice.total.toFixed(2)}</td>
-                            <td>
-                              <span className={`badge ${invoice.format === 'XML' ? 'badge-info' : 'badge-gray'}`}>
-                                {invoice.format}
-                              </span>
+                            <td className="text-muted text-xs" style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={invoice.accessKey}>
+                              {invoice.accessKey}
                             </td>
+                            <td>{invoice.customerDate}</td>
+                            <td>${Number(invoice.subtotal).toFixed(2)}</td>
+                            <td>${Number(invoice.iva).toFixed(2)}</td>
+                            <td className="font-semibold">${Number(invoice.total).toFixed(2)}</td>
                           </tr>
                         ))}
                       </tbody>

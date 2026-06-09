@@ -4,20 +4,30 @@ export class InvoiceService {
   public async getInvoicesByUser(userId: string) {
     return prisma.invoice.findMany({
       where: { userId },
-      orderBy: { date: 'desc' },
+      orderBy: { customerDate: 'desc' },
     });
   }
 
   public async saveInvoices(userId: string, invoicesData: any[]) {
     const invoices = invoicesData.map(data => ({
       number: data.number || '',
+      authorizationNumber: data.authorizationNumber || '',
+      accessKey: data.accessKey || '',
+      emissionType: data.emissionType || 'Normal',
       issuerName: data.issuerName || '',
+      issuerCommercialName: data.issuerCommercialName || '',
       issuerRuc: data.issuerRuc || '',
-      date: data.date || '',
-      taxBase: Number(data.taxBase) || 0,
+      issuerAddress: data.issuerAddress || '',
+      customerName: data.customerName || '',
+      customerId: data.customerId || '',
+      customerDate: data.date || '',
+      customerAddress: data.customerAddress || '',
+      customerPhone: data.customerPhone || '',
+      customerEmail: data.customerEmail || '',
+      subtotal: Number(data.taxBase) || 0,
       iva: Number(data.iva) || 0,
       total: Number(data.total) || 0,
-      format: data.format || 'XML',
+      products: [],
       userId,
     }));
 

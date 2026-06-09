@@ -21,7 +21,7 @@ export class WorkspaceService {
     if (userId) whereClause.userId = userId;
     return prisma.invoice.findMany({
       where: whereClause,
-      orderBy: { date: 'desc' }
+      orderBy: { customerDate: 'desc' }
     });
   }
 
@@ -41,7 +41,7 @@ export class WorkspaceService {
     const aggregate = await prisma.invoice.aggregate({
       where: whereClause,
       _count: { id: true },
-      _sum: { total: true, taxBase: true, iva: true }
+      _sum: { total: true, subtotal: true, iva: true }
     });
 
     const errorAtsCount = await prisma.atsFile.aggregate({
@@ -51,7 +51,7 @@ export class WorkspaceService {
 
     return {
       invoiceCount: aggregate._count.id,
-      taxBaseSum: aggregate._sum.taxBase || 0,
+      taxBaseSum: aggregate._sum.subtotal || 0,
       ivaSum: aggregate._sum.iva || 0,
       totalSum: aggregate._sum.total || 0,
       errorCount: errorAtsCount._sum.validationErrors || 0

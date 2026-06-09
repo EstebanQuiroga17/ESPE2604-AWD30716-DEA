@@ -3,7 +3,7 @@ import type { TaxPayer, SriConnectionStatus, Workspace } from '../types';
 import { MockWorkspaces } from '../data/mockData';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 interface AuthContextValue {
   currentUser: TaxPayer | null;
@@ -22,6 +22,8 @@ interface AuthContextValue {
   deleteWorkspace: (workspaceId: string) => Promise<boolean>;
   selectWorkspace: (workspace: Workspace) => void;
   loadWorkspaces: () => Promise<void>;
+  loginGoogle: (credential: string) => Promise<{ success: boolean; needsProfileCompletion?: boolean }>;
+  completeProfile: (data: any) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -53,9 +55,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
       if (response.data.success) {
         const user = response.data.data;
-        setCurrentUser(user);
-        try { localStorage.setItem('currentUser', JSON.stringify(user)); } catch {}
+        const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName, isAdmin: user.role === 'admin' };
+        setCurrentUser(mappedUser);
+        try { localStorage.setItem('currentUser', JSON.stringify(mappedUser)); } catch {}
         // set header for subsequent requests
+        axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
         axios.defaults.headers.common['X-User-Id'] = user.id;
         return true;
       }
@@ -68,9 +72,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const register = useCallback(async (data: any): Promise<boolean> => {
     try {
-      const response = await axios.post(`${API_URL}/users/register`, data);
+      const payload = {
+        firstName: data.firstName,
+        middleName: data.secondName,
+        lastName: data.firstLastName,
+        secondLastName: data.secondLastName,
+        ruc: data.RUC,
+        email: data.email,
+        password: data.password,
+        birthDate: data.birthDate
+      };
+      const response = await axios.post(`${API_URL}/users/register`, payload);
       if (response.data.success) {
-        setCurrentUser(response.data.data);
+        const user = response.data.data;
+        setCurrentUser({ ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName });
         return true;
       }
       return false;
@@ -213,6 +228,66 @@ export function AuthProvider({ children }: AuthProviderProps) {
     selectWorkspace,
     loadWorkspaces,
   };
+
+  const loginGoogle = useCallback(async (credential: string) => {
+    try {
+      const response = await axios.post(`${API_URL}/users/login/google`, { credential });
+      if (response.data.success) {
+        const user = response.data.data;
+        const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
+        if (!response.data.needsProfileCompletion) {
+          setCurrentUser(mappedUser);
+          try { localStorage.setItem('currentUser', JSON.stringify(mappedUser)); } catch {}
+          axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
+        } else {
+          try { localStorage.setItem('incompleteUser', JSON.stringify(mappedUser)); } catch {}
+        }
+        return { success: true, needsProfileCompletion: response.data.needsProfileCompletion };
+      }
+      return { success: false };
+    } catch (error) {
+      console.error("Google login error:", error);
+      return { success: false };
+    }
+  }, []);
+
+  const completeProfile = useCallback(async (data: any) => {
+    try {
+      const stored = localStorage.getItem('incompleteUser');
+      if (!stored) return false;
+      const incompleteUser = JSON.parse(stored);
+      
+      const payload = {
+        email: incompleteUser.email,
+        firstName: data.firstName,
+        middleName: data.secondName,
+        lastName: data.firstLastName,
+        secondLastName: data.secondLastName,
+        ruc: data.RUC,
+        birthDate: data.birthDate
+      };
+      
+      const response = await axios.post(`${API_URL}/users/complete-profile`, payload);
+      if (response.data.success) {
+        const user = response.data.data;
+        const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
+        setCurrentUser(mappedUser);
+        try { 
+          localStorage.setItem('currentUser', JSON.stringify(mappedUser));
+          localStorage.removeItem('incompleteUser');
+        } catch {}
+        axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Complete profile error:", error);
+      return false;
+    }
+  }, []);
+
+  contextValue.loginGoogle = loginGoogle;
+  contextValue.completeProfile = completeProfile;
 
   return (
     <AuthContext.Provider value={contextValue}>
