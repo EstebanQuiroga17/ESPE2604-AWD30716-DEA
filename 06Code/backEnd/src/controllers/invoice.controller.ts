@@ -61,51 +61,7 @@ export class InvoiceController {
         customerId: ruc
       };
 
-      // Si no hay facturas en BD para este cliente, vamos a crear mocks
       let invoices = await prisma.invoice.findMany({ where: filters });
-      
-      if (invoices.length === 0) {
-        const mockInvoices = [
-          {
-            number: '001-001-000000001',
-            authorizationNumber: '1234567890123456789012345678901234567890123456789',
-            emissionType: 'Normal',
-            accessKey: '1234567890123456789012345678901234567890123456789',
-            issuerName: 'EMPRESA DEMO S.A.',
-            issuerCommercialName: 'DEMO COMERCIAL',
-            issuerAddress: 'AV. PRINCIPAL 123',
-            issuerRuc: '1790000000001',
-            customerName: 'CLIENTE PRUEBA',
-            customerId: ruc,
-            customerDate: '2026-02-15',
-            products: [],
-            subtotal: 100.00,
-            iva: 15.00,
-            total: 115.00,
-            userId: (req as any).user?.id || '07787dd8-aafa-4c6d-a49c-07595438199d'
-          },
-          {
-            number: '001-001-000000002',
-            authorizationNumber: '9876543210987654321098765432109876543210987654321',
-            emissionType: 'Normal',
-            accessKey: '9876543210987654321098765432109876543210987654321',
-            issuerName: 'PROVEEDOR SERVICIOS CIA. LTDA.',
-            issuerRuc: '1790000000003',
-            customerName: 'CLIENTE PRUEBA',
-            customerId: ruc,
-            customerDate: '2026-08-20',
-            products: [],
-            subtotal: 250.00,
-            iva: 37.50,
-            total: 287.50,
-            userId: (req as any).user?.id || '07787dd8-aafa-4c6d-a49c-07595438199d'
-          }
-        ];
-        await prisma.invoice.createMany({ data: mockInvoices });
-        invoices = await prisma.invoice.findMany({ where: filters });
-      }
-
-      // Filter locally to avoid complex Prisma string manipulation
       let filteredInvoices = invoices;
       
       if (year) {

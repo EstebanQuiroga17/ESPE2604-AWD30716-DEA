@@ -58,7 +58,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName, isAdmin: user.role === 'admin' };
         setCurrentUser(mappedUser);
         try { localStorage.setItem('currentUser', JSON.stringify(mappedUser)); } catch {}
-        // set header for subsequent requests
         axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
         axios.defaults.headers.common['X-User-Id'] = user.id;
         return true;

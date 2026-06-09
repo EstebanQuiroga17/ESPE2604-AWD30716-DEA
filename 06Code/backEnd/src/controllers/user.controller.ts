@@ -47,7 +47,7 @@ export class UserController {
         return;
       }
 
-      // Check if email already exists
+
       const existingEmail = await this.userService.getLoginUser(email);
       if (existingEmail) {
         res.status(400).json({ success: false, message: 'User with this Email already exists' });
@@ -88,7 +88,7 @@ export class UserController {
         return;
       }
       
-      // Remove password from response
+
       const { password: _, ...userWithoutPassword } = user;
       
       res.status(200).json({ success: true, data: userWithoutPassword });
@@ -145,7 +145,7 @@ export class UserController {
       let needsProfileCompletion = false;
 
       if (!user || !user.profileCompleted) {
-        // Return incomplete data without creating user yet
+
         needsProfileCompletion = true;
         const incompleteUser = user ? user : {
           email: payload.email,
@@ -184,7 +184,7 @@ export class UserController {
         return;
       }
 
-      // Check if another user already has this RUC
+
       const existingRucUser = await this.userService.getUserByRuc(ruc);
       if (existingRucUser && existingRucUser.email !== email) {
         res.status(400).json({ success: false, message: 'El RUC ingresado ya está registrado con otra cuenta.' });
