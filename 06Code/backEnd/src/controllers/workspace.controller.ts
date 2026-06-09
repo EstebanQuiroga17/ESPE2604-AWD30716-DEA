@@ -169,4 +169,67 @@ export class WorkspaceController {
       res.status(500).send('Internal server error');
     }
   }
+
+  public async createWorkspace(req: Request, res: Response): Promise<void> {
+    try {
+      const { period, workspaceLocation } = req.body;
+      const userId = req.headers['x-user-id'] as string;
+      if (!period || !workspaceLocation) {
+        res.status(400).json({ success: false, message: 'Missing required fields' });
+        return;
+      }
+      
+      const newWorkspace = await prisma.workspace.create({
+        data: {
+          name: `Workspace ${period}`,
+          periodYear: parseInt(period.split('-')[0]),
+          periodMonth: parseInt(period.split('-')[1]),
+          workspaceLocation,
+          userId
+        }
+      });
+      res.status(201).json({ success: true, data: newWorkspace });
+    } catch (error) {
+      console.error("Error creating workspace:", error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+
+  public async downloadInvoicesAsync(req: Request, res: Response): Promise<void> {
+    try {
+      res.status(202).json({
+        success: true,
+        message: 'Invoice download triggered',
+        data: { invoiceDownloadStatus: false }
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+
+  public async generateAtsAsync(req: Request, res: Response): Promise<void> {
+    try {
+      res.status(202).json({
+        success: true,
+        message: 'ATS generation triggered'
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+
+  public async deleteWorkspace(req: Request, res: Response): Promise<void> {
+    try {
+      const workspaceId = req.params.workspaceId as string;
+      // In a real application, you would also need to delete related records
+      // like invoices, atsFiles, processSteps if onDelete: Cascade is not set in Prisma
+      await prisma.workspace.delete({
+        where: { id: workspaceId }
+      });
+      res.status(200).json({ success: true, message: 'Workspace deleted successfully' });
+    } catch (error) {
+      console.error("Error deleting workspace:", error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
 }

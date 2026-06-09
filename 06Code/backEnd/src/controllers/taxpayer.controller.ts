@@ -87,4 +87,27 @@ export class TaxpayerController {
       res.status(500).json({ success: false, message: 'Internal server error' });
     }
   }
+
+  public async updateProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.params.userId as string;
+      const { firstName, lastName } = req.body;
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: { firstName, lastName }
+      });
+      res.status(200).json({
+        success: true,
+        data: {
+          id: updatedUser.id,
+          ruc: updatedUser.ruc,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          email: updatedUser.email
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
 }

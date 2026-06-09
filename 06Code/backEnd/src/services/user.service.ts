@@ -51,4 +51,11 @@ export class UserService {
       data,
     });
   }
+
+  public async updatePassword(email: string, newPassword: string) {
+    return prisma.user.update({
+      where: { email },
+      data: { password: newPassword },
+    });
+  }
 }
