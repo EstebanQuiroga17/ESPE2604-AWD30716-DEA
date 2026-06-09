@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import '../../styles/Profile.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function isValidName(name: string): boolean {
   return /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(name);
