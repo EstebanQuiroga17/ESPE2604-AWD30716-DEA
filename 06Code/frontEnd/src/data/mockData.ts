@@ -1,63 +1,28 @@
-import type { User, DashboardSummary, Invoice, AtsFile, ProcessStep, AuditEvent, Notification, Workspace } from '../types';
+import type { TaxPayer, Invoice, AtsFile, ProcessStep, Workspace } from '../types';
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: 'n1',
-    type: 'warning',
-    title: 'Facturas Faltantes',
-    message: '2 facturas del proveedor XYZ no han sido descargadas.',
-    timestamp: 'Hace 1 hora',
-    read: false,
-  },
-  {
-    id: 'n2',
-    type: 'error',
-    title: 'Inconsistencia en ATS',
-    message: 'La retención M001-001-000040 tiene un error de validación.',
-    timestamp: 'Hace 2 horas',
-    read: false,
-  },
-  {
-    id: 'n3',
-    type: 'info',
-    title: 'Recordatorio',
-    message: 'El plazo para declarar el ATS vence el 30/11/2025.',
-    timestamp: 'Hace 3 horas',
-    read: true,
-  },
-];
 
-export const MockUserData: User = {
+export const MockUserData: TaxPayer = {
   id: 'u001',
-  ruc: '1234567890001',
+  RUC: '1234567890001',
   firstName: 'David',
-  lastName: 'Rodriguez',
+  firstLastName: 'Rodriguez',
   email: 'david2626714@gmail.com',
   birthDate: '1990-05-15',
-  role: 'accountant',
+  isAdmin: false,
   createdAt: '2025-01-10T10:00:00Z',
 };
 
-export const MockAdminData: User = {
+export const MockAdminData: TaxPayer = {
   id: 'u002',
-  ruc: '9876543210001',
+  RUC: '9876543210001',
   firstName: 'Angel',
-  lastName: 'Sabando',
+  firstLastName: 'Sabando',
   email: 'admin@atsexpress.com',
   birthDate: '1985-03-20',
-  role: 'admin',
+  isAdmin: true,
   createdAt: '2024-12-01T08:00:00Z',
 };
 
-export const MockDashboardSummary: DashboardSummary = {
-  invoicesDownloaded: 247,
-  invoicesDownloadedChange: 12,
-  errorsDetected: 3,
-  atsReadyToGenerate: true,
-  sriStatus: 'connected',
-  lastSync: 'Hace 15 minutos',
-  notifications: MOCK_NOTIFICATIONS,
-};
 
 export const MockInvoices: Invoice[] = [
   {
@@ -168,48 +133,6 @@ export const MockProcessSteps: ProcessStep[] = [
   },
 ];
 
-export const MockAuditEvents: AuditEvent[] = [
-  {
-    id: 'ae001',
-    userId: 'u001',
-    action: 'LOGIN',
-    module: 'Autenticación',
-    timestamp: '2025-11-28T08:55:00Z',
-    details: 'Inicio de sesión exitoso desde 192.168.1.10',
-  },
-  {
-    id: 'ae002',
-    userId: 'u001',
-    action: 'SRI_CONNECT',
-    module: 'Integración SRI',
-    timestamp: '2025-11-28T09:00:00Z',
-    details: 'Vinculación exitosa con portal SRI en línea',
-  },
-  {
-    id: 'ae003',
-    userId: 'u001',
-    action: 'INVOICES_DOWNLOAD',
-    module: 'Gestión de Facturas',
-    timestamp: '2025-11-28T09:45:00Z',
-    details: '247 facturas descargadas para Noviembre 2025',
-  },
-  {
-    id: 'ae004',
-    userId: 'u001',
-    action: 'DIRECTORY_UPLOAD',
-    module: 'Gestión de Facturas',
-    timestamp: '2025-11-28T10:00:00Z',
-    details: 'Directorio XML cargado y validado correctamente',
-  },
-  {
-    id: 'ae005',
-    userId: 'u001',
-    action: 'ATS_XLSM_GENERATE',
-    module: 'Generación ATS',
-    timestamp: '2025-11-28T10:30:00Z',
-    details: 'ATS XLSM generado: ATS_2025_11_v1.xlsm con 247 facturas',
-  },
-];
 
 export const MockWorkspaces: Workspace[] = [
   {
@@ -223,8 +146,13 @@ export const MockWorkspaces: Workspace[] = [
     lastActivityAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     invoicesCount: 45,
     atsFilesCount: 3,
-    workSpaceLocation: '/home/user/ats-data/workspace-principal',
+    workspaceLocation: '/home/user/ats-data/workspace-principal',
     period: { type: 'monthly', month: 11, year: 2025 },
+    processTracer: {
+      invoicedDownloadStatus: true,
+      atsXlsmGenerationStatus: true,
+      atsXmlGenerationStatus: false,
+    },
   },
   {
     id: 'ws-2',
@@ -237,7 +165,12 @@ export const MockWorkspaces: Workspace[] = [
     lastActivityAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     invoicesCount: 12,
     atsFilesCount: 1,
-    workSpaceLocation: '/home/user/ats-data/proyectos-especiales',
+    workspaceLocation: '/home/user/ats-data/proyectos-especiales',
     period: { type: 'semi-annual', semester: 1, year: 2025 },
+    processTracer: {
+      invoicedDownloadStatus: false,
+      atsXlsmGenerationStatus: false,
+      atsXmlGenerationStatus: false,
+    },
   },
 ];

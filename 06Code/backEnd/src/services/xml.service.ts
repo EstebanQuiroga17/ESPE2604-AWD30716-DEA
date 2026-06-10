@@ -94,16 +94,16 @@ export class XmlService {
 
     for (const inv of invoices) {
       const type = (inv.type || 'COMPRA').toUpperCase();
-      const taxBase = parseFloat(inv.taxBase) || 0;
+      const subtotalVal = parseFloat(inv.subtotal) || 0;
       const iva = parseFloat(inv.iva) || 0;
       const total = parseFloat(inv.total) || 0;
 
       if (type === 'VENTA') {
-        totalSalesTaxBase += taxBase;
+        totalSalesTaxBase += subtotalVal;
         totalSalesIva += iva;
         totalSalesAmount += total;
       } else {
-        totalExpensesTaxBase += taxBase;
+        totalExpensesTaxBase += subtotalVal;
         totalExpensesIva += iva;
         totalExpensesAmount += total;
       }
@@ -112,10 +112,10 @@ export class XmlService {
       xml += `      <id>${this.escapeXml(inv.id)}</id>\n`;
       xml += `      <type>${this.escapeXml(type)}</type>\n`;
       xml += `      <number>${this.escapeXml(inv.number)}</number>\n`;
-      xml += `      <date>${this.escapeXml(inv.date)}</date>\n`;
+      xml += `      <date>${this.escapeXml(inv.customerDate)}</date>\n`;
       xml += '      <issuer>\n';
       xml += `        <name>${this.escapeXml(inv.issuerName)}</name>\n`;
-      xml += `        <tradeName>${this.escapeXml(inv.issuerTradeName)}</tradeName>\n`;
+      xml += `        <tradeName>${this.escapeXml(inv.issuerCommercialName)}</tradeName>\n`;
       xml += `        <address>${this.escapeXml(inv.issuerAddress)}</address>\n`;
       xml += `        <ruc>${this.escapeXml(inv.issuerRuc)}</ruc>\n`;
       xml += '      </issuer>\n';
@@ -123,11 +123,11 @@ export class XmlService {
       xml += `      <emissionType>${this.escapeXml(inv.emissionType || 'Normal')}</emissionType>\n`;
       xml += `      <accessKey>${this.escapeXml(inv.accessKey)}</accessKey>\n`;
       xml += '      <client>\n';
-      xml += `        <name>${this.escapeXml(inv.clientName)}</name>\n`;
-      xml += `        <identification>${this.escapeXml(inv.clientIdentification)}</identification>\n`;
-      xml += `        <address>${this.escapeXml(inv.clientAddress)}</address>\n`;
-      xml += `        <phone>${this.escapeXml(inv.clientPhone)}</phone>\n`;
-      xml += `        <email>${this.escapeXml(inv.clientEmail)}</email>\n`;
+      xml += `        <name>${this.escapeXml(inv.customerName)}</name>\n`;
+      xml += `        <identification>${this.escapeXml(inv.customerId)}</identification>\n`;
+      xml += `        <address>${this.escapeXml(inv.customerAddress)}</address>\n`;
+      xml += `        <phone>${this.escapeXml(inv.customerPhone)}</phone>\n`;
+      xml += `        <email>${this.escapeXml(inv.customerEmail)}</email>\n`;
       xml += '      </client>\n';
       
       xml += '      <details>\n';
@@ -152,7 +152,7 @@ export class XmlService {
       xml += '      </details>\n';
 
       xml += '      <financials>\n';
-      xml += `        <subtotal>${taxBase.toFixed(2)}</subtotal>\n`;
+      xml += `        <subtotal>${subtotalVal.toFixed(2)}</subtotal>\n`;
       xml += `        <iva>${iva.toFixed(2)}</iva>\n`;
       xml += `        <total>${total.toFixed(2)}</total>\n`;
       xml += '      </financials>\n';

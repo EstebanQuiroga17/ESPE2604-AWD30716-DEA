@@ -80,11 +80,11 @@ export class AtsController {
         invoices.push(invoice);
       }
 
-      let totalSalesTaxBase = 0;
+      let totalSalesSubtotal = 0;
       let totalSalesIva = 0;
       let totalSalesAmount = 0;
 
-      let totalExpensesTaxBase = 0;
+      let totalExpensesSubtotal = 0;
       let totalExpensesIva = 0;
       let totalExpensesAmount = 0;
 
@@ -94,7 +94,7 @@ export class AtsController {
       invoices.forEach((inv, index) => {
         const rowNum = index + 2; 
         const type = (inv.type || 'COMPRA').toUpperCase();
-        const taxBase = parseFloat(inv.taxBase) || 0;
+        const subtotalVal = parseFloat(inv.subtotal) || 0;
         const iva = parseFloat(inv.iva) || 0;
         const total = parseFloat(inv.total) || 0;
 
@@ -106,22 +106,22 @@ export class AtsController {
           validationErrors.push(`Fila ${rowNum}: Falta el RUC del emisor.`);
         }
 
-        const diff = Math.abs((taxBase + iva) - total);
+        const diff = Math.abs((subtotalVal + iva) - total);
         if (diff > 0.05) { 
-          validationErrors.push(`Fila ${rowNum} (${inv.number || 'Sin número'}): La suma de subtotal (${taxBase}) + IVA (${iva}) no coincide con el total (${total}). Dif: ${diff.toFixed(2)}`);
+          validationErrors.push(`Fila ${rowNum} (${inv.number || 'Sin número'}): La suma de subtotal (${subtotalVal}) + IVA (${iva}) no coincide con el total (${total}). Dif: ${diff.toFixed(2)}`);
         }
 
         if (type === 'VENTA') {
-          totalSalesTaxBase += taxBase;
+          totalSalesSubtotal += subtotalVal;
           totalSalesIva += iva;
           totalSalesAmount += total;
         } else if (type === 'COMPRA') {
-          totalExpensesTaxBase += taxBase;
+          totalExpensesSubtotal += subtotalVal;
           totalExpensesIva += iva;
           totalExpensesAmount += total;
         } else {
           validationErrors.push(`Fila ${rowNum}: Tipo de factura desconocido '${type}'. Debe ser VENTA o COMPRA.`);
-          totalExpensesTaxBase += taxBase;
+          totalExpensesSubtotal += subtotalVal;
           totalExpensesIva += iva;
           totalExpensesAmount += total;
         }
@@ -134,17 +134,17 @@ export class AtsController {
           invoiceCount,
           totals: {
             sales: {
-              subtotal: Number(totalSalesTaxBase.toFixed(2)),
+              subtotal: Number(totalSalesSubtotal.toFixed(2)),
               iva: Number(totalSalesIva.toFixed(2)),
               total: Number(totalSalesAmount.toFixed(2))
             },
             expenses: {
-              subtotal: Number(totalExpensesTaxBase.toFixed(2)),
+              subtotal: Number(totalExpensesSubtotal.toFixed(2)),
               iva: Number(totalExpensesIva.toFixed(2)),
               total: Number(totalExpensesAmount.toFixed(2))
             },
             global: {
-              subtotal: Number((totalSalesTaxBase + totalExpensesTaxBase).toFixed(2)),
+              subtotal: Number((totalSalesSubtotal + totalExpensesSubtotal).toFixed(2)),
               iva: Number((totalSalesIva + totalExpensesIva).toFixed(2)),
               total: Number((totalSalesAmount + totalExpensesAmount).toFixed(2))
             }

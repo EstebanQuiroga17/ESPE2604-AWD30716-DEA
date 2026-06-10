@@ -47,4 +47,21 @@ export class SriController {
       res.status(500).json({ success: false, message: 'Internal server error' });
     }
   }
+
+  public async connect(req: Request, res: Response): Promise<void> {
+    try {
+      const { ruc, password, additionalCi } = req.body;
+      if (!ruc || !password) {
+        res.status(400).json({ success: false, message: 'Missing required credentials' });
+        return;
+      }
+      res.status(200).json({
+        success: true,
+        message: 'SRI connection established successfully',
+        data: { connected: true }
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
 }

@@ -24,9 +24,9 @@ export class AtsService {
 
   public generateInvoiceCsv(invoices: any[]): string {
     const headers = [
-      'id', 'type', 'number', 'issuerName', 'issuerTradeName', 'issuerAddress', 'issuerRuc',
-      'date', 'authorizationNumber', 'emissionType', 'accessKey', 'clientName', 'clientIdentification',
-      'clientAddress', 'clientPhone', 'clientEmail', 'taxBase', 'iva', 'total', 'products'
+      'id', 'type', 'number', 'issuerName', 'issuerCommercialName', 'issuerAddress', 'issuerRuc',
+      'customerDate', 'authorizationNumber', 'emissionType', 'accessKey', 'customerName', 'customerId',
+      'customerAddress', 'customerPhone', 'customerEmail', 'subtotal', 'iva', 'total', 'products'
     ];
 
     const csvRows = [headers.join(',')];

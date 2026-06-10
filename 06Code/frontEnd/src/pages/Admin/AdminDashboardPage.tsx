@@ -1,6 +1,5 @@
-import { Users, FileText, AlertTriangle, TrendingUp, Shield, Activity } from 'lucide-react';
+import { Users, FileText, AlertTriangle, TrendingUp, Shield } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
-import { MockAuditEvents } from '../../data/mockData';
 import '../../styles/Dashboard.css';
 
 interface AdminStat {
@@ -44,42 +43,7 @@ export default function AdminDashboardPage() {
           ))}
         </div>
 
-        <div className="admin-bottom-grid">
-          <div className="card">
-            <div className="card-header">
-              <div className="flex items-center gap-8">
-                <Activity size={18} className="text-primary" />
-                <h2 className="card-title">Actividad reciente del sistema</h2>
-              </div>
-            </div>
-            <div className="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Evento</th>
-                    <th>Módulo</th>
-                    <th>Usuario</th>
-                    <th>Detalles</th>
-                    <th>Fecha</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {MockAuditEvents.map((event) => (
-                    <tr key={event.id}>
-                      <td>
-                        <span className="badge badge-info">{event.action}</span>
-                      </td>
-                      <td className="text-sm">{event.module}</td>
-                      <td className="text-sm text-muted">{event.userId}</td>
-                      <td className="text-sm">{event.details}</td>
-                      <td className="text-xs text-muted">{new Date(event.timestamp).toLocaleString('es-EC')}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', maxWidth: '600px' }}>
           <div className="card">
             <div className="card-header">
               <h2 className="card-title">Estado de módulos</h2>

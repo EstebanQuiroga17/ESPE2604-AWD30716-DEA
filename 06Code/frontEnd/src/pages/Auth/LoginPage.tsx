@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import '../../styles/Auth.css';
 
 interface LoginFormState {
@@ -17,12 +18,22 @@ interface LoginFormErrors {
 }
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginGoogle, isAuthenticated, sriConnectionStatus } = useAuth();
   const navigate = useNavigate();
   const [formState, setFormState] = useState<LoginFormState>({ identifier: '', password: '', rememberMe: false });
   const [errors, setErrors] = useState<LoginFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (sriConnectionStatus === 'connected') {
+        navigate('/dashboard');
+      } else {
+        navigate('/sri-connection');
+      }
+    }
+  }, [isAuthenticated, sriConnectionStatus, navigate]);
 
   const validateForm = (): boolean => {
     const newErrors: LoginFormErrors = {};
@@ -40,11 +51,36 @@ export default function LoginPage() {
     setErrors({});
     try {
       const success = await login(formState.identifier, formState.password);
-      if (success) navigate('/workspaces');
+      if (success) {
+        const storedUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        if (storedUser.isAdmin) {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/workspaces');
+        }
+      }
       else setErrors({ general: 'Credenciales incorrectas. Verifica tu usuario y contraseña.' });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setIsLoading(true);
+    setErrors({});
+    const result = await loginGoogle(credentialResponse.credential);
+    if (result.success) {
+      if (result.needsProfileCompletion) {
+        navigate('/complete-profile');
+      }
+    } else {
+      setErrors({ general: 'Error al iniciar sesión con Google.' });
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setErrors({ general: 'Fallo en la conexión con Google.' });
   };
 
   const handleChange = (field: keyof LoginFormState) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,6 +188,20 @@ export default function LoginPage() {
               {isLoading ? <><span className="spinner" /> Verificando...</> : 'Iniciar Sesión'}
             </button>
           </form>
+
+          <div className="auth-divider">
+            <span>O ingresa con</span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem', marginBottom: '1.5rem' }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap
+              theme="outline"
+              text="continue_with"
+            />
+          </div>
 
           <p className="auth-footer-text">
             ¿No tienes una cuenta? <Link to="/register" className="auth-link">Regístrate aquí</Link>

@@ -6,6 +6,7 @@ import LandingPage from './pages/Landing/Landing';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
+import CompleteProfilePage from './pages/Auth/CompleteProfilePage';
 import NoSessionPage from './pages/NoSession/NoSessionPage';
 import WorkspaceManagementPage from './pages/Workspaces/WorkspaceManagementPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
@@ -20,7 +21,6 @@ import SupportPage from './pages/Support/SupportPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
 import AdminUsersPage from './pages/Admin/AdminUsersPage';
-import AdminAuditPage from './pages/Admin/AdminAuditPage';
 import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
 
 import './styles/global.css';
@@ -34,6 +34,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/complete-profile" element={<CompleteProfilePage />} />
 
           <Route path="/workspaces" element={<ProtectedRoute><WorkspaceManagementPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
@@ -50,7 +51,6 @@ export default function App() {
 
           <Route path="/admin/dashboard" element={<ProtectedRoute requireAdmin><AdminDashboardPage /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute requireAdmin><AdminUsersPage /></ProtectedRoute>} />
-          <Route path="/admin/audit" element={<ProtectedRoute requireAdmin><AdminAuditPage /></ProtectedRoute>} />
           <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettingsPage /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

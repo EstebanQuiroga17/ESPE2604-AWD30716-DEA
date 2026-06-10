@@ -4,16 +4,19 @@ export class InvoiceService {
   public async getInvoicesByUser(userId: string) {
     return prisma.invoice.findMany({
       where: { userId },
-      orderBy: { date: 'desc' },
+      orderBy: { customerDate: 'desc' },
     });
   }
 
   public async saveInvoices(userId: string, invoicesData: any[]) {
     const invoices = invoicesData.map(data => {
-      let parsedProducts = null;
+      let parsedProducts: any[] = [];
       if (data.products) {
         try {
           parsedProducts = typeof data.products === 'string' ? JSON.parse(data.products) : data.products;
+          if (!Array.isArray(parsedProducts)) {
+            parsedProducts = [];
+          }
         } catch (e) {
           console.error('Error parsing products JSON:', e);
         }
@@ -21,23 +24,23 @@ export class InvoiceService {
 
       return {
         number: data.number || '',
-        issuerName: data.issuerName || '',
-        issuerTradeName: data.issuerTradeName || null,
-        issuerAddress: data.issuerAddress || null,
-        issuerRuc: data.issuerRuc || '',
-        date: data.date || '',
-        authorizationNumber: data.authorizationNumber || null,
+        authorizationNumber: data.authorizationNumber || '',
+        accessKey: data.accessKey || '',
         emissionType: data.emissionType || 'Normal',
-        accessKey: data.accessKey || null,
-        clientName: data.clientName || null,
-        clientIdentification: data.clientIdentification || null,
-        clientAddress: data.clientAddress || null,
-        clientPhone: data.clientPhone || null,
-        clientEmail: data.clientEmail || null,
-        products: parsedProducts,
-        taxBase: Number(data.taxBase) || 0,
+        issuerName: data.issuerName || '',
+        issuerCommercialName: data.issuerCommercialName || data.issuerTradeName || '',
+        issuerRuc: data.issuerRuc || '',
+        issuerAddress: data.issuerAddress || '',
+        customerName: data.customerName || data.clientName || '',
+        customerId: data.customerId || data.clientIdentification || '',
+        customerDate: data.customerDate || data.date || '',
+        customerAddress: data.customerAddress || data.clientAddress || '',
+        customerPhone: data.customerPhone || data.clientPhone || '',
+        customerEmail: data.customerEmail || data.clientEmail || '',
+        subtotal: Number(data.subtotal) || Number(data.taxBase) || 0,
         iva: Number(data.iva) || 0,
         total: Number(data.total) || 0,
+        products: parsedProducts,
         type: data.type || 'COMPRA',
         format: data.format || 'XML',
         userId,

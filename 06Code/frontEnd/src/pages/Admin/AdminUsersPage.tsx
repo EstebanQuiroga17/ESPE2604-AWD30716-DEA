@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Users, Search, Edit2, Trash2, Plus, Shield, UserCheck, X, AlertCircle } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
-import type { User } from '../../types';
+import type { TaxPayer } from '../../types';
 import axios from 'axios';
 import '../../styles/AdminUsers.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function isValidRuc(ruc: string): boolean {
   return /^\d{13}$/.test(ruc);
@@ -17,7 +17,7 @@ function isValidName(name: string): boolean {
 
 export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<TaxPayer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +28,9 @@ export default function AdminUsersPage() {
   const [formData, setFormData] = useState({
     ruc: '',
     firstName: '',
-    lastName: '',
+    secondName: '',
+    firstLastName: '',
+    secondLastName: '',
     email: '',
     password: ''
   });
@@ -52,15 +54,23 @@ export default function AdminUsersPage() {
   const openCreateModal = () => {
     setIsEditing(false);
     setEditingUserId(null);
-    setFormData({ ruc: '', firstName: '', lastName: '', email: '', password: '' });
+    setFormData({ ruc: '', firstName: '', secondName: '', firstLastName: '', secondLastName: '', email: '', password: '' });
     setModalError('');
     setIsModalOpen(true);
   };
 
-  const openEditModal = (user: User) => {
+  const openEditModal = (user: TaxPayer) => {
     setIsEditing(true);
     setEditingUserId(user.id);
-    setFormData({ ruc: user.ruc, firstName: user.firstName, lastName: user.lastName, email: user.email, password: '' });
+    setFormData({
+      ruc: user.RUC,
+      firstName: user.firstName,
+      secondName: user.secondName || '',
+      firstLastName: user.firstLastName,
+      secondLastName: user.secondLastName || '',
+      email: user.email,
+      password: ''
+    });
     setModalError('');
     setIsModalOpen(true);
   };
@@ -84,8 +94,8 @@ export default function AdminUsersPage() {
     setModalError('');
     setIsSubmitting(true);
     
-    if (!formData.firstName || !formData.lastName || !formData.email) {
-      setModalError('Los nombres, apellidos y correo son obligatorios');
+    if (!formData.firstName || !formData.firstLastName || !formData.email) {
+      setModalError('El primer nombre, primer apellido y correo electrónico son obligatorios');
       setIsSubmitting(false);
       return;
     }
@@ -102,8 +112,8 @@ export default function AdminUsersPage() {
       return;
     }
 
-    if (!isValidName(formData.firstName) || !isValidName(formData.lastName)) {
-      setModalError('El nombre y apellido no deben contener números ni símbolos');
+    if (!isValidName(formData.firstName) || !isValidName(formData.firstLastName)) {
+      setModalError('El primer nombre y primer apellido no deben contener números ni símbolos');
       setIsSubmitting(false);
       return;
     }
@@ -113,15 +123,32 @@ export default function AdminUsersPage() {
         const response = await axios.post(`${API_URL}/users/update`, {
           id: editingUserId,
           firstName: formData.firstName,
-          lastName: formData.lastName,
+          secondName: formData.secondName,
+          firstLastName: formData.firstLastName,
+          secondLastName: formData.secondLastName,
           email: formData.email,
         });
         if (response.data.success) {
-          setUsers(users.map(u => u.id === editingUserId ? { ...u, firstName: formData.firstName, lastName: formData.lastName, email: formData.email } : u));
+          setUsers(users.map(u => u.id === editingUserId ? {
+            ...u,
+            firstName: formData.firstName,
+            secondName: formData.secondName,
+            firstLastName: formData.firstLastName,
+            secondLastName: formData.secondLastName,
+            email: formData.email
+          } : u));
           setIsModalOpen(false);
         }
       } else {
-        const response = await axios.post(`${API_URL}/users/register`, formData);
+        const response = await axios.post(`${API_URL}/users/register`, {
+          RUC: formData.ruc,
+          firstName: formData.firstName,
+          secondName: formData.secondName,
+          firstLastName: formData.firstLastName,
+          secondLastName: formData.secondLastName,
+          email: formData.email,
+          password: formData.password
+        });
         if (response.data.success) {
           setUsers([response.data.data, ...users]);
           setIsModalOpen(false);
@@ -135,8 +162,8 @@ export default function AdminUsersPage() {
   };
 
   const filteredUsers = users.filter(user =>
-    `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.ruc.includes(searchQuery) ||
+    `${user.firstName} ${user.firstLastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.RUC.includes(searchQuery) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -197,21 +224,21 @@ export default function AdminUsersPage() {
                     <td>
                       <div className="flex items-center gap-10">
                         <div className="user-row-avatar">
-                          {user.firstName[0]}{user.lastName[0]}
+                          {user.firstName[0]}{user.firstLastName[0]}
                         </div>
                         <div>
-                          <p className="font-semibold text-sm">{user.firstName} {user.lastName}</p>
+                          <p className="font-semibold text-sm">{user.firstName} {user.firstLastName}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="text-sm font-medium">{user.ruc}</td>
+                    <td className="text-sm font-medium">{user.RUC}</td>
                     <td className="text-sm text-muted">{user.email}</td>
                     <td>
-                      <span className={`badge ${user.role === 'admin' ? 'badge-danger' : 'badge-info'}`}>
-                        {user.role === 'admin' ? <><Shield size={12} />Admin</> : <><UserCheck size={12} />Contador</>}
+                      <span className={`badge ${user.isAdmin ? 'badge-danger' : 'badge-info'}`}>
+                        {user.isAdmin ? <><Shield size={12} />Admin</> : <><UserCheck size={12} />Contador</>}
                       </span>
                     </td>
-                    <td className="text-sm text-muted">{new Date(user.createdAt).toLocaleDateString('es-EC')}</td>
+                    <td className="text-sm text-muted">{user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-EC') : '-'}</td>
                     <td>
                       <div className="flex gap-4">
                         <button className="btn btn-ghost btn-sm" aria-label="Editar usuario" onClick={() => openEditModal(user)}>
@@ -247,12 +274,22 @@ export default function AdminUsersPage() {
                 )}
                 <div className="grid-2 mb-16">
                   <div className="form-group">
-                    <label className="form-label text-sm">Nombres</label>
+                    <label className="form-label text-sm">Primer Nombre</label>
                     <input type="text" className="form-input" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} required />
                   </div>
                   <div className="form-group">
-                    <label className="form-label text-sm">Apellidos</label>
-                    <input type="text" className="form-input" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} required />
+                    <label className="form-label text-sm">Segundo Nombre</label>
+                    <input type="text" className="form-input" value={formData.secondName} onChange={e => setFormData({...formData, secondName: e.target.value})} />
+                  </div>
+                </div>
+                <div className="grid-2 mb-16">
+                  <div className="form-group">
+                    <label className="form-label text-sm">Primer Apellido</label>
+                    <input type="text" className="form-input" value={formData.firstLastName} onChange={e => setFormData({...formData, firstLastName: e.target.value})} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label text-sm">Segundo Apellido</label>
+                    <input type="text" className="form-input" value={formData.secondLastName} onChange={e => setFormData({...formData, secondLastName: e.target.value})} />
                   </div>
                 </div>
                 <div className="form-group mb-16">

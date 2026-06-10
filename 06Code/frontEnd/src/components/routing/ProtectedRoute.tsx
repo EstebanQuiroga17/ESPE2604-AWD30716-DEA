@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     return <Navigate to="/no-session" replace />;
   }
 
-  if (requireAdmin && currentUser?.role !== 'admin') {
+  if (requireAdmin && !currentUser?.isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { User, SriConnectionStatus, Workspace } from '../types';
+import type { TaxPayer, SriConnectionStatus, Workspace } from '../types';
 import { MockWorkspaces } from '../data/mockData';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 interface AuthContextValue {
-  currentUser: User | null;
+  currentUser: TaxPayer | null;
   isAuthenticated: boolean;
   sriConnectionStatus: SriConnectionStatus;
   currentWorkspace: Workspace | null;
@@ -17,11 +17,13 @@ interface AuthContextValue {
   logout: () => void;
   connectToSri: (username: string, password: string) => Promise<boolean>;
   disconnectFromSri: () => void;
-  updateCurrentUser: (data: Partial<User>) => void;
-  createWorkspace: (name: string, description: string, workSpaceLocation: string, period: any) => Promise<Workspace | null>;
+  updateCurrentUser: (data: Partial<TaxPayer>) => void;
+  createWorkspace: (name: string, description: string, workspaceLocation: string, period: any) => Promise<Workspace | null>;
   deleteWorkspace: (workspaceId: string) => Promise<boolean>;
   selectWorkspace: (workspace: Workspace) => void;
   loadWorkspaces: () => Promise<void>;
+  loginGoogle: (credential: string) => Promise<{ success: boolean; needsProfileCompletion?: boolean }>;
+  completeProfile: (data: any) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -32,11 +34,11 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const stored = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
-  const initialUser = stored ? JSON.parse(stored) as User : null;
+  const initialUser = stored ? JSON.parse(stored) as TaxPayer : null;
   if (initialUser) {
     axios.defaults.headers.common['X-User-Id'] = initialUser.id;
   }
-  const [currentUser, setCurrentUser] = useState<User | null>(initialUser);
+  const [currentUser, setCurrentUser] = useState<TaxPayer | null>(initialUser);
   const [sriConnectionStatus, setSriConnectionStatus] = useState<SriConnectionStatus>('disconnected');
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -53,9 +55,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
       if (response.data.success) {
         const user = response.data.data;
-        setCurrentUser(user);
-        try { localStorage.setItem('currentUser', JSON.stringify(user)); } catch {}
-        // set header for subsequent requests
+        const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName, isAdmin: user.role === 'admin' };
+        setCurrentUser(mappedUser);
+        try { localStorage.setItem('currentUser', JSON.stringify(mappedUser)); } catch {}
+        axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
         axios.defaults.headers.common['X-User-Id'] = user.id;
         return true;
       }
@@ -68,9 +71,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const register = useCallback(async (data: any): Promise<boolean> => {
     try {
-      const response = await axios.post(`${API_URL}/users/register`, data);
+      const payload = {
+        firstName: data.firstName,
+        middleName: data.secondName,
+        lastName: data.firstLastName,
+        secondLastName: data.secondLastName,
+        ruc: data.RUC,
+        email: data.email,
+        password: data.password,
+        birthDate: data.birthDate
+      };
+      const response = await axios.post(`${API_URL}/users/register`, payload);
       if (response.data.success) {
-        setCurrentUser(response.data.data);
+        const user = response.data.data;
+        setCurrentUser({ ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName });
         return true;
       }
       return false;
@@ -84,10 +98,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     setCurrentUser({
       id: '07787dd8-aafa-4c6d-a49c-07595438199d',
-      ruc: '1790011223002',
-      role: 'admin',
+      RUC: '1790011223002',
+      isAdmin: true,
       firstName: 'David',
-      lastName: 'Admin',
+      firstLastName: 'Admin',
       email: 'david26@gmail.com',
       birthDate: '1990-01-01',
       createdAt: '2026-05-04T02:06:07.024Z'
@@ -119,11 +133,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setSriConnectionStatus('disconnected');
   }, []);
 
-  const updateCurrentUser = useCallback((data: Partial<User>) => {
+  const updateCurrentUser = useCallback((data: Partial<TaxPayer>) => {
     setCurrentUser(prev => prev ? { ...prev, ...data } : null);
   }, []);
 
-  const createWorkspace = useCallback(async (name: string, description: string, workSpaceLocation: string, period: any): Promise<Workspace | null> => {
+  const createWorkspace = useCallback(async (name: string, description: string, workspaceLocation: string, period: any): Promise<Workspace | null> => {
     if (!currentUser) return null;
     try {
       const newWorkspace: Workspace = {
@@ -137,8 +151,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         lastActivityAt: new Date().toISOString(),
         invoicesCount: 0,
         atsFilesCount: 0,
-        workSpaceLocation,
+        workspaceLocation,
         period,
+        processTracer: {
+          invoicedDownloadStatus: false,
+          atsXlsmGenerationStatus: false,
+          atsXmlGenerationStatus: false,
+        },
       };
       setWorkspaces(prev => [...prev, newWorkspace]);
       return newWorkspace;
@@ -208,6 +227,66 @@ export function AuthProvider({ children }: AuthProviderProps) {
     selectWorkspace,
     loadWorkspaces,
   };
+
+  const loginGoogle = useCallback(async (credential: string) => {
+    try {
+      const response = await axios.post(`${API_URL}/users/login/google`, { credential });
+      if (response.data.success) {
+        const user = response.data.data;
+        const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
+        if (!response.data.needsProfileCompletion) {
+          setCurrentUser(mappedUser);
+          try { localStorage.setItem('currentUser', JSON.stringify(mappedUser)); } catch {}
+          axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
+        } else {
+          try { localStorage.setItem('incompleteUser', JSON.stringify(mappedUser)); } catch {}
+        }
+        return { success: true, needsProfileCompletion: response.data.needsProfileCompletion };
+      }
+      return { success: false };
+    } catch (error) {
+      console.error("Google login error:", error);
+      return { success: false };
+    }
+  }, []);
+
+  const completeProfile = useCallback(async (data: any) => {
+    try {
+      const stored = localStorage.getItem('incompleteUser');
+      if (!stored) return false;
+      const incompleteUser = JSON.parse(stored);
+      
+      const payload = {
+        email: incompleteUser.email,
+        firstName: data.firstName,
+        middleName: data.secondName,
+        lastName: data.firstLastName,
+        secondLastName: data.secondLastName,
+        ruc: data.RUC,
+        birthDate: data.birthDate
+      };
+      
+      const response = await axios.post(`${API_URL}/users/complete-profile`, payload);
+      if (response.data.success) {
+        const user = response.data.data;
+        const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
+        setCurrentUser(mappedUser);
+        try { 
+          localStorage.setItem('currentUser', JSON.stringify(mappedUser));
+          localStorage.removeItem('incompleteUser');
+        } catch {}
+        axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Complete profile error:", error);
+      return false;
+    }
+  }, []);
+
+  contextValue.loginGoogle = loginGoogle;
+  contextValue.completeProfile = completeProfile;
 
   return (
     <AuthContext.Provider value={contextValue}>
