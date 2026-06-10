@@ -12,6 +12,12 @@ export class XmlService {
       const char = csvContent[i];
       const nextChar = csvContent[i + 1];
 
+      if (char === '\\') {
+        currentVal += nextChar || '';
+        i++;
+        continue;
+      }
+
       if (char === '"') {
         if (inQuotes && nextChar === '"') {
           currentVal += '"';
