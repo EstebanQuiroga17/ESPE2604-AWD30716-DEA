@@ -55,12 +55,27 @@ export class SriController {
         res.status(400).json({ success: false, message: 'Missing required credentials' });
         return;
       }
+
+      const user = await prisma.user.findUnique({
+        where: { ruc }
+      });
+
+      if (!user) {
+        res.status(404).json({ success: false, message: 'User with this RUC not found' });
+        return;
+      }
+
+      await this.sriService.setSriConnection(user.id, true);
+
       res.status(200).json({
         success: true,
         message: 'SRI connection established successfully',
-        data: { connected: true }
+        data: {
+          connected: true
+        }
       });
     } catch (error) {
+      console.error('SRI Connect error:', error);
       res.status(500).json({ success: false, message: 'Internal server error' });
     }
   }

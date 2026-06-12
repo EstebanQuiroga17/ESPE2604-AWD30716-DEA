@@ -5,7 +5,7 @@ dotenv.config();
 import app from './app-business';
 
 // Corre en el puerto 3001 por defecto para el servicio de reglas de negocio
-const PORT = process.env.PORT_BUSINESS || 3001;
+const PORT = process.env.PORT_BUSINESS || process.env.PORT || 3001;
 
 try {
   app.listen(Number(PORT), '0.0.0.0', () => {

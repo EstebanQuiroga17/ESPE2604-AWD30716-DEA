@@ -4,13 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/server-crud.js",
+    "start": "node dist/server-business.js",
     "start:crud": "node dist/server-crud.js",
     "start:business": "node dist/server-business.js",
     "dev": "nodemon src/server-crud.ts",
     "dev:crud": "nodemon src/server-crud.ts",
     "dev:business": "nodemon src/server-business.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "db:push": "prisma db push"
   },
   "keywords": [],

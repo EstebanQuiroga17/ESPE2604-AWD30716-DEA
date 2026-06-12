@@ -30,9 +30,18 @@ export class AdminController {
   public async deleteUser(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.userId as string;
-      await prisma.user.delete({
-        where: { id: userId }
-      });
+
+      // Delete all related records first to avoid foreign key constraint violations
+      await prisma.$transaction([
+        prisma.invoice.deleteMany({ where: { userId } }),
+        prisma.atsFile.deleteMany({ where: { userId } }),
+        prisma.processStep.deleteMany({ where: { userId } }),
+        prisma.auditEvent.deleteMany({ where: { userId } }),
+        prisma.ticket.deleteMany({ where: { userId } }),
+        prisma.workspace.deleteMany({ where: { userId } }),
+        prisma.user.delete({ where: { id: userId } })
+      ]);
+
       res.status(200).json({ success: true, message: 'User deleted successfully' });
     } catch (error) {
       console.error("Error deleting user:", error);
