@@ -57,15 +57,58 @@ export class InvoiceService {
   }
 
   public async getInvoiceSummary(userId: string) {
-    const result = await prisma.invoice.aggregate({
-      where: { userId },
-      _count: { id: true },
-      _sum: { total: true },
+    const invoices = await prisma.invoice.findMany({
+      where: { userId }
+    });
+
+    let salesCount = 0;
+    let salesSubtotal = 0;
+    let salesIva = 0;
+    let salesTotal = 0;
+
+    let expensesCount = 0;
+    let expensesSubtotal = 0;
+    let expensesIva = 0;
+    let expensesTotal = 0;
+
+    invoices.forEach(inv => {
+      const type = (inv.type || 'COMPRA').toUpperCase();
+      const subtotal = inv.subtotal || 0;
+      const iva = inv.iva || 0;
+      const total = inv.total || 0;
+
+      if (type === 'VENTA') {
+        salesCount++;
+        salesSubtotal += subtotal;
+        salesIva += iva;
+        salesTotal += total;
+      } else {
+        expensesCount++;
+        expensesSubtotal += subtotal;
+        expensesIva += iva;
+        expensesTotal += total;
+      }
     });
 
     return {
-      count: result._count.id,
-      totalAmount: result._sum.total || 0,
+      sales: {
+        count: salesCount,
+        subtotal: Number(salesSubtotal.toFixed(2)),
+        iva: Number(salesIva.toFixed(2)),
+        total: Number(salesTotal.toFixed(2))
+      },
+      expenses: {
+        count: expensesCount,
+        subtotal: Number(expensesSubtotal.toFixed(2)),
+        iva: Number(expensesIva.toFixed(2)),
+        total: Number(expensesTotal.toFixed(2))
+      },
+      global: {
+        count: invoices.length,
+        subtotal: Number((salesSubtotal + expensesSubtotal).toFixed(2)),
+        iva: Number((salesIva + expensesIva).toFixed(2)),
+        total: Number((salesTotal + expensesTotal).toFixed(2))
+      }
     };
   }
 }

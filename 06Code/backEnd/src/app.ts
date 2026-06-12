@@ -31,11 +31,13 @@ class App {
     this.app.use('/users', userRoutes);
     this.app.use('/taxpayer', taxpayerRoutes);
     this.app.use('/sri', sriRoutes);
-    this.app.use('/workspaces', workspaceRoutes);
+    this.app.use('/workspaces', authMiddleware, workspaceRoutes);
     this.app.use('/invoices', authMiddleware, invoiceRoutes);
     this.app.use('/ats', authMiddleware, atsRoutes);
     this.app.use('/traceability', authMiddleware, traceabilityRoutes);
     this.app.use('/dashboard', authMiddleware, dashboardRoutes);
+    this.app.use('/admin', adminRoutes);
+    this.app.use('/support', supportRoutes);
     // Health check endpoint
     this.app.get('/health', (req, res) => {
       res.status(200).json({ status: 'OK', timestamp: new Date() });
