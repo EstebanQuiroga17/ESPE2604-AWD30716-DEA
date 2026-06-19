@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Package,
   ChevronDown,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
@@ -34,6 +35,7 @@ const userNavigationItems: NavigationItem[] = [
   { path: '/ats/export', icon: <FileCode2 size={20} />, label: 'Exportar XML' },
   { path: '/traceability', icon: <History size={20} />, label: 'Trazabilidad' },
   { path: '/support', icon: <LifeBuoy size={20} />, label: 'Soporte' },
+  { path: '/reports', icon: <FileText size={20} />, label: 'Reportes' },
 ];
 
 const adminNavigationItems: NavigationItem[] = [

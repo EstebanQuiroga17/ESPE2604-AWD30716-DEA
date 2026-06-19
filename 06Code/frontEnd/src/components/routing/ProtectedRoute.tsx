@@ -36,6 +36,11 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     return <>{children}</>;
   }
 
+  // Allow access to reports globally
+  if (location.pathname === '/reports') {
+    return <>{children}</>;
+  }
+
   // For other pages, require workspace selection
   if (!currentWorkspace) {
     return <Navigate to="/workspaces" replace />;

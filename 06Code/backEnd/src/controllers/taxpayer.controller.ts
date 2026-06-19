@@ -110,4 +110,16 @@ export class TaxpayerController {
       res.status(500).json({ success: false, message: 'Internal server error' });
     }
   }
+
+  public async getTaxPayers(req: Request, res: Response): Promise<void> {
+    try {
+      const taxPayers = await prisma.user.findMany();
+      res.status(200).json({
+        success: true,
+        data: taxPayers
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
 }

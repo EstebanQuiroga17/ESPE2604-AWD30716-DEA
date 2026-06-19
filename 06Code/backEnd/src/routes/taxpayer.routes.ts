@@ -9,5 +9,5 @@ router.get('/profile/:userId', (req, res) => taxpayerController.getProfile(req, 
 router.get('/stats/:userId', (req, res) => taxpayerController.getStats(req, res));
 router.get('/validate-ruc/:ruc', (req, res) => taxpayerController.validateRuc(req, res));
 router.put('/profile/:userId', (req, res) => taxpayerController.updateProfile(req, res));
-
+router.get('/taxPayers', (req,res) => taxpayerController.getTaxPayers(req,res));
 export default router;

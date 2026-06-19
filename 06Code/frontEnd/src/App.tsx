@@ -22,6 +22,7 @@ import ProfilePage from './pages/Profile/ProfilePage';
 import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
 import AdminUsersPage from './pages/Admin/AdminUsersPage';
 import AdminSettingsPage from './pages/Admin/AdminSettingsPage';
+import ReportsPage from './pages/Reports/ReportsPage';
 
 import './styles/global.css';
 
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/ats/export" element={<ProtectedRoute><AtsExportPage /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><SupportPage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
           <Route path="/no-session" element={<NoSessionPage />} />
 
           <Route path="/admin/dashboard" element={<ProtectedRoute requireAdmin><AdminDashboardPage /></ProtectedRoute>} />
