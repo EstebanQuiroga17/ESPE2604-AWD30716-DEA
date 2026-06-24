@@ -5,7 +5,7 @@ export class SupportController {
   public async createTicket(req: Request, res: Response): Promise<void> {
     try {
       const { subject, category, priority, description, userId } = req.body;
-      const actualUserId = userId || req.headers['x-user-id'] as string;
+      const actualUserId = userId || (req as any).currentUser.id;
       
       if (!subject || !category || !priority || !description || !actualUserId) {
         res.status(400).json({ success: false, message: 'Missing required fields' });
@@ -31,7 +31,7 @@ export class SupportController {
 
   public async getUserTickets(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
       if (!userId) {
         res.status(400).json({ success: false, message: 'Missing user ID' });
         return;

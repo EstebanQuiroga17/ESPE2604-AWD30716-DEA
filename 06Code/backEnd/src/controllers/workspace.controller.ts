@@ -22,7 +22,7 @@ export class WorkspaceController {
   public async getWorkspaceDetail(req: Request, res: Response): Promise<void> {
     try {
       const workspaceId = req.params.workspaceId as string;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
 
       const workspace = await this.workspaceService.getWorkspaceById(workspaceId, userId);
       if (!workspace) {
@@ -39,7 +39,7 @@ export class WorkspaceController {
   public async getInvoices(req: Request, res: Response): Promise<void> {
     try {
       const workspaceId = req.params.workspaceId as string;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
 
       const invoices = await this.workspaceService.getWorkspaceInvoices(workspaceId, userId);
       res.status(200).json({ success: true, data: invoices });
@@ -51,7 +51,7 @@ export class WorkspaceController {
   public async getAtsFiles(req: Request, res: Response): Promise<void> {
     try {
       const workspaceId = req.params.workspaceId as string;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
 
       const atsFiles = await this.workspaceService.getWorkspaceAtsFiles(workspaceId, userId);
       res.status(200).json({ success: true, data: atsFiles });
@@ -63,7 +63,7 @@ export class WorkspaceController {
   public async getSummary(req: Request, res: Response): Promise<void> {
     try {
       const workspaceId = req.params.workspaceId as string;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
 
       const summary = await this.workspaceService.getWorkspaceSummary(workspaceId, userId);
       res.status(200).json({ success: true, data: summary });
@@ -75,7 +75,7 @@ export class WorkspaceController {
   public async getProcessStatus(req: Request, res: Response): Promise<void> {
     try {
       const workspaceId = req.params.workspaceId as string;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
 
       const status = await this.workspaceService.getWorkspaceProcessStatus(workspaceId, userId);
       res.status(200).json({ success: true, data: status });
@@ -87,7 +87,7 @@ export class WorkspaceController {
   public async getProcessSteps(req: Request, res: Response): Promise<void> {
     try {
       const workspaceId = req.params.workspaceId as string;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
 
       const steps = await this.workspaceService.getWorkspaceProcessSteps(workspaceId, userId);
       res.status(200).json({ success: true, data: steps });
@@ -99,7 +99,7 @@ export class WorkspaceController {
   public async getLogs(req: Request, res: Response): Promise<void> {
     try {
       const workspaceId = req.params.workspaceId as string;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
 
       const logs = await this.workspaceService.getWorkspaceLogs(workspaceId, userId);
       res.status(200).json({ success: true, data: logs });
@@ -129,7 +129,7 @@ export class WorkspaceController {
   public async downloadAtsXml(req: Request, res: Response): Promise<void> {
     try {
       const workspaceId = req.params.workspaceId as string;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
 
       let ruc = '1790011223002';
       if (userId) {
@@ -173,7 +173,7 @@ export class WorkspaceController {
   public async createWorkspace(req: Request, res: Response): Promise<void> {
     try {
       const { period, workspaceLocation } = req.body;
-      const userId = req.headers['x-user-id'] as string;
+      const userId = (req as any).currentUser.id;
       if (!period || !workspaceLocation) {
         res.status(400).json({ success: false, message: 'Missing required fields' });
         return;

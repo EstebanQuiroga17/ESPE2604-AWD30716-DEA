@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { UserService } from '../services/user.service';
 import { OAuth2Client } from 'google-auth-library';
 import { prisma } from '../config/database';
+import jwt from 'jsonwebtoken';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -66,7 +67,8 @@ export class UserController {
         profileCompleted: true
       });
 
-      res.status(201).json({ success: true, data: newUser });
+      const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
+      res.status(201).json({ success: true, token, data: newUser });
     } catch (error) {
       console.error('Register error:', error);
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -91,7 +93,8 @@ export class UserController {
 
       const { password: _, ...userWithoutPassword } = user;
       
-      res.status(200).json({ success: true, data: userWithoutPassword });
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
+      res.status(200).json({ success: true, token, data: userWithoutPassword });
     } catch (error) {
       console.error('Login controller error:', error);
       res.status(500).json({ success: false, message: 'Internal server error' });
@@ -164,8 +167,10 @@ export class UserController {
 
       const { password: _, ...userWithoutPassword } = user;
 
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
       res.status(200).json({ 
         success: true, 
+        token,
         data: userWithoutPassword,
         needsProfileCompletion: false
       });
@@ -221,7 +226,8 @@ export class UserController {
       }
 
       const { password: _, ...userWithoutPassword } = updatedUser;
-      res.status(200).json({ success: true, data: userWithoutPassword });
+      const token = jwt.sign({ id: updatedUser.id }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
+      res.status(200).json({ success: true, token, data: userWithoutPassword });
     } catch (error) {
       console.error('Complete profile error:', error);
       res.status(500).json({ success: false, message: 'Internal server error completing profile' });

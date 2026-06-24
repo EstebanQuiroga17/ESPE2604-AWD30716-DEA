@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/user.controller';
+import { authMiddleware } from '../middlewares/auth.middleware';
 
 const router = Router();
 const userController = new UserController();
 
-router.get('/', (req, res) => userController.getUsers(req, res));
-router.get('/:id', (req, res) => userController.getUser(req, res));
+router.get('/', authMiddleware, (req, res) => userController.getUsers(req, res));
+router.get('/:id', authMiddleware, (req, res) => userController.getUser(req, res));
 router.post('/register', (req, res) => userController.register(req, res));
 router.post('/login', (req, res) => userController.login(req, res));
 router.post('/login/google', (req, res) => userController.loginGoogle(req, res));

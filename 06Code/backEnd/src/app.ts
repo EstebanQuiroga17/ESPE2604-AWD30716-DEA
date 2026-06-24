@@ -29,9 +29,11 @@ class App {
 
   private configureRoutes(): void {
     this.app.use('/users', userRoutes);
-    this.app.use('/taxpayer', taxpayerRoutes);
-    this.app.use('/sri', sriRoutes);
-    this.app.use('/workspaces', workspaceRoutes);
+    this.app.use('/taxpayer', authMiddleware, taxpayerRoutes);
+    this.app.use('/sri', authMiddleware, sriRoutes);
+    this.app.use('/workspaces', authMiddleware, workspaceRoutes);
+    this.app.use('/admin', authMiddleware, adminRoutes);
+    this.app.use('/support', authMiddleware, supportRoutes);
     this.app.use('/invoices', authMiddleware, invoiceRoutes);
     this.app.use('/ats', authMiddleware, atsRoutes);
     this.app.use('/traceability', authMiddleware, traceabilityRoutes);

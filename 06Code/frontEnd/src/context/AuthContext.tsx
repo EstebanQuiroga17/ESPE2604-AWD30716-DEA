@@ -34,9 +34,10 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const stored = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
+  const storedToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
   const initialUser = stored ? JSON.parse(stored) as TaxPayer : null;
-  if (initialUser) {
-    axios.defaults.headers.common['X-User-Id'] = initialUser.id;
+  if (storedToken) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
   }
   const [currentUser, setCurrentUser] = useState<TaxPayer | null>(initialUser);
   const [sriConnectionStatus, setSriConnectionStatus] = useState<SriConnectionStatus>('disconnected');
@@ -54,12 +55,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         password: password
       });
       if (response.data.success) {
-        const user = response.data.data;
+        const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName, isAdmin: user.role === 'admin' };
         setCurrentUser(mappedUser);
-        try { localStorage.setItem('currentUser', JSON.stringify(mappedUser)); } catch {}
-        axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
-        axios.defaults.headers.common['X-User-Id'] = user.id;
+        try { 
+          localStorage.setItem('currentUser', JSON.stringify(mappedUser)); 
+          localStorage.setItem('authToken', token);
+        } catch {}
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         return true;
       }
       return false;
@@ -83,8 +86,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
       const response = await axios.post(`${API_URL}/users/register`, payload);
       if (response.data.success) {
-        const user = response.data.data;
-        setCurrentUser({ ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName });
+        const { token, data: user } = response.data;
+        const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
+        setCurrentUser(mappedUser);
+        try { 
+          localStorage.setItem('currentUser', JSON.stringify(mappedUser)); 
+          localStorage.setItem('authToken', token);
+        } catch {}
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         return true;
       }
       return false;
@@ -115,7 +124,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setWorkspaces([]);
     try { localStorage.removeItem('currentUser'); } catch {}
     try { localStorage.removeItem('currentWorkspace'); } catch {}
-    delete axios.defaults.headers.common['X-User-Id'];
+    try { localStorage.removeItem('authToken'); } catch {}
+    delete axios.defaults.headers.common['Authorization'];
   }, []);
 
   const connectToSri = useCallback(async (username: string, password: string): Promise<boolean> => {
@@ -232,12 +242,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await axios.post(`${API_URL}/users/login/google`, { credential });
       if (response.data.success) {
-        const user = response.data.data;
+        const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
         if (!response.data.needsProfileCompletion) {
           setCurrentUser(mappedUser);
-          try { localStorage.setItem('currentUser', JSON.stringify(mappedUser)); } catch {}
-          axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
+          try { 
+            localStorage.setItem('currentUser', JSON.stringify(mappedUser)); 
+            localStorage.setItem('authToken', token);
+          } catch {}
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         } else {
           try { localStorage.setItem('incompleteUser', JSON.stringify(mappedUser)); } catch {}
         }
@@ -268,14 +281,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       const response = await axios.post(`${API_URL}/users/complete-profile`, payload);
       if (response.data.success) {
-        const user = response.data.data;
+        const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
         setCurrentUser(mappedUser);
         try { 
           localStorage.setItem('currentUser', JSON.stringify(mappedUser));
+          localStorage.setItem('authToken', token);
           localStorage.removeItem('incompleteUser');
         } catch {}
-        axios.defaults.headers.common['X-User-Id'] = mappedUser.id;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         return true;
       }
       return false;
