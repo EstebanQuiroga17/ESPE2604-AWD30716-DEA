@@ -1,16 +1,91 @@
 import { Request, Response } from 'express';
 import { AtsService } from '../services/ats.service';
-import { XmlService } from '../services/xml.service';
 import { InvoiceService } from '../services/invoice.service';
+import CircuitBreaker from 'opossum';
+
+// URL del Servicio A (Reglas de Negocio)
+const SERVICE_A_URL = process.env.SERVICE_A_URL || 'http://localhost:3001';
+
+// Configuración del disyuntor
+const breakerOptions = {
+  timeout: 3000,               // Falla si el Servicio A tarda más de 3 segundos
+  errorThresholdPercentage: 50, // Abre el circuito si el 50% de peticiones falla
+  resetTimeout: 10000          // Tiempo de enfriamiento antes de reintentar (10s)
+};
+
+// Acciones que realiza el Servicio B hacia el Servicio A
+async function generateCsvAction(invoices: any[]): Promise<string> {
+  const response = await fetch(`${SERVICE_A_URL}/business/generate-csv`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ invoices })
+  });
+  if (!response.ok) {
+    throw new Error(`Servicio A respondió con código ${response.status}`);
+  }
+  const result: any = await response.json();
+  if (!result.success) {
+    throw new Error(result.message || 'Error en Servicio A');
+  }
+  return result.csvContent;
+}
+
+async function validateCsvAction(csvContent: string): Promise<any> {
+  const response = await fetch(`${SERVICE_A_URL}/business/validate-csv`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ csvContent })
+  });
+  if (!response.ok) {
+    throw new Error(`Servicio A respondió con código ${response.status}`);
+  }
+  const result: any = await response.json();
+  if (!result.success) {
+    throw new Error(result.message || 'Error en Servicio A');
+  }
+  return result.data;
+}
+
+async function convertXmlAction(csvContent: string): Promise<string> {
+  const response = await fetch(`${SERVICE_A_URL}/business/convert-xml`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ csvContent })
+  });
+  if (!response.ok) {
+    throw new Error(`Servicio A respondió con código ${response.status}`);
+  }
+  const result: any = await response.json();
+  if (!result.success) {
+    throw new Error(result.message || 'Error en Servicio A');
+  }
+  return result.xmlContent;
+}
+
+// Inicialización de disyuntores
+const generateCsvBreaker = new CircuitBreaker(generateCsvAction, breakerOptions);
+const validateCsvBreaker = new CircuitBreaker(validateCsvAction, breakerOptions);
+const convertXmlBreaker = new CircuitBreaker(convertXmlAction, breakerOptions);
+
+// Función de Fallback unificada
+function handleFallback(error: any) {
+  return {
+    isFallback: true,
+    message: 'El Servicio de Reglas de Negocio (Servicio A) no está disponible temporalmente. Las funciones básicas de CRUD (Servicio B) siguen operativas.',
+    error: error.message || 'SERVICE_A_UNAVAILABLE'
+  };
+}
+
+generateCsvBreaker.fallback(handleFallback);
+validateCsvBreaker.fallback(handleFallback);
+convertXmlBreaker.fallback(handleFallback);
 
 export class AtsController {
   private atsService: AtsService;
-  private xmlService: XmlService;
   private invoiceService: InvoiceService;
 
   constructor() {
     this.atsService = new AtsService();
-    this.xmlService = new XmlService();
     this.invoiceService = new InvoiceService();
   }
 
@@ -40,7 +115,13 @@ export class AtsController {
     try {
       const { userId } = req.params;
       const invoices = await this.invoiceService.getInvoicesByUser(userId as string);
-      const csvContent = this.atsService.generateInvoiceCsv(invoices);
+      
+      const csvContent = await generateCsvBreaker.fire(invoices);
+      
+      if (typeof csvContent === 'object' && (csvContent as any).isFallback) {
+        res.status(503).json(csvContent);
+        return;
+      }
       
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename=invoices_${userId}.csv`);
@@ -59,98 +140,16 @@ export class AtsController {
         return;
       }
 
-      const rows = this.xmlService.parseCsv(csvContent);
-      if (rows.length === 0) {
-        res.status(400).json({ success: false, message: 'CSV content is empty' });
+      const result = await validateCsvBreaker.fire(csvContent);
+      
+      if (result && result.isFallback) {
+        res.status(503).json(result);
         return;
       }
 
-      const headers = rows[0].map(h => h.replace(/^"|"$/g, '').trim());
-      const invoices: any[] = [];
-      for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        const invoice: any = {};
-        headers.forEach((header, index) => {
-          let cellVal = row[index] || '';
-          if (cellVal.startsWith('"') && cellVal.endsWith('"')) {
-            cellVal = cellVal.substring(1, cellVal.length - 1);
-          }
-          invoice[header] = cellVal;
-        });
-        invoices.push(invoice);
-      }
-
-      let totalSalesSubtotal = 0;
-      let totalSalesIva = 0;
-      let totalSalesAmount = 0;
-
-      let totalExpensesSubtotal = 0;
-      let totalExpensesIva = 0;
-      let totalExpensesAmount = 0;
-
-      const invoiceCount = invoices.length;
-      const validationErrors: string[] = [];
-
-      invoices.forEach((inv, index) => {
-        const rowNum = index + 2; 
-        const type = (inv.type || 'COMPRA').toUpperCase();
-        const subtotalVal = parseFloat(inv.subtotal) || 0;
-        const iva = parseFloat(inv.iva) || 0;
-        const total = parseFloat(inv.total) || 0;
-
-        if (!inv.number) {
-          validationErrors.push(`Fila ${rowNum}: Falta el número de factura.`);
-        }
-
-        if (!inv.issuerRuc) {
-          validationErrors.push(`Fila ${rowNum}: Falta el RUC del emisor.`);
-        }
-
-        const diff = Math.abs((subtotalVal + iva) - total);
-        if (diff > 0.05) { 
-          validationErrors.push(`Fila ${rowNum} (${inv.number || 'Sin número'}): La suma de subtotal (${subtotalVal}) + IVA (${iva}) no coincide con el total (${total}). Dif: ${diff.toFixed(2)}`);
-        }
-
-        if (type === 'VENTA') {
-          totalSalesSubtotal += subtotalVal;
-          totalSalesIva += iva;
-          totalSalesAmount += total;
-        } else if (type === 'COMPRA') {
-          totalExpensesSubtotal += subtotalVal;
-          totalExpensesIva += iva;
-          totalExpensesAmount += total;
-        } else {
-          validationErrors.push(`Fila ${rowNum}: Tipo de factura desconocido '${type}'. Debe ser VENTA o COMPRA.`);
-          totalExpensesSubtotal += subtotalVal;
-          totalExpensesIva += iva;
-          totalExpensesAmount += total;
-        }
-      });
-
       res.status(200).json({
         success: true,
-        data: {
-          isValid: validationErrors.length === 0,
-          invoiceCount,
-          totals: {
-            sales: {
-              subtotal: Number(totalSalesSubtotal.toFixed(2)),
-              iva: Number(totalSalesIva.toFixed(2)),
-              total: Number(totalSalesAmount.toFixed(2))
-            },
-            expenses: {
-              subtotal: Number(totalExpensesSubtotal.toFixed(2)),
-              iva: Number(totalExpensesIva.toFixed(2)),
-              total: Number(totalExpensesAmount.toFixed(2))
-            },
-            global: {
-              subtotal: Number((totalSalesSubtotal + totalExpensesSubtotal).toFixed(2)),
-              iva: Number((totalSalesIva + totalExpensesIva).toFixed(2)),
-              total: Number((totalSalesAmount + totalExpensesAmount).toFixed(2))
-            }
-          },
-          errors: validationErrors
-        }
+        data: result
       });
     } catch (error) {
       console.error('Validate CSV error:', error);
@@ -166,7 +165,13 @@ export class AtsController {
         return;
       }
 
-      const xmlContent = this.xmlService.convertCsvToXml(csvContent);
+      const xmlContent = await convertXmlBreaker.fire(csvContent);
+      
+      if (typeof xmlContent === 'object' && (xmlContent as any).isFallback) {
+        res.status(503).json(xmlContent);
+        return;
+      }
+
       res.setHeader('Content-Type', 'application/xml');
       res.status(200).send(xmlContent);
     } catch (error) {
