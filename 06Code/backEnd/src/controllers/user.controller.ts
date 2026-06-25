@@ -86,7 +86,7 @@ export class UserController {
       const user = await this.userService.getLoginUser(email);
       
       if (!user || user.password !== password) {
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
+        res.status(401).json({ success: false, message: 'El usuario o la contraseña es incorrecta.' });
         return;
       }
       
