@@ -12,7 +12,7 @@ export class SriController {
   public async getSriStatus(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.userId as string;
-      const user = await prisma.user.findUnique({
+      const user = await prisma.taxpayer.findUnique({
         where: { id: userId }
       });
       if (!user) {
@@ -56,7 +56,7 @@ export class SriController {
         return;
       }
 
-      const user = await prisma.user.findUnique({
+      const user = await prisma.taxpayer.findUnique({
         where: { ruc }
       });
 

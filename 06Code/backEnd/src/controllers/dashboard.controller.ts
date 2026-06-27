@@ -7,12 +7,12 @@ export class DashboardController {
       const userId = req.params.userId as string;
       
       const invoicesCount = await prisma.invoice.count({
-        where: { userId }
+        where: { taxpayerId: userId }
       });
       
       const atsWithErrorsCount = await prisma.atsFile.count({
         where: { 
-          userId, 
+          taxpayerId: userId, 
           validationErrors: { gt: 0 } 
         }
       });

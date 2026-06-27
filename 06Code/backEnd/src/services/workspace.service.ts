@@ -3,14 +3,14 @@ import { prisma } from '../config/database';
 export class WorkspaceService {
   public async getUserWorkspaces(userId: string) {
     return prisma.workspace.findMany({
-      where: { userId },
+      where: { taxpayerId: userId },
       orderBy: { createdAt: 'desc' }
     });
   }
 
   public async getWorkspaceById(id: string, userId?: string) {
     const whereClause: any = { id };
-    if (userId) whereClause.userId = userId;
+    if (userId) whereClause.taxpayerId = userId;
     return prisma.workspace.findFirst({
       where: whereClause
     });
@@ -18,7 +18,7 @@ export class WorkspaceService {
 
   public async getWorkspaceInvoices(workspaceId: string, userId?: string) {
     const whereClause: any = { workspaceId };
-    if (userId) whereClause.userId = userId;
+    if (userId) whereClause.taxpayerId = userId;
     return prisma.invoice.findMany({
       where: whereClause,
       orderBy: { customerDate: 'desc' }
@@ -27,7 +27,7 @@ export class WorkspaceService {
 
   public async getWorkspaceAtsFiles(workspaceId: string, userId?: string) {
     const whereClause: any = { workspaceId };
-    if (userId) whereClause.userId = userId;
+    if (userId) whereClause.taxpayerId = userId;
     return prisma.atsFile.findMany({
       where: whereClause,
       orderBy: { createdAt: 'desc' }
@@ -36,7 +36,7 @@ export class WorkspaceService {
 
   public async getWorkspaceSummary(workspaceId: string, userId?: string) {
     const whereClause: any = { workspaceId };
-    if (userId) whereClause.userId = userId;
+    if (userId) whereClause.taxpayerId = userId;
 
     const aggregate = await prisma.invoice.aggregate({
       where: whereClause,
@@ -60,7 +60,7 @@ export class WorkspaceService {
 
   public async getWorkspaceProcessStatus(workspaceId: string, userId?: string) {
     const whereClause: any = { workspaceId };
-    if (userId) whereClause.userId = userId;
+    if (userId) whereClause.taxpayerId = userId;
 
     const steps = await prisma.processStep.findMany({
       where: whereClause
@@ -80,7 +80,7 @@ export class WorkspaceService {
 
   public async getWorkspaceProcessSteps(workspaceId: string, userId?: string) {
     const whereClause: any = { workspaceId };
-    if (userId) whereClause.userId = userId;
+    if (userId) whereClause.taxpayerId = userId;
 
     return prisma.processStep.findMany({
       where: whereClause,
@@ -95,7 +95,7 @@ export class WorkspaceService {
         { module: { contains: 'Workspace' } }
       ]
     };
-    if (userId) whereClause.userId = userId;
+    if (userId) whereClause.taxpayerId = userId;
 
     const events = await prisma.auditEvent.findMany({
       where: whereClause,

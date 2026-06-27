@@ -3,7 +3,7 @@ import { prisma } from '../config/database';
 export class InvoiceService {
   public async getInvoicesByUser(userId: string) {
     return prisma.invoice.findMany({
-      where: { userId },
+      where: { taxpayerId: userId },
       orderBy: { customerDate: 'desc' },
     });
   }
@@ -43,7 +43,7 @@ export class InvoiceService {
         products: parsedProducts,
         type: data.type || 'COMPRA',
         format: data.format || 'XML',
-        userId,
+        taxpayerId: userId,
         workspaceId: data.workspaceId || null,
       };
     });
@@ -58,7 +58,7 @@ export class InvoiceService {
 
   public async getInvoiceSummary(userId: string) {
     const invoices = await prisma.invoice.findMany({
-      where: { userId }
+      where: { taxpayerId: userId }
     });
 
     let salesCount = 0;

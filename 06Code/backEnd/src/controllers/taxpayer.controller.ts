@@ -2,10 +2,21 @@ import { Request, Response } from 'express';
 import { prisma } from '../config/database';
 
 export class TaxpayerController {
+  public async getAllTaxpayers(req: Request, res: Response): Promise<void> {
+    try {
+      const taxpayers = await prisma.taxpayer.findMany({
+        select: { id: true, ruc: true, firstName: true, lastName: true, email: true, role: true, createdAt: true }
+      });
+      res.status(200).json({ success: true, data: taxpayers });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+
   public async getProfile(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.userId as string;
-      const user = await prisma.user.findUnique({
+      const user = await prisma.taxpayer.findUnique({
         where: { id: userId }
       });
       if (!user) {
@@ -32,7 +43,7 @@ export class TaxpayerController {
   public async getStats(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.userId as string;
-      const user = await prisma.user.findUnique({
+      const user = await prisma.taxpayer.findUnique({
         where: { id: userId }
       });
       if (!user) {
@@ -41,15 +52,15 @@ export class TaxpayerController {
       }
 
       const workspacesCount = await prisma.workspace.count({
-        where: { userId: user.id }
+        where: { taxpayerId: user.id }
       });
 
       const totalInvoices = await prisma.invoice.count({
-        where: { userId: user.id }
+        where: { taxpayerId: user.id }
       });
 
       const lastSyncEvent = await prisma.auditEvent.findFirst({
-        where: { userId: user.id, action: 'INVOICES_DOWNLOAD' },
+        where: { taxpayerId: user.id, action: 'INVOICES_DOWNLOAD' },
         orderBy: { timestamp: 'desc' }
       });
 
@@ -74,7 +85,7 @@ export class TaxpayerController {
         return;
       }
 
-      const user = await prisma.user.findUnique({
+      const user = await prisma.taxpayer.findUnique({
         where: { ruc }
       });
 
@@ -92,7 +103,7 @@ export class TaxpayerController {
     try {
       const userId = req.params.userId as string;
       const { firstName, lastName } = req.body;
-      const updatedUser = await prisma.user.update({
+      const updatedUser = await prisma.taxpayer.update({
         where: { id: userId },
         data: { firstName, lastName }
       });

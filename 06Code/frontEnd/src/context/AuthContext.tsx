@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { TaxPayer, SriConnectionStatus, Workspace } from '../types';
-import { MockWorkspaces } from '../data/mockData';
+
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return false;
     }
     try {
-      const response = await axios.post(`${API_URL}/users/login`, {
+      const response = await axios.post(`${API_URL}/auth/login`, {
         email: identifier,
         password: password
       });
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         password: data.password,
         birthDate: data.birthDate
       };
-      const response = await axios.post(`${API_URL}/users/register`, payload);
+      const response = await axios.post(`${API_URL}/auth/register`, payload);
       if (response.data.success) {
         const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
@@ -200,20 +200,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const loadWorkspaces = useCallback(async () => {
     if (!currentUser?.id) return;
     try {
-      const mockWorkspaces = MockWorkspaces.map(ws => ({
-        ...ws,
-        ownerId: currentUser.id,
-      }));
-      setWorkspaces(mockWorkspaces);
-      
-      const stored = typeof window !== 'undefined' ? localStorage.getItem('currentWorkspace') : null;
-      if (stored) {
-        try {
-          const saved = JSON.parse(stored) as Workspace;
-          const found = mockWorkspaces.find(ws => ws.id === saved.id);
-          if (found) setCurrentWorkspace(found);
-        } catch {}
-      }
+      setWorkspaces([]);
     } catch (error) {
       console.error("Error loading workspaces:", error);
     }
@@ -240,7 +227,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const loginGoogle = useCallback(async (credential: string) => {
     try {
-      const response = await axios.post(`${API_URL}/users/login/google`, { credential });
+      const response = await axios.post(`${API_URL}/auth/login/google`, { credential });
       if (response.data.success) {
         const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
@@ -279,7 +266,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         birthDate: data.birthDate
       };
       
-      const response = await axios.post(`${API_URL}/users/complete-profile`, payload);
+      const response = await axios.post(`${API_URL}/auth/complete-profile`, payload);
       if (response.data.success) {
         const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };

@@ -6,7 +6,7 @@ export class TraceabilityService {
       orderBy: { timestamp: 'desc' },
       take: 100,
       include: {
-        user: {
+        taxpayer: {
           select: { firstName: true, lastName: true, ruc: true },
         },
       },
@@ -19,14 +19,14 @@ export class TraceabilityService {
         action: data.action,
         module: data.module,
         details: data.details,
-        userId: data.userId,
+        taxpayerId: data.userId,
       },
     });
   }
 
   public async getProcessSteps(userId: string) {
     return prisma.processStep.findMany({
-      where: { userId },
+      where: { taxpayerId: userId },
       orderBy: { createdAt: 'asc' },
     });
   }

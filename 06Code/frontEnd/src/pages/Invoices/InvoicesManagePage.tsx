@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FolderOpen, Upload, CheckCircle2, AlertCircle, FileText, X, Shield } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
-import { MockInvoices } from '../../data/mockData';
+
 import type { Invoice } from '../../types';
 import '../../styles/InvoicesManage.css';
 
@@ -21,7 +21,7 @@ export default function InvoicesManagePage() {
     setValidationResult(null);
     await new Promise(resolve => setTimeout(resolve, 2000));
     setValidationResult({
-      valid: MockInvoices,
+      valid: [],
       invalid: [
         { name: 'F004-001-000003.xml', reason: 'El RUC del emisor no corresponde al contribuyente' },
       ],

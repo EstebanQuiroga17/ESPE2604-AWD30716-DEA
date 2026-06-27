@@ -38,7 +38,7 @@ export default function AdminUsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(`${API_URL}/users`);
+        const response = await axios.get(`${API_URL}/taxpayer`);
         if (response.data.success) {
           setUsers(response.data.data);
         }
@@ -140,11 +140,11 @@ export default function AdminUsersPage() {
           setIsModalOpen(false);
         }
       } else {
-        const response = await axios.post(`${API_URL}/users/register`, {
-          RUC: formData.ruc,
+        const response = await axios.post(`${API_URL}/auth/register`, {
+          ruc: formData.ruc,
           firstName: formData.firstName,
-          secondName: formData.secondName,
-          firstLastName: formData.firstLastName,
+          middleName: formData.secondName,
+          lastName: formData.firstLastName,
           secondLastName: formData.secondLastName,
           email: formData.email,
           password: formData.password

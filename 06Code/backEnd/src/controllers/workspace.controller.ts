@@ -133,7 +133,7 @@ export class WorkspaceController {
 
       let ruc = '1790011223002';
       if (userId) {
-        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const user = await prisma.taxpayer.findUnique({ where: { id: userId } });
         if (user) ruc = user.ruc;
       }
 
@@ -185,7 +185,7 @@ export class WorkspaceController {
           periodYear: parseInt(period.split('-')[0]),
           periodMonth: parseInt(period.split('-')[1]),
           workspaceLocation,
-          userId
+          taxpayerId: userId
         }
       });
       res.status(201).json({ success: true, data: newWorkspace });

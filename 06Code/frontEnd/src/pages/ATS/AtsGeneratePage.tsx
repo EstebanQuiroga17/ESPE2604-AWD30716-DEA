@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FileSpreadsheet, Play, Download, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
-import { MockInvoices, MockAtsFiles } from '../../data/mockData';
+
 import type { AtsFile } from '../../types';
 import '../../styles/AtsModule.css';
 
@@ -20,7 +20,7 @@ export default function AtsGeneratePage() {
       await new Promise(resolve => setTimeout(resolve, 500));
       setProgress(target);
     }
-    setGeneratedFile(MockAtsFiles[0]);
+    setGeneratedFile(null);
     setGenerationStatus('done');
   };
 

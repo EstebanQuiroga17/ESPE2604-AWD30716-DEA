@@ -21,7 +21,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
     }
     const userId = decoded.id;
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.taxpayer.findUnique({ where: { id: userId } });
     if (!user) {
       res.status(401).json({ success: false, message: 'Invalid user' });
       return;

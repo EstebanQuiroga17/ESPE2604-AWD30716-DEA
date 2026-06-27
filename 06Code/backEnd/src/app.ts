@@ -1,6 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
-import userRoutes from './routes/user.routes';
+import authRoutes from './routes/auth.routes';
 import taxpayerRoutes from './routes/taxpayer.routes';
 import sriRoutes from './routes/sri.routes';
 import workspaceRoutes from './routes/workspace.routes';
@@ -28,7 +28,7 @@ class App {
   }
 
   private configureRoutes(): void {
-    this.app.use('/users', userRoutes);
+    this.app.use('/auth', authRoutes);
     this.app.use('/taxpayer', authMiddleware, taxpayerRoutes);
     this.app.use('/sri', authMiddleware, sriRoutes);
     this.app.use('/workspaces', authMiddleware, workspaceRoutes);

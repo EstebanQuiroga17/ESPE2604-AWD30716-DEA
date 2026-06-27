@@ -9,7 +9,7 @@ export class SriService {
     if (!SriService.activeSessions.has(userId)) {
       // Check if they had a recent success connection in AuditEvent to persist mock connection
       const lastConnect = await prisma.auditEvent.findFirst({
-        where: { userId, action: 'SRI_CONNECT' },
+        where: { taxpayerId: userId, action: 'SRI_CONNECT' },
         orderBy: { timestamp: 'desc' }
       });
       
@@ -32,7 +32,7 @@ export class SriService {
         action: connected ? 'SRI_CONNECT' : 'SRI_DISCONNECT',
         module: 'Integración SRI',
         details: connected ? 'Vinculación exitosa con portal SRI en línea' : 'Sesión con SRI finalizada',
-        userId
+        taxpayerId: userId
       }
     });
   }
@@ -40,7 +40,7 @@ export class SriService {
   public async getSriHistory(userId: string) {
     return prisma.auditEvent.findMany({
       where: {
-        userId,
+        taxpayerId: userId,
         module: 'Integración SRI'
       },
       orderBy: { timestamp: 'desc' }

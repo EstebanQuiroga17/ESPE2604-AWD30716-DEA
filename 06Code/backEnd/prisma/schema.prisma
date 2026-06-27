@@ -8,13 +8,13 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
+model Taxpayer {
   id               String         @id @default(uuid())
   ruc              String         @unique
   firstName        String
   middleName       String?
   lastName         String
-  secondLastName   String?
+  secondLastName   String?  
   email            String         @unique
   password         String?
   birthDate        DateTime?
@@ -29,6 +29,8 @@ model User {
   auditEvents  AuditEvent[]
   workspaces   Workspace[]
   tickets      Ticket[]
+
+  @@map("Taxpayer")
 }
 
 model Workspace {
@@ -41,11 +43,11 @@ model Workspace {
   periodSemester      Int?
   workspaceLocation   String
   sriConnectionStatus String        @default("disconnected")
-  userId              String
+  taxpayerId          String
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
 
-  user                User          @relation(fields: [userId], references: [id])
+  taxpayer            Taxpayer      @relation(fields: [taxpayerId], references: [id])
   invoices            Invoice[]
   atsFiles            AtsFile[]
   processSteps        ProcessStep[]
@@ -78,11 +80,11 @@ model Invoice {
 
   type                 String     @default("COMPRA") // "VENTA" o "COMPRA"
   format               String     @default("XML")
-  userId               String
+  taxpayerId           String
   workspaceId          String?
   createdAt            DateTime   @default(now())
   
-  user                 User       @relation(fields: [userId], references: [id])
+  taxpayer             Taxpayer   @relation(fields: [taxpayerId], references: [id])
   workspace            Workspace? @relation(fields: [workspaceId], references: [id])
 }
 
@@ -94,11 +96,11 @@ model AtsFile {
   periodYear       Int
   invoiceCount     Int
   validationErrors Int
-  userId           String
+  taxpayerId       String
   workspaceId      String?
   createdAt        DateTime   @default(now())
 
-  user             User       @relation(fields: [userId], references: [id])
+  taxpayer         Taxpayer   @relation(fields: [taxpayerId], references: [id])
   workspace        Workspace? @relation(fields: [workspaceId], references: [id])
 }
 
@@ -109,23 +111,23 @@ model ProcessStep {
   status      String
   module      String
   completedAt DateTime?
-  userId      String
+  taxpayerId  String
   workspaceId String?
   createdAt   DateTime   @default(now())
 
-  user        User       @relation(fields: [userId], references: [id])
+  taxpayer    Taxpayer   @relation(fields: [taxpayerId], references: [id])
   workspace   Workspace? @relation(fields: [workspaceId], references: [id])
 }
 
 model AuditEvent {
-  id        String   @id @default(uuid())
-  action    String
-  module    String
-  details   String
-  timestamp DateTime @default(now())
-  userId    String
+  id         String   @id @default(uuid())
+  action     String
+  module     String
+  details    String
+  timestamp  DateTime @default(now())
+  taxpayerId String
 
-  user      User     @relation(fields: [userId], references: [id])
+  taxpayer   Taxpayer @relation(fields: [taxpayerId], references: [id])
 }
 
 model Ticket {
@@ -135,9 +137,9 @@ model Ticket {
   priority    String
   description String
   status      String   @default("open")
-  userId      String
+  taxpayerId  String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id])
+  taxpayer    Taxpayer @relation(fields: [taxpayerId], references: [id])
 }

@@ -4,7 +4,7 @@ import { prisma } from '../config/database';
 export class AdminController {
   public async getUsers(req: Request, res: Response): Promise<void> {
     try {
-      const users = await prisma.user.findMany({
+      const users = await prisma.taxpayer.findMany({
         select: { id: true, ruc: true, firstName: true, lastName: true, email: true, role: true, createdAt: true }
       });
       res.status(200).json({ success: true, data: users });
@@ -33,13 +33,13 @@ export class AdminController {
 
       // Delete all related records first to avoid foreign key constraint violations
       await prisma.$transaction([
-        prisma.invoice.deleteMany({ where: { userId } }),
-        prisma.atsFile.deleteMany({ where: { userId } }),
-        prisma.processStep.deleteMany({ where: { userId } }),
-        prisma.auditEvent.deleteMany({ where: { userId } }),
-        prisma.ticket.deleteMany({ where: { userId } }),
-        prisma.workspace.deleteMany({ where: { userId } }),
-        prisma.user.delete({ where: { id: userId } })
+        prisma.invoice.deleteMany({ where: { taxpayerId: userId } }),
+        prisma.atsFile.deleteMany({ where: { taxpayerId: userId } }),
+        prisma.processStep.deleteMany({ where: { taxpayerId: userId } }),
+        prisma.auditEvent.deleteMany({ where: { taxpayerId: userId } }),
+        prisma.ticket.deleteMany({ where: { taxpayerId: userId } }),
+        prisma.workspace.deleteMany({ where: { taxpayerId: userId } }),
+        prisma.taxpayer.delete({ where: { id: userId } })
       ]);
 
       res.status(200).json({ success: true, message: 'User deleted successfully' });
@@ -54,7 +54,7 @@ export class AdminController {
       const logs = await prisma.auditEvent.findMany({
         orderBy: { timestamp: 'desc' },
         take: 100,
-        include: { user: { select: { email: true, ruc: true } } }
+        include: { taxpayer: { select: { email: true, ruc: true } } }
       });
       res.status(200).json({ success: true, data: logs });
     } catch (error) {
@@ -79,7 +79,7 @@ export class AdminController {
     try {
       const tickets = await prisma.ticket.findMany({
         orderBy: { createdAt: 'desc' },
-        include: { user: { select: { firstName: true, lastName: true, email: true } } }
+        include: { taxpayer: { select: { firstName: true, lastName: true, email: true } } }
       });
       res.status(200).json({ success: true, data: tickets });
     } catch (error) {
