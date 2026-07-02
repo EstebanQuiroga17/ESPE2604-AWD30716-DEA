@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      const response = await axios.post(`${API_URL}/users/reset-password`, {
+      const response = await axios.post(`${API_URL}/auth/reset-password`, {
         email,
         newPassword
       });

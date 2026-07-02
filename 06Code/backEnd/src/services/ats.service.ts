@@ -3,7 +3,7 @@ import { prisma } from '../config/database';
 export class AtsService {
   public async getAtsFilesByUser(userId: string) {
     return prisma.atsFile.findMany({
-      where: { userId },
+      where: { taxpayerId: userId },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -17,7 +17,7 @@ export class AtsService {
         periodYear: data.periodYear,
         invoiceCount: data.invoiceCount,
         validationErrors: data.validationErrors,
-        userId: data.userId,
+        taxpayerId: data.userId,
       },
     });
   }

@@ -41,13 +41,9 @@ export default function ProfilePage() {
     
     setIsSaving(true);
     try {
-      const response = await axios.post(`${API_URL}/users/update`, {
-        id: currentUser?.id,
+      const response = await axios.put(`${API_URL}/taxpayer/profile/${currentUser?.id}`, {
         firstName: formState.firstName,
-        secondName: formState.secondName,
-        firstLastName: formState.firstLastName,
-        secondLastName: formState.secondLastName,
-        email: formState.email
+        lastName: formState.firstLastName,
       });
       
       if (response.data.success) {

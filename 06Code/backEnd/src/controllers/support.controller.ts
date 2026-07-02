@@ -18,7 +18,7 @@ export class SupportController {
           category,
           priority,
           description,
-          userId: actualUserId
+          taxpayerId: actualUserId
         }
       });
 
@@ -38,7 +38,7 @@ export class SupportController {
       }
 
       const tickets = await prisma.ticket.findMany({
-        where: { userId },
+        where: { taxpayerId: userId },
         orderBy: { createdAt: 'desc' }
       });
 
