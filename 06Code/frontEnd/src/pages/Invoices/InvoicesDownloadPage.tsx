@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Download, Filter, Calendar, CheckCircle2 } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
-import type { Invoice, TaxPeriodType } from '../../types';
+import type { TaxPeriodType } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import '../../styles/InvoicesDownload.css';

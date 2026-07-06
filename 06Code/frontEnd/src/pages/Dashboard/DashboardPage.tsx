@@ -6,10 +6,6 @@ import {
   FileSpreadsheet,
   FileCode2,
   RefreshCw,
-  AlertTriangle,
-  CheckCircle2,
-  TrendingUp,
-  FileText,
 } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
 import { useAuth } from '../../context/AuthContext';
