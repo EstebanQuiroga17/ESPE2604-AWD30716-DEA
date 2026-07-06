@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FolderOpen, Upload, CheckCircle2, AlertCircle, FileText, X, Shield } from 'lucide-react';
+import { FolderOpen, Upload, CheckCircle2, AlertCircle, FileText, X } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
 
 import type { Invoice } from '../../types';

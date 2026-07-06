@@ -7,6 +7,9 @@ import '../../styles/AtsModule.css';
 
 type GenerationStatus = 'idle' | 'processing' | 'done' | 'error';
 
+const MockInvoices: any[] = [];
+const MockAtsFiles: any[] = [];
+
 export default function AtsGeneratePage() {
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>('idle');
   const [generatedFile, setGeneratedFile] = useState<AtsFile | null>(null);
@@ -151,7 +154,7 @@ export default function AtsGeneratePage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {MockAtsFiles.map((file) => (
+                    {MockAtsFiles.map((file: any) => (
                       <tr key={file.id}>
                         <td>
                           <div className="flex items-center gap-8">

@@ -206,25 +206,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [currentUser?.id]);
 
-  const contextValue: AuthContextValue = {
-    currentUser,
-    isAuthenticated: currentUser !== null,
-    sriConnectionStatus,
-    currentWorkspace,
-    workspaces,
-    login,
-    register,
-    loginAsAdmin,
-    logout,
-    connectToSri,
-    disconnectFromSri,
-    updateCurrentUser,
-    createWorkspace,
-    deleteWorkspace,
-    selectWorkspace,
-    loadWorkspaces,
-  };
-
   const loginGoogle = useCallback(async (credential: string) => {
     try {
       const response = await axios.post(`${API_URL}/auth/login/google`, { credential });
@@ -286,8 +267,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  contextValue.loginGoogle = loginGoogle;
-  contextValue.completeProfile = completeProfile;
+  const contextValue: AuthContextValue = {
+    currentUser,
+    isAuthenticated: currentUser !== null,
+    sriConnectionStatus,
+    currentWorkspace,
+    workspaces,
+    login,
+    register,
+    loginAsAdmin,
+    logout,
+    connectToSri,
+    disconnectFromSri,
+    updateCurrentUser,
+    createWorkspace,
+    deleteWorkspace,
+    selectWorkspace,
+    loadWorkspaces,
+    loginGoogle,
+    completeProfile,
+  };
 
   return (
     <AuthContext.Provider value={contextValue}>
