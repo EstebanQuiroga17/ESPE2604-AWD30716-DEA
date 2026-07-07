@@ -12,7 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import '../../styles/Dashboard.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
 
 interface ActionCard {
   id: string;
@@ -73,7 +73,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (currentUser?.id) {
-      axios.get(`${API_URL}/dashboard/${currentUser.id}`)
+      axios.get(`${BUSINESS_SERVICE_URL}/dashboard/${currentUser.id}`)
         .then(response => {
           if (response.data.success) {
             setSummary(response.data.data);
@@ -155,11 +155,11 @@ export default function DashboardPage() {
                 >
                   {isSyncing ? <><span className="spinner" />Sincronizando...</> : <><RefreshCw size={15} />Sincronizar Ahora</>}
                 </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </AppLayout>
   );
 }

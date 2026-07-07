@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import '../../styles/Profile.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
 
 function isValidName(name: string): boolean {
   return /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(name);
@@ -28,24 +28,24 @@ export default function ProfilePage() {
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
-    
+
     if (!formState.firstName.trim() || !formState.firstLastName.trim() || !formState.email.trim()) {
       setError('Todos los campos son obligatorios');
       return;
     }
-    
+
     if (!isValidName(formState.firstName) || !isValidName(formState.firstLastName)) {
       setError('El primer nombre y primer apellido no deben contener números ni símbolos');
       return;
     }
-    
+
     setIsSaving(true);
     try {
-      const response = await axios.put(`${API_URL}/taxpayer/profile/${currentUser?.id}`, {
+      const response = await axios.put(`${BUSINESS_SERVICE_URL}/taxpayer/profile/${currentUser?.id}`, {
         firstName: formState.firstName,
         lastName: formState.firstLastName,
       });
-      
+
       if (response.data.success) {
         updateCurrentUser({
           firstName: formState.firstName,

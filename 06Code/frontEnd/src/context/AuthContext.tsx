@@ -3,7 +3,7 @@ import type { TaxPayer, SriConnectionStatus, Workspace } from '../types';
 
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
 
 interface AuthContextValue {
   currentUser: TaxPayer | null;
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return false;
     }
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
+      const response = await axios.post(`${BUSINESS_SERVICE_URL}/auth/login`, {
         email: identifier,
         password: password
       });
@@ -58,10 +58,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName, isAdmin: user.role === 'admin' };
         setCurrentUser(mappedUser);
-        try { 
-          localStorage.setItem('currentUser', JSON.stringify(mappedUser)); 
+        try {
+          localStorage.setItem('currentUser', JSON.stringify(mappedUser));
           localStorage.setItem('authToken', token);
-        } catch {}
+        } catch { }
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         return true;
       }
@@ -84,15 +84,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         password: data.password,
         birthDate: data.birthDate
       };
-      const response = await axios.post(`${API_URL}/auth/register`, payload);
+      const response = await axios.post(`${BUSINESS_SERVICE_URL}/auth/register`, payload);
       if (response.data.success) {
         const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
         setCurrentUser(mappedUser);
-        try { 
-          localStorage.setItem('currentUser', JSON.stringify(mappedUser)); 
+        try {
+          localStorage.setItem('currentUser', JSON.stringify(mappedUser));
           localStorage.setItem('authToken', token);
-        } catch {}
+        } catch { }
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         return true;
       }
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const loginAsAdmin = useCallback(() => {
-    
+
     setCurrentUser({
       id: '07787dd8-aafa-4c6d-a49c-07595438199d',
       RUC: '1790011223002',
@@ -122,9 +122,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setSriConnectionStatus('disconnected');
     setCurrentWorkspace(null);
     setWorkspaces([]);
-    try { localStorage.removeItem('currentUser'); } catch {}
-    try { localStorage.removeItem('currentWorkspace'); } catch {}
-    try { localStorage.removeItem('authToken'); } catch {}
+    try { localStorage.removeItem('currentUser'); } catch { }
+    try { localStorage.removeItem('currentWorkspace'); } catch { }
+    try { localStorage.removeItem('authToken'); } catch { }
     delete axios.defaults.headers.common['Authorization'];
   }, []);
 
@@ -194,7 +194,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setCurrentWorkspace(workspace);
     try {
       localStorage.setItem('currentWorkspace', JSON.stringify(workspace));
-    } catch {}
+    } catch { }
   }, []);
 
   const loadWorkspaces = useCallback(async () => {
@@ -208,19 +208,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const loginGoogle = useCallback(async (credential: string) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login/google`, { credential });
+      const response = await axios.post(`${BUSINESS_SERVICE_URL}/auth/login/google`, { credential });
       if (response.data.success) {
         const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
         if (!response.data.needsProfileCompletion) {
           setCurrentUser(mappedUser);
-          try { 
-            localStorage.setItem('currentUser', JSON.stringify(mappedUser)); 
+          try {
+            localStorage.setItem('currentUser', JSON.stringify(mappedUser));
             localStorage.setItem('authToken', token);
-          } catch {}
+          } catch { }
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         } else {
-          try { localStorage.setItem('incompleteUser', JSON.stringify(mappedUser)); } catch {}
+          try { localStorage.setItem('incompleteUser', JSON.stringify(mappedUser)); } catch { }
         }
         return { success: true, needsProfileCompletion: response.data.needsProfileCompletion };
       }
@@ -236,7 +236,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const stored = localStorage.getItem('incompleteUser');
       if (!stored) return false;
       const incompleteUser = JSON.parse(stored);
-      
+
       const payload = {
         email: incompleteUser.email,
         firstName: data.firstName,
@@ -246,17 +246,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         ruc: data.RUC,
         birthDate: data.birthDate
       };
-      
-      const response = await axios.post(`${API_URL}/auth/complete-profile`, payload);
+
+      const response = await axios.post(`${BUSINESS_SERVICE_URL}/auth/complete-profile`, payload);
       if (response.data.success) {
         const { token, data: user } = response.data;
         const mappedUser = { ...user, RUC: user.ruc, firstLastName: user.lastName, secondName: user.middleName };
         setCurrentUser(mappedUser);
-        try { 
+        try {
           localStorage.setItem('currentUser', JSON.stringify(mappedUser));
           localStorage.setItem('authToken', token);
           localStorage.removeItem('incompleteUser');
-        } catch {}
+        } catch { }
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         return true;
       }

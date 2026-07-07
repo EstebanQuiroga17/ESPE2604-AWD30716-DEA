@@ -5,7 +5,7 @@ import type { TaxPayer } from '../../types';
 import axios from 'axios';
 import '../../styles/AdminUsers.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
 
 function isValidRuc(ruc: string): boolean {
   return /^\d{13}$/.test(ruc);
@@ -38,7 +38,7 @@ export default function AdminUsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(`${API_URL}/taxpayer`);
+        const response = await axios.get(`${BUSINESS_SERVICE_URL}/taxpayer`);
         if (response.data.success) {
           setUsers(response.data.data);
         }
@@ -78,7 +78,7 @@ export default function AdminUsersPage() {
   const handleDeleteUser = async (id: string) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) return;
     try {
-      const response = await axios.post(`${API_URL}/users/delete`, { id });
+      const response = await axios.post(`${BUSINESS_SERVICE_URL}/users/delete`, { id });
       if (response.data.success) {
         setUsers(users.filter(u => u.id !== id));
       } else {
@@ -93,7 +93,7 @@ export default function AdminUsersPage() {
     e.preventDefault();
     setModalError('');
     setIsSubmitting(true);
-    
+
     if (!formData.firstName || !formData.firstLastName || !formData.email) {
       setModalError('El primer nombre, primer apellido y correo electrónico son obligatorios');
       setIsSubmitting(false);
@@ -120,7 +120,7 @@ export default function AdminUsersPage() {
 
     try {
       if (isEditing) {
-        const response = await axios.post(`${API_URL}/users/update`, {
+        const response = await axios.post(`${BUSINESS_SERVICE_URL}/users/update`, {
           id: editingUserId,
           firstName: formData.firstName,
           secondName: formData.secondName,
@@ -140,7 +140,7 @@ export default function AdminUsersPage() {
           setIsModalOpen(false);
         }
       } else {
-        const response = await axios.post(`${API_URL}/auth/register`, {
+        const response = await axios.post(`${BUSINESS_SERVICE_URL}/auth/register`, {
           ruc: formData.ruc,
           firstName: formData.firstName,
           middleName: formData.secondName,
@@ -275,34 +275,34 @@ export default function AdminUsersPage() {
                 <div className="grid-2 mb-16">
                   <div className="form-group">
                     <label className="form-label text-sm">Primer Nombre</label>
-                    <input type="text" className="form-input" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} required />
+                    <input type="text" className="form-input" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} required />
                   </div>
                   <div className="form-group">
                     <label className="form-label text-sm">Segundo Nombre</label>
-                    <input type="text" className="form-input" value={formData.secondName} onChange={e => setFormData({...formData, secondName: e.target.value})} />
+                    <input type="text" className="form-input" value={formData.secondName} onChange={e => setFormData({ ...formData, secondName: e.target.value })} />
                   </div>
                 </div>
                 <div className="grid-2 mb-16">
                   <div className="form-group">
                     <label className="form-label text-sm">Primer Apellido</label>
-                    <input type="text" className="form-input" value={formData.firstLastName} onChange={e => setFormData({...formData, firstLastName: e.target.value})} required />
+                    <input type="text" className="form-input" value={formData.firstLastName} onChange={e => setFormData({ ...formData, firstLastName: e.target.value })} required />
                   </div>
                   <div className="form-group">
                     <label className="form-label text-sm">Segundo Apellido</label>
-                    <input type="text" className="form-input" value={formData.secondLastName} onChange={e => setFormData({...formData, secondLastName: e.target.value})} />
+                    <input type="text" className="form-input" value={formData.secondLastName} onChange={e => setFormData({ ...formData, secondLastName: e.target.value })} />
                   </div>
                 </div>
                 <div className="form-group mb-16">
                   <label className="form-label text-sm">Número de RUC</label>
-                  <input type="text" className="form-input" maxLength={13} value={formData.ruc} onChange={e => setFormData({...formData, ruc: e.target.value})} disabled={isEditing} required={!isEditing} />
+                  <input type="text" className="form-input" maxLength={13} value={formData.ruc} onChange={e => setFormData({ ...formData, ruc: e.target.value })} disabled={isEditing} required={!isEditing} />
                 </div>
                 <div className="form-group mb-16">
                   <label className="form-label text-sm">Correo Electrónico</label>
-                  <input type="email" className="form-input" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                  <input type="email" className="form-input" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required />
                 </div>
                 <div className="form-group mb-24">
                   <label className="form-label text-sm">Contraseña Temporal</label>
-                  <input type="text" className="form-input" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder={isEditing ? 'No modificable aquí' : 'Mínimo 8 caracteres'} disabled={isEditing} required={!isEditing} />
+                  <input type="text" className="form-input" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder={isEditing ? 'No modificable aquí' : 'Mínimo 8 caracteres'} disabled={isEditing} required={!isEditing} />
                 </div>
                 <div className="flex gap-12 justify-end">
                   <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>

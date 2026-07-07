@@ -4,7 +4,7 @@ import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import axios from 'axios';
 import '../../styles/Auth.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     if (!email.trim() || !newPassword.trim()) {
       setError('Todos los campos son obligatorios');
       return;
@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
       setError('Ingresa un correo electrónico válido');
       return;
     }
-    
+
     if (newPassword.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres');
       return;
@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      const response = await axios.post(`${API_URL}/auth/reset-password`, {
+      const response = await axios.post(`${BUSINESS_SERVICE_URL}/auth/reset-password`, {
         email,
         newPassword
       });
@@ -68,9 +68,9 @@ export default function ForgotPasswordPage() {
           <Link to="/" className="auth-logo-link">
             <div className="auth-logo">
               <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-                <path d="M6 8h20M6 14h16M6 20h10" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                <circle cx="25" cy="22" r="5" fill="#10B981"/>
-                <path d="M23 22l1.5 1.5L27 20" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M6 8h20M6 14h16M6 20h10" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="25" cy="22" r="5" fill="#10B981" />
+                <path d="M23 22l1.5 1.5L27 20" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
             <span className="auth-brand-name">ATS Express</span>

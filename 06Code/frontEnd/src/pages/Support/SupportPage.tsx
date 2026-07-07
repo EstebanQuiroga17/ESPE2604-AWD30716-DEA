@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import '../../styles/Support.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
 
 interface SupportFormState {
   subject: string;
@@ -46,14 +46,14 @@ export default function SupportPage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
     try {
-      const response = await axios.post(`${API_URL}/support/tickets`, {
+      const response = await axios.post(`${BUSINESS_SERVICE_URL}/support/tickets`, {
         ...formState,
         userId: currentUser?.id
       });
-      
+
       if (response.data.success) {
         setSubmitted(true);
       } else {

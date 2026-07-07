@@ -14,8 +14,8 @@ interface DownloadFilterState {
 }
 
 const MONTHS = [
-  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -32,8 +32,8 @@ export default function InvoicesDownloadPage() {
   const [downloadedInvoices, setDownloadedInvoices] = useState<any[]>([]);
   const [downloadComplete, setDownloadComplete] = useState(false);
   const { currentUser } = useAuth();
-  
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+  const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
 
   const handleDownload = async () => {
     if (!currentUser || !currentUser.RUC) {
@@ -43,9 +43,9 @@ export default function InvoicesDownloadPage() {
 
     setIsDownloading(true);
     setDownloadComplete(false);
-    
+
     try {
-      const response = await axios.get(`${API_URL}/invoices/download/${currentUser.RUC}`, {
+      const response = await axios.get(`${BUSINESS_SERVICE_URL}/invoices/download/${currentUser.RUC}`, {
         params: {
           periodType: filterState.periodType,
           month: filterState.month,
@@ -53,7 +53,7 @@ export default function InvoicesDownloadPage() {
           year: filterState.year
         }
       });
-      
+
       if (response.data.success) {
         // Mock a slight delay for better UX
         await new Promise(resolve => setTimeout(resolve, 1500));
