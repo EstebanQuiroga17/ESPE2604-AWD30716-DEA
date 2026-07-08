@@ -1,6 +1,4 @@
-export * from './sri-session.type';
 export * from './tax-payer.type';
-export type { SriSession } from './sri-session.type';
 export * from './period.type';
 export * from './monthly-period.type';
 export * from './semester.type';

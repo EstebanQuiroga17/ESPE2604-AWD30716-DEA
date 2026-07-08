@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Download,
@@ -47,8 +47,10 @@ export default function Sidebar() {
   const { currentUser } = useAuth();
   const { currentWorkspace, workspaces, selectWorkspace } = useWorkspace();
   const location = useLocation();
+  const navigate = useNavigate();
   const isAdminSection = location.pathname.startsWith('/admin');
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+  const hasWorkspaceContext = Boolean(currentWorkspace) && location.pathname !== '/workspaces';
 
   const navigationItems = currentUser?.isAdmin
     ? (isAdminSection ? adminNavigationItems : userNavigationItems)
@@ -79,7 +81,7 @@ export default function Sidebar() {
       )}
 
       {/* Workspace Selector */}
-      <div className="sidebar-workspace-selector">
+      <div className={`sidebar-workspace-selector ${!currentWorkspace ? 'workspace-selector-highlight' : ''}`}>
         <div className="workspace-selector-header">
           <span className="workspace-label">Workspace Actual</span>
           <NavLink to="/workspaces" className="workspace-manage-link">
@@ -110,6 +112,9 @@ export default function Sidebar() {
                   onClick={() => {
                     selectWorkspace(workspace);
                     setIsWorkspaceDropdownOpen(false);
+                    if (location.pathname === '/workspaces') {
+                      navigate('/dashboard');
+                    }
                   }}
                 >
                   <span className="workspace-item-name">{workspace.name}</span>
@@ -123,21 +128,23 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="sidebar-nav">
-        <ul className="sidebar-nav-list">
-          {navigationItems.map((item) => (
-            <li key={item.path}>
-              <NavLink
-                to={item.path}
-                className={({ isActive }) => `sidebar-nav-item ${isActive ? 'active' : ''}`}
-              >
-                <span className="sidebar-nav-icon">{item.icon}</span>
-                <span className="sidebar-nav-label">{item.label}</span>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {hasWorkspaceContext && (
+        <nav className="sidebar-nav">
+          <ul className="sidebar-nav-list">
+            {navigationItems.map((item) => (
+              <li key={item.path}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) => `sidebar-nav-item ${isActive ? 'active' : ''}`}
+                >
+                  <span className="sidebar-nav-icon">{item.icon}</span>
+                  <span className="sidebar-nav-label">{item.label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
 
       <div className="sidebar-footer">
         <div className="sidebar-plan">

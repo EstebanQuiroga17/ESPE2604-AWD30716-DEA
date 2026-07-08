@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, ChevronDown, Settings, UserCircle, Link2 } from 'lucide-react';
+import { LogOut, ChevronDown, Settings, UserCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useWorkspace } from '../../context/WorkspaceContext';
 import '../../styles/Header.css';
 
 export default function Header() {
   const { currentUser, logout } = useAuth();
-  const { sriConnectionStatus } = useWorkspace();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -16,25 +14,9 @@ export default function Header() {
     navigate('/login');
   };
 
-  const sriStatusLabel = {
-    connected: 'Conectado',
-    disconnected: 'Desconectado',
-    pending: 'Conectando...',
-  }[sriConnectionStatus];
-
   return (
     <header className="app-header">
       <div className="header-left">
-        <Link 
-          to="/sri-connection" 
-          className={`sri-connection-btn sri-connection-${sriConnectionStatus}`}
-          title="Conexión con SRI"
-        >
-          <span className={`status-dot status-dot-${sriConnectionStatus === 'connected' ? 'success' : sriConnectionStatus === 'pending' ? 'warning' : 'danger'}`} />
-          <Link2 size={18} />
-          <span className="sri-label">SRI</span>
-          <span className="sri-status-text">{sriStatusLabel}</span>
-        </Link>
       </div>
 
       <div className="header-right">

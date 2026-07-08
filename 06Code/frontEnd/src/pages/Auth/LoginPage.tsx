@@ -20,7 +20,7 @@ interface LoginFormErrors {
 
 export default function LoginPage() {
   const { login, loginGoogle, isAuthenticated } = useAuth();
-  const { sriConnectionStatus } = useWorkspace();
+  const { currentWorkspace } = useWorkspace();
   const navigate = useNavigate();
   const [formState, setFormState] = useState<LoginFormState>({ identifier: '', password: '', rememberMe: false });
   const [errors, setErrors] = useState<LoginFormErrors>({});
@@ -29,13 +29,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (sriConnectionStatus === 'connected') {
+      if (currentWorkspace) {
         navigate('/dashboard');
       } else {
-        navigate('/sri-connection');
+        navigate('/workspaces');
       }
     }
-  }, [isAuthenticated, sriConnectionStatus, navigate]);
+  }, [isAuthenticated, currentWorkspace, navigate]);
 
   const validateForm = (): boolean => {
     const newErrors: LoginFormErrors = {};

@@ -1,4 +1,3 @@
-import type { SriSession } from './sri-session.type'; 
 
 export type TipoContribuyente = '1' | '2';
 
@@ -11,7 +10,6 @@ export interface TaxPayer {
   RUC: string;
   email: string;
   birthDate: string | Date;
-  SriSession?: SriSession;
   tipoContribuyente?: TipoContribuyente;
   isAdmin: boolean;
   createdAt?: string;

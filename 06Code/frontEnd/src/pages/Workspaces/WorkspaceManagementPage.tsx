@@ -6,7 +6,6 @@ import {
   LogOut,
   Package,
   FileStack,
-  Link2,
   Calendar,
   Clock,
 } from 'lucide-react';
@@ -87,7 +86,8 @@ export default function WorkspaceManagementPage() {
     navigate('/dashboard');
   };
 
-  const handleDeleteWorkspace = async (workspace: Workspace) => {
+  const handleDeleteWorkspace = async (workspace: Workspace, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (window.confirm(`¿Estás seguro de que deseas eliminar el workspace "${workspace.name}"?`)) {
       const success = await deleteWorkspace(workspace.id);
       if (!success) {
@@ -111,12 +111,6 @@ export default function WorkspaceManagementPage() {
     });
   };
 
-  const getSriStatusBadge = (status: string) => {
-    if (status === 'connected') {
-      return <span className="badge badge-success">Conectado</span>;
-    }
-    return <span className="badge badge-default">Desconectado</span>;
-  };
 
   const formatPeriod = (period: any) => {
     if (period.type === 'monthly') {
@@ -333,6 +327,8 @@ export default function WorkspaceManagementPage() {
                   className={`workspace-card ${
                     currentWorkspace?.id === workspace.id ? 'active' : ''
                   }`}
+                  onClick={() => handleSelectWorkspace(workspace)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="workspace-card-header">
                     <div className="flex-1">
@@ -357,11 +353,7 @@ export default function WorkspaceManagementPage() {
                         {workspace.atsFilesCount || 0} ATS
                       </span>
                     </div>
-                    <div className="stat-item">
-                      <Link2 size={16} />
-                      {getSriStatusBadge(workspace.sriConnectionStatus)}
                     </div>
-                  </div>
 
                   <div className="workspace-card-dates">
                     <div className="date-info">
@@ -392,18 +384,19 @@ export default function WorkspaceManagementPage() {
                   </div>
 
                   <div className="workspace-card-actions">
-                    {currentWorkspace?.id !== workspace.id && (
-                      <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => handleSelectWorkspace(workspace)}
-                      >
-                        <LogOut size={16} />
-                        Abrir
-                      </button>
-                    )}
+                    <button
+                      className={`btn btn-sm ${currentWorkspace?.id === workspace.id ? 'btn-secondary' : 'btn-primary'}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectWorkspace(workspace);
+                      }}
+                    >
+                      <LogOut size={16} />
+                      {currentWorkspace?.id === workspace.id ? 'Ir al Dashboard' : 'Abrir'}
+                    </button>
                     <button
                       className="btn btn-danger btn-sm"
-                      onClick={() => handleDeleteWorkspace(workspace)}
+                      onClick={(e) => handleDeleteWorkspace(workspace, e)}
                     >
                       <Trash2 size={16} />
                       Eliminar

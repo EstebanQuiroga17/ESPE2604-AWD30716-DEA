@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react';
+
 import { Link } from 'react-router-dom';
 import {
-  Link2,
   Download,
   FileSpreadsheet,
   FileCode2,
-  RefreshCw,
 } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
-import { useAuth } from '../../context/AuthContext';
-import { useWorkspace } from '../../context/WorkspaceContext';
-import axios from 'axios';
-import '../../styles/Dashboard.css';
 
-const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
+import { useWorkspace } from '../../context/WorkspaceContext';
+import '../../styles/Dashboard.css';
 
 interface ActionCard {
   id: string;
@@ -24,17 +19,7 @@ interface ActionCard {
   color: string;
   status?: string;
 }
-
-const buildActionCards = (sriConnected: boolean): ActionCard[] => [
-  {
-    id: 'connect-sri',
-    icon: <Link2 size={28} />,
-    title: 'Conectar con SRI',
-    subtitle: 'Portal web del SRI',
-    path: '/sri-connection',
-    color: sriConnected ? 'green' : 'blue',
-    status: sriConnected ? 'Conectado' : undefined,
-  },
+const buildActionCards = (): ActionCard[] => [
   {
     id: 'download-invoices',
     icon: <Download size={28} />,
@@ -63,36 +48,8 @@ const buildActionCards = (sriConnected: boolean): ActionCard[] => [
 
 
 export default function DashboardPage() {
-  const { currentUser } = useAuth();
-  const { sriConnectionStatus, currentWorkspace } = useWorkspace();
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [summary, setSummary] = useState({
-    invoicesDownloaded: 0,
-    invoicesDownloadedChange: 0,
-    errorsDetected: 0,
-    lastSync: 'No sincronizado',
-  });
-
-  useEffect(() => {
-    if (currentUser?.id) {
-      axios.get(`${BUSINESS_SERVICE_URL}/dashboard/${currentUser.id}`)
-        .then(response => {
-          if (response.data.success) {
-            setSummary(response.data.data);
-          }
-        })
-        .catch(error => console.error("Error fetching dashboard data:", error));
-    }
-  }, [currentUser]);
-
-  const actionCards = buildActionCards(sriConnectionStatus === 'connected');
-
-  const handleSync = async () => {
-    setIsSyncing(true);
-    // Real sync logic would go here
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSyncing(false);
-  };
+  const { currentWorkspace } = useWorkspace();
+  const actionCards = buildActionCards();
 
   return (
     <AppLayout>
@@ -131,36 +88,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </section>
-
-        <div className="dashboard-bottom-grid">
-          <div className="dashboard-right-col">
-            <div className="card mb-16">
-              <div className="card-header">
-                <h2 className="card-title">Estado de Conexión SRI</h2>
-              </div>
-              <div className="card-body">
-                <div className="sri-status-row">
-                  <span className="text-sm text-muted">Estado</span>
-                  <span className={`badge ${sriConnectionStatus === 'connected' ? 'badge-success' : 'badge-danger'}`}>
-                    {sriConnectionStatus === 'connected' ? 'Conectado' : 'Desconectado'}
-                  </span>
-                </div>
-                <div className="sri-status-row">
-                  <span className="text-sm text-muted">Última sincronización</span>
-                  <span className="text-sm">{summary.lastSync}</span>
-                </div>
-                <button
-                  id="sync-now-btn"
-                  className="btn btn-primary btn-full mt-16"
-                  onClick={handleSync}
-                  disabled={isSyncing || sriConnectionStatus !== 'connected'}
-                >
-                  {isSyncing ? <><span className="spinner" />Sincronizando...</> : <><RefreshCw size={15} />Sincronizar Ahora</>}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </AppLayout>
   );

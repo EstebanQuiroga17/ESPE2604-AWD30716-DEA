@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
-import type { Workspace, SriConnectionStatus } from '../types';
+import type { Workspace } from '../types';
 import { useAuth } from './AuthContext';
 
 const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
@@ -8,13 +8,10 @@ const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL ||
 interface WorkspaceContextValue {
   workspaces: Workspace[];
   currentWorkspace: Workspace | null;
-  sriConnectionStatus: SriConnectionStatus;
   createWorkspace: (name: string, description: string, workspaceLocation: string, period: any) => Promise<Workspace | null>;
   deleteWorkspace: (workspaceId: string) => Promise<boolean>;
   selectWorkspace: (workspace: Workspace) => void;
   loadWorkspaces: () => Promise<void>;
-  connectToSri: (username: string, password: string) => Promise<boolean>;
-  disconnectFromSri: () => void;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -28,7 +25,6 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     return stored ? JSON.parse(stored) : null;
   });
   
-  const [sriConnectionStatus, setSriConnectionStatus] = useState<SriConnectionStatus>('disconnected');
 
   const mapBackendWorkspace = (ws: any): Workspace => {
     return {
@@ -67,7 +63,6 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     } else {
       setWorkspaces([]);
       setCurrentWorkspace(null);
-      setSriConnectionStatus('disconnected');
     }
   }, [isAuthenticated, currentUser, loadWorkspaces]);
 
@@ -116,32 +111,13 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     } catch { }
   }, []);
 
-  // Todo: Real SRI connection logic to backend
-  const connectToSri = useCallback(async (username: string, password: string): Promise<boolean> => {
-    setSriConnectionStatus('pending');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    if (username && password) {
-      setSriConnectionStatus('connected');
-      return true;
-    }
-    setSriConnectionStatus('disconnected');
-    return false;
-  }, []);
-
-  const disconnectFromSri = useCallback(() => {
-    setSriConnectionStatus('disconnected');
-  }, []);
-
   const contextValue: WorkspaceContextValue = {
     workspaces,
     currentWorkspace,
-    sriConnectionStatus,
     createWorkspace,
     deleteWorkspace,
     selectWorkspace,
-    loadWorkspaces,
-    connectToSri,
-    disconnectFromSri
+    loadWorkspaces
   };
 
   return (
