@@ -119,10 +119,10 @@ export class WorkspaceController {
 
   public async createWorkspace(req: Request, res: Response): Promise<void> {
     try {
-      const { period, workspaceLocation } = req.body;
+      const { name, description, period, workspaceLocation } = req.body;
       const userId = (req as any).currentUser.id;
       if (!period || !workspaceLocation) { res.status(400).json({ success: false, message: 'Missing required fields' }); return; }
-      const result = await crudClient.post('/repo/workspaces', { period, workspaceLocation, userId });
+      const result = await crudClient.post('/repo/workspaces', { name, description, period, workspaceLocation, userId });
       res.status(201).json(result);
     } catch (error) {
       console.error('Error creating workspace:', error);

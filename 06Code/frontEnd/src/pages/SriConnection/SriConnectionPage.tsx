@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link2, Shield, AlertCircle, CheckCircle2, Unlink, ExternalLink } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
-import { useAuth } from '../../context/AuthContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import '../../styles/SriConnection.css';
 
 interface SriFormState {
@@ -16,7 +16,7 @@ interface SriFormErrors {
 }
 
 export default function SriConnectionPage() {
-  const { sriConnectionStatus, connectToSri, disconnectFromSri } = useAuth();
+  const { sriConnectionStatus, connectToSri, disconnectFromSri } = useWorkspace();
   const [formState, setFormState] = useState<SriFormState>({ username: '', password: '' });
   const [errors, setErrors] = useState<SriFormErrors>({});
   const [isConnecting, setIsConnecting] = useState(false);

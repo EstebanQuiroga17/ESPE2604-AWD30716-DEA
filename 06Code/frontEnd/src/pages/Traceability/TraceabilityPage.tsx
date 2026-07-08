@@ -2,7 +2,7 @@ import { History, CheckCircle2, Clock, Lock, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 
-import { useAuth } from '../../context/AuthContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import type { ProcessStep, ProcessStepStatus } from '../../types';
 import '../../styles/Traceability.css';
 
@@ -26,7 +26,7 @@ function buildCompletionPercentage(steps: ProcessStep[]): number {
 }
 
 export default function TraceabilityPage() {
-  const { currentWorkspace } = useAuth();
+  const { currentWorkspace } = useWorkspace();
   const steps: ProcessStep[] = [];
   const completionPercentage = steps.length > 0 ? buildCompletionPercentage(steps) : 0;
 

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
 import { useAuth } from '../../context/AuthContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import axios from 'axios';
 import '../../styles/Dashboard.css';
 
@@ -62,7 +63,8 @@ const buildActionCards = (sriConnected: boolean): ActionCard[] => [
 
 
 export default function DashboardPage() {
-  const { sriConnectionStatus, currentUser, currentWorkspace } = useAuth();
+  const { currentUser } = useAuth();
+  const { sriConnectionStatus, currentWorkspace } = useWorkspace();
   const [isSyncing, setIsSyncing] = useState(false);
   const [summary, setSummary] = useState({
     invoicesDownloaded: 0,

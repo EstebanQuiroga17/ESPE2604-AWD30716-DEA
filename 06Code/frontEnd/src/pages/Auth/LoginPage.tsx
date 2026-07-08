@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { GoogleLogin } from '@react-oauth/google';
 import '../../styles/Auth.css';
 
@@ -18,7 +19,8 @@ interface LoginFormErrors {
 }
 
 export default function LoginPage() {
-  const { login, loginGoogle, isAuthenticated, sriConnectionStatus } = useAuth();
+  const { login, loginGoogle, isAuthenticated } = useAuth();
+  const { sriConnectionStatus } = useWorkspace();
   const navigate = useNavigate();
   const [formState, setFormState] = useState<LoginFormState>({ identifier: '', password: '', rememberMe: false });
   const [errors, setErrors] = useState<LoginFormErrors>({});

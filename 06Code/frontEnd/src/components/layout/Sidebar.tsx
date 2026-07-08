@@ -15,6 +15,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { useState } from 'react';
 import '../../styles/Sidebar.css';
 
@@ -43,7 +44,8 @@ const adminNavigationItems: NavigationItem[] = [
 ];
 
 export default function Sidebar() {
-  const { currentUser, currentWorkspace, workspaces, selectWorkspace } = useAuth();
+  const { currentUser } = useAuth();
+  const { currentWorkspace, workspaces, selectWorkspace } = useWorkspace();
   const location = useLocation();
   const isAdminSection = location.pathname.startsWith('/admin');
   const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);

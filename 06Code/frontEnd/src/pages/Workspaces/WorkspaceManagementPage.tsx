@@ -11,13 +11,13 @@ import {
   Clock,
 } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
-import { useAuth } from '../../context/AuthContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import type { Workspace } from '../../types';
 import '../../styles/WorkspaceManagement.css';
 
 // Workspace Management Page - Create, edit, and manage workspaces
 export default function WorkspaceManagementPage() {
-  const { workspaces, currentWorkspace, selectWorkspace, createWorkspace, deleteWorkspace } = useAuth();
+  const { workspaces, currentWorkspace, selectWorkspace, createWorkspace, deleteWorkspace } = useWorkspace();
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState('');

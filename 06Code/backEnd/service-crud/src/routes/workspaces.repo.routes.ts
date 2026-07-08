@@ -75,12 +75,32 @@ router.get('/logs/:id', async (req, res) => {
 // POST /repo/workspaces — create workspace
 router.post('/', async (req, res) => {
   try {
-    const { period, workspaceLocation, userId } = req.body;
+    const { name, description, period, workspaceLocation, userId } = req.body;
+    
+    // Fallbacks in case period is a simple string for legacy tests
+    let periodYear = 2025;
+    let periodMonth = null;
+    let periodSemester = null;
+    let periodType = 'monthly';
+
+    if (period && typeof period === 'object') {
+      periodYear = period.year;
+      periodType = period.type || 'monthly';
+      periodMonth = period.month || null;
+      periodSemester = period.semester || null;
+    } else if (period && typeof period === 'string') {
+      periodYear = parseInt(period.split('-')[0]) || 2025;
+      periodMonth = parseInt(period.split('-')[1]) || null;
+    }
+
     const workspace = await prisma.workspace.create({
       data: {
-        name: `Workspace ${period}`,
-        periodYear: parseInt(period.split('-')[0]),
-        periodMonth: parseInt(period.split('-')[1]),
+        name: name || `Workspace ${periodYear}`,
+        description: description || null,
+        periodYear,
+        periodMonth,
+        periodType,
+        periodSemester,
         workspaceLocation,
         taxpayerId: userId
       }

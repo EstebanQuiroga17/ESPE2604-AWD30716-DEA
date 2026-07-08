@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, ChevronDown, Settings, UserCircle, Link2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import '../../styles/Header.css';
 
 export default function Header() {
-  const { currentUser, logout, sriConnectionStatus } = useAuth();
+  const { currentUser, logout } = useAuth();
+  const { sriConnectionStatus } = useWorkspace();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
 

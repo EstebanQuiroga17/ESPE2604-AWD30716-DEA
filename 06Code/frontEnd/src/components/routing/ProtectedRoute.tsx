@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,7 +9,8 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { isAuthenticated, currentUser, currentWorkspace, loadWorkspaces, workspaces } = useAuth();
+  const { isAuthenticated, currentUser } = useAuth();
+  const { currentWorkspace, loadWorkspaces, workspaces } = useWorkspace();
   const location = useLocation();
 
   // Load workspaces on component mount if not already loaded

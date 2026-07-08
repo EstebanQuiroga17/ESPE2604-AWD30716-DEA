@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { TaxPayer, SriConnectionStatus, Workspace } from '../types';
-
+import type { TaxPayer } from '../types';
 import axios from 'axios';
 
 const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
@@ -8,20 +7,11 @@ const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL ||
 interface AuthContextValue {
   currentUser: TaxPayer | null;
   isAuthenticated: boolean;
-  sriConnectionStatus: SriConnectionStatus;
-  currentWorkspace: Workspace | null;
-  workspaces: Workspace[];
   login: (identifier: string, password: string) => Promise<boolean>;
   register: (data: any) => Promise<boolean>;
   loginAsAdmin: () => void;
   logout: () => void;
-  connectToSri: (username: string, password: string) => Promise<boolean>;
-  disconnectFromSri: () => void;
   updateCurrentUser: (data: Partial<TaxPayer>) => void;
-  createWorkspace: (name: string, description: string, workspaceLocation: string, period: any) => Promise<Workspace | null>;
-  deleteWorkspace: (workspaceId: string) => Promise<boolean>;
-  selectWorkspace: (workspace: Workspace) => void;
-  loadWorkspaces: () => Promise<void>;
   loginGoogle: (credential: string) => Promise<{ success: boolean; needsProfileCompletion?: boolean }>;
   completeProfile: (data: any) => Promise<boolean>;
 }
@@ -40,9 +30,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
   }
   const [currentUser, setCurrentUser] = useState<TaxPayer | null>(initialUser);
-  const [sriConnectionStatus, setSriConnectionStatus] = useState<SriConnectionStatus>('disconnected');
-  const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
 
   const login = useCallback(async (identifier: string, password: string): Promise<boolean> => {
     if (!identifier || !password) {
@@ -104,7 +91,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const loginAsAdmin = useCallback(() => {
-
     setCurrentUser({
       id: '07787dd8-aafa-4c6d-a49c-07595438199d',
       RUC: '1790011223002',
@@ -119,92 +105,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = useCallback(() => {
     setCurrentUser(null);
-    setSriConnectionStatus('disconnected');
-    setCurrentWorkspace(null);
-    setWorkspaces([]);
     try { localStorage.removeItem('currentUser'); } catch { }
-    try { localStorage.removeItem('currentWorkspace'); } catch { }
     try { localStorage.removeItem('authToken'); } catch { }
+    try { localStorage.removeItem('currentWorkspace'); } catch { }
     delete axios.defaults.headers.common['Authorization'];
-  }, []);
-
-  const connectToSri = useCallback(async (username: string, password: string): Promise<boolean> => {
-    setSriConnectionStatus('pending');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    if (username && password) {
-      setSriConnectionStatus('connected');
-      return true;
-    }
-    setSriConnectionStatus('disconnected');
-    return false;
-  }, []);
-
-  const disconnectFromSri = useCallback(() => {
-    setSriConnectionStatus('disconnected');
   }, []);
 
   const updateCurrentUser = useCallback((data: Partial<TaxPayer>) => {
     setCurrentUser(prev => prev ? { ...prev, ...data } : null);
   }, []);
-
-  const createWorkspace = useCallback(async (name: string, description: string, workspaceLocation: string, period: any): Promise<Workspace | null> => {
-    if (!currentUser) return null;
-    try {
-      const newWorkspace: Workspace = {
-        id: `ws-${Date.now()}`,
-        name,
-        description,
-        ownerId: currentUser.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        sriConnectionStatus: 'disconnected',
-        lastActivityAt: new Date().toISOString(),
-        invoicesCount: 0,
-        atsFilesCount: 0,
-        workspaceLocation,
-        period,
-        processTracer: {
-          invoicedDownloadStatus: false,
-          atsXlsmGenerationStatus: false,
-          atsXmlGenerationStatus: false,
-        },
-      };
-      setWorkspaces(prev => [...prev, newWorkspace]);
-      return newWorkspace;
-    } catch (error) {
-      console.error("Error creating workspace:", error);
-      return null;
-    }
-  }, [currentUser]);
-
-  const deleteWorkspace = useCallback(async (workspaceId: string): Promise<boolean> => {
-    try {
-      setWorkspaces(prev => prev.filter(ws => ws.id !== workspaceId));
-      if (currentWorkspace?.id === workspaceId) {
-        setCurrentWorkspace(null);
-      }
-      return true;
-    } catch (error) {
-      console.error("Error deleting workspace:", error);
-      return false;
-    }
-  }, [currentWorkspace]);
-
-  const selectWorkspace = useCallback((workspace: Workspace) => {
-    setCurrentWorkspace(workspace);
-    try {
-      localStorage.setItem('currentWorkspace', JSON.stringify(workspace));
-    } catch { }
-  }, []);
-
-  const loadWorkspaces = useCallback(async () => {
-    if (!currentUser?.id) return;
-    try {
-      setWorkspaces([]);
-    } catch (error) {
-      console.error("Error loading workspaces:", error);
-    }
-  }, [currentUser?.id]);
 
   const loginGoogle = useCallback(async (credential: string) => {
     try {
@@ -270,20 +179,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const contextValue: AuthContextValue = {
     currentUser,
     isAuthenticated: currentUser !== null,
-    sriConnectionStatus,
-    currentWorkspace,
-    workspaces,
     login,
     register,
     loginAsAdmin,
     logout,
-    connectToSri,
-    disconnectFromSri,
     updateCurrentUser,
-    createWorkspace,
-    deleteWorkspace,
-    selectWorkspace,
-    loadWorkspaces,
     loginGoogle,
     completeProfile,
   };
