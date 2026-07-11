@@ -1,38 +1,17 @@
 import { Router } from 'express';
-import { prisma } from '../config/database';
+import { AtsRepoController } from '../controllers/ats.repo.controller';
 
 const router = Router();
+const atsController = new AtsRepoController();
 
 // GET /repo/ats/:userId — list ATS files for a user
-router.get('/:userId', async (req, res) => {
-  try {
-    const files = await prisma.atsFile.findMany({
-      where: { taxpayerId: req.params.userId },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json({ success: true, data: files });
-  } catch (e) { res.status(500).json({ success: false, message: 'Internal server error' }); }
-});
+router.get('/:userId', (req, res) => atsController.getUserAtsFiles(req, res));
 
 // GET /repo/ats/errors/count/:userId — count ATS files with errors (for dashboard)
-router.get('/errors/count/:userId', async (req, res) => {
-  try {
-    const count = await prisma.atsFile.count({
-      where: { taxpayerId: req.params.userId, validationErrors: { gt: 0 } }
-    });
-    res.json({ success: true, data: { count } });
-  } catch (e) { res.status(500).json({ success: false, message: 'Internal server error' }); }
-});
+router.get('/errors/count/:userId', (req, res) => atsController.getAtsErrorsCount(req, res));
 
 // POST /repo/ats — save an ATS file record
-router.post('/', async (req, res) => {
-  try {
-    const { name, format, periodMonth, periodYear, invoiceCount, validationErrors, userId } = req.body;
-    const atsFile = await prisma.atsFile.create({
-      data: { name, format, periodMonth, periodYear, invoiceCount, validationErrors, taxpayerId: userId }
-    });
-    res.status(201).json({ success: true, data: atsFile });
-  } catch (e) { res.status(500).json({ success: false, message: 'Internal server error' }); }
-});
+router.post('/', (req, res) => atsController.createAtsFile(req, res));
 
 export default router;
+
