@@ -11,6 +11,7 @@ import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
 import supportRoutes from './routes/support.routes';
 import { authMiddleware } from './middlewares/auth.middleware';
+import { InvoiceController } from './controllers/invoice.controller';
 
 class App {
   public app: Application;
@@ -28,6 +29,9 @@ class App {
   }
 
   private configureRoutes(): void {
+    const invoiceController = new InvoiceController();
+    this.app.post('/invoices/compress-xml', (req, res) => invoiceController.compressXmlInvoices(req, res));
+
     this.app.use('/auth', authRoutes);
     this.app.use('/taxpayer', authMiddleware, taxpayerRoutes);
     this.app.use('/sri', authMiddleware, sriRoutes);
