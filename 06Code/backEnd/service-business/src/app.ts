@@ -29,9 +29,6 @@ class App {
   }
 
   private configureRoutes(): void {
-    const invoiceController = new InvoiceController();
-    this.app.post('/invoices/compress-xml', (req, res) => invoiceController.compressXmlInvoices(req, res));
-
     this.app.use('/auth', authRoutes);
     this.app.use('/taxpayer', authMiddleware, taxpayerRoutes);
     this.app.use('/sri', authMiddleware, sriRoutes);
