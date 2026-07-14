@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import AdmZip from 'adm-zip';
 import { crudClient } from '../http-client/crud.client';
 import { InvoiceBusinessService } from '../services/invoice-business.service';
 
@@ -51,6 +52,66 @@ export class InvoiceController {
     } catch (error) {
       console.error('Download invoices error:', error);
       res.status(500).json({ success: false, message: 'Internal server error fetching invoices' });
+    }
+  }
+
+  private getXmlFileName(xmlContent: string, index: number): string {
+    const authMatch = xmlContent.match(/<numeroAutorizacion>([^<]+)<\/numeroAutorizacion>/i);
+    if (authMatch && authMatch[1]) {
+      const cleaned = authMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+      if (cleaned) return `${cleaned}.xml`;
+    }
+
+    const accessMatch = xmlContent.match(/<claveAcceso>([^<]+)<\/claveAcceso>/i);
+    if (accessMatch && accessMatch[1]) {
+      const cleaned = accessMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+      if (cleaned) return `${cleaned}.xml`;
+    }
+
+    return `factura_${index + 1}.xml`;
+  }
+
+  public async compressXmlInvoices(req: Request, res: Response): Promise<void> {
+    try {
+      let xmlList: any = null;
+      if (Array.isArray(req.body)) {
+        xmlList = req.body;
+      } else if (req.body && typeof req.body === 'object') {
+        xmlList = req.body.invoices || req.body.xmls || req.body.data;
+      }
+
+      if (!xmlList || !Array.isArray(xmlList)) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid payload. Expected JSON array of XML strings or an object containing invoices/xmls array.'
+        });
+        return;
+      }
+
+      const zip = new AdmZip();
+
+      for (let i = 0; i < xmlList.length; i++) {
+        const item = xmlList[i];
+        if (typeof item !== 'string') {
+          res.status(400).json({
+            success: false,
+            message: `Element at index ${i} is not a valid string.`
+          });
+          return;
+        }
+
+        const fileName = this.getXmlFileName(item, i);
+        zip.addFile(fileName, Buffer.from(item, 'utf-8'));
+      }
+
+      const zipBuffer = zip.toBuffer();
+
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', 'attachment; filename="facturas.zip"');
+      res.status(200).send(zipBuffer);
+    } catch (error) {
+      console.error('Error compressing XML invoices:', error);
+      res.status(500).json({ success: false, message: 'Internal server error compressing invoices' });
     }
   }
 }

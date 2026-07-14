@@ -11,6 +11,7 @@ import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
 import supportRoutes from './routes/support.routes';
 import { authMiddleware } from './middlewares/auth.middleware';
+import { InvoiceController } from './controllers/invoice.controller';
 
 class App {
   public app: Application;
