@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
-import AdmZip from 'adm-zip';
 import { crudClient } from '../http-client/crud.client';
 import { InvoiceBusinessService } from '../services/invoice-business.service';
+import { XmlService } from '../services/xml.service';
 
 export class InvoiceController {
   private invoiceBusinessService = new InvoiceBusinessService();
+  private xmlService = new XmlService();
 
   public async getUserInvoices(req: Request, res: Response): Promise<void> {
     try {
@@ -55,22 +56,6 @@ export class InvoiceController {
     }
   }
 
-  private getXmlFileName(xmlContent: string, index: number): string {
-    const authMatch = xmlContent.match(/<numeroAutorizacion>([^<]+)<\/numeroAutorizacion>/i);
-    if (authMatch && authMatch[1]) {
-      const cleaned = authMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
-      if (cleaned) return `${cleaned}.xml`;
-    }
-
-    const accessMatch = xmlContent.match(/<claveAcceso>([^<]+)<\/claveAcceso>/i);
-    if (accessMatch && accessMatch[1]) {
-      const cleaned = accessMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
-      if (cleaned) return `${cleaned}.xml`;
-    }
-
-    return `factura_${index + 1}.xml`;
-  }
-
   public async compressXmlInvoices(req: Request, res: Response): Promise<void> {
     try {
       let xmlList: any = null;
@@ -88,23 +73,17 @@ export class InvoiceController {
         return;
       }
 
-      const zip = new AdmZip();
-
       for (let i = 0; i < xmlList.length; i++) {
-        const item = xmlList[i];
-        if (typeof item !== 'string') {
+        if (typeof xmlList[i] !== 'string') {
           res.status(400).json({
             success: false,
             message: `Element at index ${i} is not a valid string.`
           });
           return;
         }
-
-        const fileName = this.getXmlFileName(item, i);
-        zip.addFile(fileName, Buffer.from(item, 'utf-8'));
       }
 
-      const zipBuffer = zip.toBuffer();
+      const zipBuffer = this.xmlService.compressXmlsToZip(xmlList);
 
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', 'attachment; filename="facturas.zip"');
