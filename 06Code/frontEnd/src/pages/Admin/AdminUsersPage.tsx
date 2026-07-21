@@ -38,7 +38,7 @@ export default function AdminUsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(`${BUSINESS_SERVICE_URL}/taxpayer`);
+        const response = await axios.get(`${BUSINESS_SERVICE_URL}/admin/users`);
         if (response.data.success) {
           setUsers(response.data.data);
         }
@@ -78,7 +78,7 @@ export default function AdminUsersPage() {
   const handleDeleteUser = async (id: string) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) return;
     try {
-      const response = await axios.post(`${BUSINESS_SERVICE_URL}/users/delete`, { id });
+      const response = await axios.delete(`${BUSINESS_SERVICE_URL}/admin/users/${id}`);
       if (response.data.success) {
         setUsers(users.filter(u => u.id !== id));
       } else {
@@ -120,11 +120,10 @@ export default function AdminUsersPage() {
 
     try {
       if (isEditing) {
-        const response = await axios.post(`${BUSINESS_SERVICE_URL}/users/update`, {
-          id: editingUserId,
+        const response = await axios.put(`${BUSINESS_SERVICE_URL}/taxpayer/profile/${editingUserId}`, {
           firstName: formData.firstName,
-          secondName: formData.secondName,
-          firstLastName: formData.firstLastName,
+          middleName: formData.secondName,
+          lastName: formData.firstLastName,
           secondLastName: formData.secondLastName,
           email: formData.email,
         });
@@ -224,10 +223,10 @@ export default function AdminUsersPage() {
                     <td>
                       <div className="flex items-center gap-10">
                         <div className="user-row-avatar">
-                          {user.firstName[0]}{user.firstLastName[0]}
+                          {user.firstName?.[0] || '?'}{user.firstLastName?.[0] || ''}
                         </div>
                         <div>
-                          <p className="font-semibold text-sm">{user.firstName} {user.firstLastName}</p>
+                          <p className="font-semibold text-sm">{user.firstName || 'Usuario'} {user.firstLastName || 'Sin Nombre'}</p>
                         </div>
                       </div>
                     </td>

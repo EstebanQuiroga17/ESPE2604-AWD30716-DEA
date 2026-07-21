@@ -18,15 +18,17 @@ interface ActionCard {
   path: string;
   color: string;
   status?: string;
+  isExternal?: boolean;
 }
 const buildActionCards = (): ActionCard[] => [
   {
     id: 'download-invoices',
     icon: <Download size={28} />,
     title: 'Descargar Facturas',
-    subtitle: 'Automático desde SRI',
-    path: '/invoices/download',
+    subtitle: 'SRI En Línea',
+    path: 'https://chromewebstore.google.com/search/SRI%20En%20L%C3%ADnea',
     color: 'purple',
+    isExternal: true,
   },
   {
     id: 'generate-xlsm',
@@ -69,21 +71,41 @@ export default function DashboardPage() {
           <div className="card-body">
             <div className="action-cards-grid">
               {actionCards.map((action) => (
-                <Link
-                  key={action.id}
-                  id={action.id}
-                  to={action.path}
-                  className={`action-card action-card-${action.color}`}
-                >
-                  <div className={`action-card-icon action-icon-${action.color}`}>
-                    {action.icon}
-                  </div>
-                  <p className="action-card-title">{action.title}</p>
-                  <p className="action-card-subtitle">{action.subtitle}</p>
-                  {action.status && (
-                    <span className="badge badge-success action-card-badge">{action.status}</span>
-                  )}
-                </Link>
+                action.isExternal ? (
+                  <a
+                    key={action.id}
+                    id={action.id}
+                    href={action.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`action-card action-card-${action.color}`}
+                  >
+                    <div className={`action-card-icon action-icon-${action.color}`}>
+                      {action.icon}
+                    </div>
+                    <p className="action-card-title">{action.title}</p>
+                    <p className="action-card-subtitle">{action.subtitle}</p>
+                    {action.status && (
+                      <span className="badge badge-success action-card-badge">{action.status}</span>
+                    )}
+                  </a>
+                ) : (
+                  <Link
+                    key={action.id}
+                    id={action.id}
+                    to={action.path}
+                    className={`action-card action-card-${action.color}`}
+                  >
+                    <div className={`action-card-icon action-icon-${action.color}`}>
+                      {action.icon}
+                    </div>
+                    <p className="action-card-title">{action.title}</p>
+                    <p className="action-card-subtitle">{action.subtitle}</p>
+                    {action.status && (
+                      <span className="badge badge-success action-card-badge">{action.status}</span>
+                    )}
+                  </Link>
+                )
               ))}
             </div>
           </div>
