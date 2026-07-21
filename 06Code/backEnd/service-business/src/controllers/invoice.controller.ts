@@ -2,10 +2,12 @@ import { Request, Response } from 'express';
 import { crudClient } from '../http-client/crud.client';
 import { InvoiceBusinessService } from '../services/invoice-business.service';
 import { XmlService } from '../services/xml.service';
+import { PdfCreatorService } from '../services/pdfCreator.service';
 
 export class InvoiceController {
   private invoiceBusinessService = new InvoiceBusinessService();
   private xmlService = new XmlService();
+  private pdfCreatorService = new PdfCreatorService();
 
   public async getUserInvoices(req: Request, res: Response): Promise<void> {
     try {
@@ -91,6 +93,53 @@ export class InvoiceController {
     } catch (error) {
       console.error('Error compressing XML invoices:', error);
       res.status(500).json({ success: false, message: 'Internal server error compressing invoices' });
+    }
+  }
+
+  public async generatePdfs(req: Request, res: Response): Promise<void> {
+    try {
+      // 1. Extraer el arreglo de XMLs del body (misma lógica flexible que compressXmlInvoices)
+      let xmlList: any = null;
+      if (Array.isArray(req.body)) {
+        xmlList = req.body;
+      } else if (req.body && typeof req.body === 'object') {
+        xmlList = req.body.invoices || req.body.xmls || req.body.data;
+      }
+
+      if (!xmlList || !Array.isArray(xmlList)) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid payload. Expected JSON array of XML strings or an object containing invoices/xmls/data array.',
+        });
+        return;
+      }
+
+      // 2. Validar que cada elemento sea un string
+      for (let i = 0; i < xmlList.length; i++) {
+        if (typeof xmlList[i] !== 'string') {
+          res.status(400).json({
+            success: false,
+            message: `Element at index ${i} is not a valid string.`,
+          });
+          return;
+        }
+      }
+
+      // 3. Generar los PDFs y empaquetarlos en ZIP
+      const { zipBuffer, errors } = await this.pdfCreatorService.generatePdfsAsZip(xmlList);
+
+      // 4. Adjuntar errores parciales en header si los hay
+      if (errors.length > 0) {
+        res.setHeader('X-Pdf-Errors', JSON.stringify(errors));
+      }
+
+      // 5. Enviar el ZIP
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', 'attachment; filename="facturas_pdf.zip"');
+      res.status(200).send(zipBuffer);
+    } catch (error) {
+      console.error('Error generating PDF invoices:', error);
+      res.status(500).json({ success: false, message: 'Internal server error generating PDFs' });
     }
   }
 }
