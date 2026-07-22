@@ -44,9 +44,9 @@ export class AuthController {
       const { password: _, ...userWithoutPassword } = user;
       const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, { expiresIn: '24h' });
       res.status(200).json({ success: true, token, data: userWithoutPassword });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
+      res.status(500).json({ success: false, message: error.message || 'Internal server error' });
     }
   }
 
