@@ -1,0 +1,1691 @@
+UNIVERSIDAD DE LAS FUERZAS ARMADAS ESPE
+Department of Computer Science – Software Engineering
+ADVANCED WEB DEVELOPMENT
+Names: Esteban Quiroga, Angel Sabando, David Rodriguez
+NRC: 30716
+Date: July 26, 2026
+Full System Documentation: ATS Express
+System Endpoints & Resource Architecture
+
+Overview
+This document contains the complete URI mapping for the entire ATS Express software system deployed in production on Microsoft Azure. It covers three main areas in alignment with our microservices architecture:
+• Part 1 — Business Logic API Endpoints: Server-side routes that encapsulate domain logic, authentication, SRI tax validations, file processing (XML, ZIP, PDF), and return structured JSON responses.
+• Part 2 — CRUD Persistence & Repository API Endpoints: Server-side repository routes interacting directly with our PostgreSQL database via Prisma ORM and Supabase, strictly protected by internal API keys.
+• Part 3 — Frontend Page URIs: Client-side single-page application (SPA) routes that render our interfaces and dashboards in the browser.
+
+====================================================================================================
+PART 1
+Business Logic API Endpoints
+Server-side routes · JSON responses · https://ats-business-rules-service-angel-czefcghef8c3bcca.eastus2-01.azurewebsites.net
+====================================================================================================
+Overview
+The Business Logic Service acts as our primary application gateway and orchestrator in production on Azure. It verifies JWT authorization tokens, validates RUC structures against official Ecuadorian Internal Revenue Service (SRI) algorithms, handles asynchronous batch operations, generates PDF RIDE documents, packages XML invoices in memory into ZIP archives, and securely routes data requests to our persistence layer via an automated Circuit Breaker design pattern.
+
+Base URL
+The primary production base URL for all Business Logic API requests is:
+https://ats-business-rules-service-angel-czefcghef8c3bcca.eastus2-01.azurewebsites.net
+
+
+----------------------------------------------------------------------------------------------------
+1. SYSTEM & HEALTH MODULE
+----------------------------------------------------------------------------------------------------
+
+GET /health
+Verifies application status and availability within the production server cluster.
+GET /health
+Parameters
+None.
+Response
+• status: String representing the availability status.
+• service: Name of the service responding.
+• timestamp: ISO timestamp of the current server time.
+Example — Request
+GET /health
+Example — Response
+{
+  "status": "OK",
+  "service": "Business Rules Service",
+  "timestamp": "2026-07-26T14:00:00.000Z"
+}
+
+
+----------------------------------------------------------------------------------------------------
+2. AUTHENTICATION & ACCOUNTS MODULE (/auth)
+----------------------------------------------------------------------------------------------------
+
+POST /auth/register
+Registers a new taxpayer user in the platform, encrypts the password with bcrypt, and initializes profile states.
+POST /auth/register
+Parameters
+• ruc (required): The RUC of the user (must be exactly 13 numeric digits ending in 001).
+• firstName (required): The first name of the taxpayer.
+• lastName (required): The last name of the taxpayer.
+• email (required): The valid electronic mail address for account notifications.
+• password (required): The plaintext password to be hashed before database insertion.
+Response
+• success: Boolean indicating if registration was completed successfully.
+• message: A brief message regarding the operation result.
+• data: The newly generated taxpayer user object (excluding sensitive hash details).
+Example — Request
+POST /auth/register
+{
+  "ruc": "1790016919001",
+  "firstName": "Esteban",
+  "lastName": "Quiroga",
+  "email": "esteban.quiroga@empresa.com.ec",
+  "password": "SecurePassword2026!"
+}
+Example — Response
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "id": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101",
+    "ruc": "1790016919001",
+    "firstName": "Esteban",
+    "lastName": "Quiroga",
+    "email": "esteban.quiroga@empresa.com.ec",
+    "role": "user",
+    "profileCompleted": true
+  }
+}
+
+POST /auth/login
+Authenticates standard taxpayer credentials and issues a JSON Web Token (JWT) for secure session communication.
+POST /auth/login
+Parameters
+• identifier (required): The email address or the 13-digit RUC number of the user.
+• password (required): The user account password.
+Response
+• success: Boolean indicating if authentication succeeded.
+• message: Result notification string.
+• token: Signed JWT authorization string valid for signed API invocations.
+• user: Taxpayer account profile object.
+Example — Request
+POST /auth/login
+{
+  "identifier": "esteban.quiroga@empresa.com.ec",
+  "password": "SecurePassword2026!"
+}
+Example — Response
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjMWY3YTgzZCIsImRvbWFpbiI6InNyaWxvZ2lucyJ9...",
+  "user": {
+    "id": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101",
+    "email": "esteban.quiroga@empresa.com.ec",
+    "role": "user",
+    "profileCompleted": true
+  }
+}
+
+POST /auth/login/google
+Authenticates a user via Google OAuth 2.0 Single Sign-On (SSO) identity token and registers incomplete accounts if they are new.
+POST /auth/login/google
+Parameters
+• idToken (required): The cryptographic identity token provided by Google authentication servers.
+Response
+• success: Boolean indicating successful validation of the Google token.
+• token: Generated internal platform JWT.
+• user: Object detailing profile metadata and whether profile completion (RUC input) is pending.
+Example — Request
+POST /auth/login/google
+{
+  "idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6InM2QjhmNWc2Li4uIn0..."
+}
+Example — Response
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "f55a1d7e-901a-4d2c-88bf-92d41a7c0099",
+    "email": "david.rodriguez@gmail.com",
+    "role": "user",
+    "profileCompleted": false
+  }
+}
+
+POST /auth/complete-profile
+Completes missing tax mandatory attributes (such as RUC and commercial formal names) after initial third-party social registration.
+POST /auth/complete-profile
+Parameters (Headers: Authorization: Bearer <token>)
+• ruc (required): The 13-digit Ecuadorian tax identification number.
+• firstName (required): Official legal first name.
+• lastName (required): Official legal last name.
+Response
+• success: Boolean confirming the profile upgrade.
+• user: Fully qualified taxpayer profile object.
+Example — Request
+POST /auth/complete-profile
+{
+  "ruc": "1791256115001",
+  "firstName": "David",
+  "lastName": "Rodriguez"
+}
+Example — Response
+{
+  "success": true,
+  "user": {
+    "id": "f55a1d7e-901a-4d2c-88bf-92d41a7c0099",
+    "ruc": "1791256115001",
+    "email": "david.rodriguez@gmail.com",
+    "profileCompleted": true
+  }
+}
+
+POST /auth/reset-password
+Requests and processes a password modification for an existing taxpayer account.
+POST /auth/reset-password
+Parameters
+• email (required): Registered electronic mail address of the target account.
+• newPassword (required): Replacement password conforming to platform security policies.
+Response
+• success: Boolean indicating successful password update in persistence layer.
+• message: Status explanation text.
+Example — Request
+POST /auth/reset-password
+{
+  "email": "esteban.quiroga@empresa.com.ec",
+  "newPassword": "NewSuperSecurePassword2027!"
+}
+Example — Response
+{
+  "success": true,
+  "message": "Password updated successfully"
+}
+
+
+----------------------------------------------------------------------------------------------------
+3. TAXPAYERS MODULE (/taxpayer)
+----------------------------------------------------------------------------------------------------
+All endpoints in this module require valid authentication header: Authorization: Bearer <token>
+
+GET /taxpayer
+Returns a list of all active registered taxpayers in the platform.
+GET /taxpayer
+Parameters
+None.
+Response
+• success: Boolean confirming query completion.
+• data: An array of taxpayer domain objects containing account metadata.
+Example — Request
+GET /taxpayer
+Example — Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101",
+      "ruc": "1790016919001",
+      "firstName": "Esteban",
+      "lastName": "Quiroga",
+      "email": "esteban.quiroga@empresa.com.ec",
+      "role": "admin"
+    },
+    {
+      "id": "2d948ee1-77a8-42cc-b690-33a55e7d1882",
+      "ruc": "0990004196001",
+      "firstName": "Maria",
+      "lastName": "Palacios",
+      "email": "mf.palacios@corporativos.ec",
+      "role": "user"
+    }
+  ]
+}
+
+GET /taxpayer/profile/{userId}
+Retrieves detailed operational and demographic records of a targeted taxpayer profile.
+GET /taxpayer/profile/{userId}
+Parameters
+• userId (required): The UUID of the taxpayer passed as a path parameter.
+Response
+• success: Boolean indicating record discovery.
+• data: Taxpayer attributes including registration dates and role assignments.
+Example — Request
+GET /taxpayer/profile/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+Example — Response
+{
+  "success": true,
+  "data": {
+    "id": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101",
+    "ruc": "1790016919001",
+    "firstName": "Esteban",
+    "lastName": "Quiroga",
+    "email": "esteban.quiroga@empresa.com.ec",
+    "role": "admin",
+    "profileCompleted": true
+  }
+}
+
+GET /taxpayer/stats/{userId}
+Returns consolidated business intelligence statistics regarding invoices, workspaces, and ATS validation history for user monitoring panels.
+GET /taxpayer/stats/{userId}
+Parameters
+• userId (required): Taxpayer profile ID passed in URL path.
+Response
+• success: Boolean evaluation.
+• data: Object detailing total invoices managed, connected workspaces count, and pending validation items.
+Example — Request
+GET /taxpayer/stats/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+Example — Response
+{
+  "success": true,
+  "data": {
+    "totalInvoices": 145,
+    "activeWorkspaces": 4,
+    "atsFilesGenerated": 12,
+    "validationErrors": 0
+  }
+}
+
+GET /taxpayer/validate-ruc/{ruc}
+Validates the structural compliance of an Ecuadorian tax ID using Modulo 11 check-digit verification algorithms according to official government standards.
+GET /taxpayer/validate-ruc/{ruc}
+Parameters
+• ruc (required): 13 numeric digits passed in URL path.
+Response
+• success: Boolean indicating error-free algorithm execution.
+• valid: Boolean confirming if the RUC number matches legal checksum calculations.
+• type: Juridical classification of the tax entity (e.g., Private Corporation, Public Sector, Natural Person).
+• message: Descriptive string of validation results.
+Example — Request
+GET /taxpayer/validate-ruc/1790016919001
+Example — Response
+{
+  "success": true,
+  "valid": true,
+  "type": "Juridical Entity / Private Company",
+  "message": "Valid Ecuadorian RUC structure confirmed."
+}
+
+PUT /taxpayer/profile/{userId}
+Updates editable taxonomic details of a taxpayer profile.
+PUT /taxpayer/profile/{userId}
+Parameters
+• userId (required): Target taxpayer ID passed in path.
+• firstName (optional): Modified first name string.
+• middleName (optional): Modified middle name string.
+• lastName (optional): Modified primary family name string.
+• secondLastName (optional): Modified secondary family name string.
+Response
+• success: Boolean evaluation.
+• message: Confirmation statement.
+Example — Request
+PUT /taxpayer/profile/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+{
+  "firstName": "Esteban Alexander",
+  "lastName": "Quiroga Morales"
+}
+Example — Response
+{
+  "success": true,
+  "message": "Taxpayer profile updated successfully"
+}
+
+
+----------------------------------------------------------------------------------------------------
+4. SRI INTEGRATION MODULE (/sri)
+----------------------------------------------------------------------------------------------------
+All endpoints require valid authentication header: Authorization: Bearer <token>
+
+GET /sri/status/{userId}
+Queries whether the taxpayer currently maintains an active, unexpired session link with the government online portal (SRI En Línea).
+GET /sri/status/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• success: Boolean operation summary.
+• connected: Boolean flag showing if a connection event occurred within the last 24 hours.
+• lastConnection: Timestamp string of the latest synchronized handshake.
+Example — Request
+GET /sri/status/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+Example — Response
+{
+  "success": true,
+  "connected": true,
+  "lastConnection": "2026-07-26T10:15:00.000Z"
+}
+
+GET /sri/history/{userId}
+Returns a chronological audit ledger of all synchronization attempts, token acquisitions, and mass downloads initiated between the browser extension and the SRI platform.
+GET /sri/history/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• success: Boolean status indicator.
+• data: Array of timestamped synchronization history entities.
+Example — Request
+GET /sri/history/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+Example — Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "3b7764cd-1289-4fa2-97be-98c871092a01",
+      "status": "connected",
+      "details": "Successful automatic synchronization via SRI Chrome Extension",
+      "timestamp": "2026-07-26T10:15:00.000Z"
+    }
+  ]
+}
+
+POST /sri/connect
+Registers an active governmental authentication checkpoint following verification from the official Chrome downloading plugin.
+POST /sri/connect
+Parameters
+• userId (required): Target taxpayer UUID.
+• status (required): State identifier string ("connected" or "disconnected").
+• details (optional): Supplemental log text regarding extension interactions.
+Response
+• success: Boolean confirmation flag.
+• message: Status explanation.
+Example — Request
+POST /sri/connect
+{
+  "userId": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101",
+  "status": "connected",
+  "details": "Session synchronized with SRI En Linea portal via XML download plugin"
+}
+Example — Response
+{
+  "success": true,
+  "message": "SRI connection recorded successfully"
+}
+
+
+----------------------------------------------------------------------------------------------------
+5. WORKSPACES & TAX ENVIRONMENTS MODULE (/workspaces)
+----------------------------------------------------------------------------------------------------
+All endpoints require valid authentication header: Authorization: Bearer <token>
+
+GET /workspaces/user/{userId}
+Returns all accounting workspaces configured by a specific user, including storage directories and active declaration periods.
+GET /workspaces/user/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• success: Boolean confirming execution.
+• data: Array of workspace objects containing folder routing metrics and SRI connection flags.
+Example — Request
+GET /workspaces/user/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+Example — Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "e441a8fb-099b-4e11-9a11-88f1c7128320",
+      "name": "Corporacion Favorita MATRIZ",
+      "description": "Monthly VAT tax declaration Quito Head Office",
+      "periodMonth": 6,
+      "periodYear": 2026,
+      "periodType": "monthly",
+      "workspaceLocation": "C:\\ATS_Data\\Favorita2026",
+      "sriConnectionStatus": "connected",
+      "taxpayerId": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101"
+    }
+  ]
+}
+
+GET /workspaces/{workspaceId}
+Retrieves fine-grained configuration parameter settings for an identified individual accounting workspace.
+GET /workspaces/{workspaceId}
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• success: Boolean status indicator.
+• data: Deeply populated workspace record object.
+Example — Request
+GET /workspaces/e441a8fb-099b-4e11-9a11-88f1c7128320
+Example — Response
+{
+  "success": true,
+  "data": {
+    "id": "e441a8fb-099b-4e11-9a11-88f1c7128320",
+    "name": "Corporacion Favorita MATRIZ",
+    "periodMonth": 6,
+    "periodYear": 2026,
+    "workspaceLocation": "C:\\ATS_Data\\Favorita2026",
+    "sriConnectionStatus": "connected"
+  }
+}
+
+POST /workspaces
+Creates a newly isolated workspace environment mapped to a computer directory path for systematic monthly tax compiling.
+POST /workspaces
+Parameters
+• name (required): Descriptive label of the company or tax project.
+• description (optional): Clarifying textual summary.
+• periodMonth (optional): Numerical representations of target calendar month (1 to 12).
+• periodYear (required): Target fiscal tax reporting year (e.g., 2026).
+• periodType (required): Declaration cycle cadence ("monthly" or "semesterly").
+• workspaceLocation (required): Target physical storage location path on local filesystem disk (e.g., "C:\\ATS_Data\\Notaria2026").
+• taxpayerId (required): UUID of the owning taxpayer profile.
+Response
+• success: Boolean confirming database insertion and validation check.
+• data: Created workspace structure.
+• message: User feedback confirmation string.
+Example — Request
+POST /workspaces
+{
+  "name": "Notaria del Pacifico S.A.",
+  "description": "Legal service tax withholding management Guayaquil",
+  "periodMonth": 6,
+  "periodYear": 2026,
+  "periodType": "monthly",
+  "workspaceLocation": "C:\\ATS_Data\\Notaria2026",
+  "taxpayerId": "2d948ee1-77a8-42cc-b690-33a55e7d1882"
+}
+Example — Response
+{
+  "success": true,
+  "data": {
+    "id": "89b7c120-4b8a-490b-b389-11c5e9b01247",
+    "name": "Notaria del Pacifico S.A.",
+    "periodYear": 2026,
+    "workspaceLocation": "C:\\ATS_Data\\Notaria2026"
+  },
+  "message": "Workspace created successfully"
+}
+
+GET /workspaces/{workspaceId}/invoices
+Returns the entire collection of received and issued invoices currently registered within this workspace container.
+GET /workspaces/{workspaceId}/invoices
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• success: Boolean status flag.
+• data: Array of complete electronic invoice structured domain objects.
+Example — Request
+GET /workspaces/e441a8fb-099b-4e11-9a11-88f1c7128320/invoices
+Example — Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "90a1b2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+      "issuerName": "MEGA DATOS S.A.",
+      "issuerRuc": "1792146738001",
+      "number": "001-002-000010001",
+      "authorizationNumber": "150620260117921467380012001002000010001123456781",
+      "total": 138.00,
+      "type": "COMPRA"
+    }
+  ]
+}
+
+GET /workspaces/{workspaceId}/ats
+Returns the metadata records of all generated ATS reports and Excel macro templates associated with this workspace session.
+GET /workspaces/{workspaceId}/ats
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• success: Boolean confirmation.
+• data: Array of ATS compilation entries with validation metrics and file naming structures.
+Example — Request
+GET /workspaces/e441a8fb-099b-4e11-9a11-88f1c7128320/ats
+Example — Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "11a22b33-44c5-66d7-88e9-00f11a22b33c",
+      "name": "ATS_FAVORITA_06_2026.xml",
+      "format": "XML",
+      "periodMonth": 6,
+      "periodYear": 2026,
+      "invoiceCount": 12,
+      "validationErrors": 0
+    }
+  ]
+}
+
+GET /workspaces/{workspaceId}/summary
+Generates an accounting calculation balance sheet summarizing net taxable bases, 15% value added tax (IVA) accruals, total spending, and revenue volume for the selected tax period.
+GET /workspaces/{workspaceId}/summary
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• success: Boolean evaluation.
+• data: Financial totals categorized by purchase transactions (COMPRA) and commercial sales (VENTA).
+Example — Request
+GET /workspaces/e441a8fb-099b-4e11-9a11-88f1c7128320/summary
+Example — Response
+{
+  "success": true,
+  "data": {
+    "totalPurchases": 4250.50,
+    "totalSales": 12890.00,
+    "totalIvaPurchases": 637.58,
+    "totalIvaSales": 1933.50,
+    "invoiceCount": 35
+  }
+}
+
+GET /workspaces/{workspaceId}/process-status
+Retrieves percentage progress and execution stages for automated pipeline procedures (SRI handshakes -> XML extraction -> verification -> ATS compilation).
+GET /workspaces/{workspaceId}/process-status
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• success: Boolean operational state.
+• data: Object detailing current progress score (0-100) and step identifiers.
+Example — Request
+GET /workspaces/e441a8fb-099b-4e11-9a11-88f1c7128320/process-status
+Example — Response
+{
+  "success": true,
+  "data": {
+    "progressPercentage": 100,
+    "currentStage": "ATS Compilation Complete",
+    "hasErrors": false
+  }
+}
+
+GET /workspaces/{workspaceId}/process-steps
+Lists the sequential processing milestones assigned to this workspace with individual completed vs pending status markers.
+GET /workspaces/{workspaceId}/process-steps
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• success: Boolean evaluation.
+• data: Array of process steps with timestamps and descriptive notes.
+Example — Request
+GET /workspaces/e441a8fb-099b-4e11-9a11-88f1c7128320/process-steps
+Example — Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "77a88b99-00c1-22d3-44e5-66f77a88b99c",
+      "title": "Conexion SRI En Linea",
+      "description": "Autenticacion mediante clave de acceso SRI extension",
+      "status": "completed",
+      "module": "SRI",
+      "completedAt": "2026-07-26T14:00:00.000Z"
+    }
+  ]
+}
+
+GET /workspaces/{workspaceId}/invoices/export
+Consolidates all invoice transactions belonging to this workspace and outputs an exportable text format for auditing software.
+GET /workspaces/{workspaceId}/invoices/export
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• HTTP 200 with structured download content stream or JSON payload of transaction rows.
+
+POST /workspaces/{workspaceId}/invoices/download
+Triggers a background worker procedure to gather, harvest, and synchronize electronic voucher files from the SRI governmental servers via registered browser credentials.
+POST /workspaces/{workspaceId}/invoices/download
+Parameters
+• workspaceId (required): Target workspace UUID passed in path.
+Response
+• success: Boolean confirming launch of synchronous/asynchronous batch downloader.
+• message: Status notice text.
+Example — Request
+POST /workspaces/e441a8fb-099b-4e11-9a11-88f1c7128320/invoices/download
+Example — Response
+{
+  "success": true,
+  "message": "Invoice synchronization process initiated in background."
+}
+
+GET /workspaces/{workspaceId}/ats/download-xml
+Serves the final validated ATS XML reporting file as a direct binary attachment ready for mandatory upload to the government tax administration portal.
+GET /workspaces/{workspaceId}/ats/download-xml
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• HTTP 200 OK with header: Content-Disposition: attachment; filename=ATS_06_2026.xml and raw XML application body.
+
+GET /workspaces/{workspaceId}/ats/download-xlsm
+Delivers the populated Excel macro template spreadsheet (.xlsm) containing formulas and visual verification sheets for accounting validation prior to official filing.
+GET /workspaces/{workspaceId}/ats/download-xlsm
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• HTTP 200 OK with header Content-Disposition: attachment; filename=ATS_Macro_Report.xlsm and binary Excel stream.
+
+POST /workspaces/{workspaceId}/ats/generate
+Invokes the high-speed computational engine to parse all invoices in the workspace, compute deductible vs non-deductible tax thresholds, check vendor RUCs, and compile official ATS structures.
+POST /workspaces/{workspaceId}/ats/generate
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• success: Boolean evaluation.
+• message: Operational confirmation.
+• data: Produced ATS metadata summaries.
+Example — Request
+POST /workspaces/e441a8fb-099b-4e11-9a11-88f1c7128320/ats/generate
+Example — Response
+{
+  "success": true,
+  "message": "ATS generated successfully with zero validation errors.",
+  "data": {
+    "fileName": "ATS_FAVORITA_06_2026.xml",
+    "totalInvoicesProcessed": 12
+  }
+}
+
+GET /workspaces/{workspaceId}/logs
+Retrieves specific localized audit events, system actions, and execution notices recorded within the boundaries of this workspace session.
+GET /workspaces/{workspaceId}/logs
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• success: Boolean status indicator.
+• data: Array of timestamped log event objects.
+
+DELETE /workspaces/{workspaceId}/
+Removes a workspace project from the application, applying relational cascading policies to unlink attached temporary computation files.
+DELETE /workspaces/{workspaceId}
+Parameters
+• workspaceId (required): Workspace UUID passed in path.
+Response
+• success: Boolean confirmation of database record elimination.
+• message: Status notice text.
+Example — Request
+DELETE /workspaces/89b7c120-4b8a-490b-b389-11c5e9b01247
+Example — Response
+{
+  "success": true,
+  "message": "Workspace deleted successfully"
+}
+
+
+----------------------------------------------------------------------------------------------------
+6. INVOICE MANAGEMENT & COMPRESSION MODULE (/invoices)
+----------------------------------------------------------------------------------------------------
+All endpoints require valid authentication header: Authorization: Bearer <token>
+
+GET /invoices/user/{userId}
+Retrieves the master repository list of all electronic invoices associated with the targeted taxpayer across all fiscal reporting cycles.
+GET /invoices/user/{userId}
+Parameters
+• userId (required): Taxpayer profile UUID passed in path.
+Response
+• success: Boolean query confirmation flag.
+• data: Array of comprehensive electronic invoice objects containing line items, authorization codes, and tax totals.
+Example — Request
+GET /invoices/user/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+Example — Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "90a1b2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+      "issuerName": "MEGA DATOS S.A.",
+      "issuerRuc": "1792146738001",
+      "number": "001-002-000010001",
+      "authorizationNumber": "150620260117921467380012001002000010001123456781",
+      "subtotal": 120.00,
+      "iva": 18.00,
+      "total": 138.00,
+      "type": "COMPRA",
+      "format": "XML"
+    }
+  ]
+}
+
+GET /invoices/download/{ruc}
+Queries and returns filtered electronic invoice sets corresponding exclusively to transactions involving a specified provider or commercial partner RUC.
+GET /invoices/download/{ruc}
+Parameters
+• ruc (required): 13 numeric digits of commercial issuer passed in path.
+Response
+• success: Boolean operational flag.
+• data: Filtered array of invoice objects matching the target tax identification number.
+
+POST /invoices/user/{userId}
+Performs mass uploading and asynchronous validation of multiple electronic invoice structures into the taxpayer's operational repository.
+POST /invoices/user/{userId}
+Parameters
+• userId (required): Target user UUID passed in path.
+• body: Array of parsed invoice JSON payloads including items array, pricing rules, and 49-digit authorization access keys.
+Response
+• success: Boolean evaluation flag.
+• message: Status notice indicating quantity of invoices successfully imported.
+Example — Request
+POST /invoices/user/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+[
+  {
+    "issuerName": "CONECEL S.A.",
+    "issuerRuc": "0991327371001",
+    "number": "001-002-000010002",
+    "authorizationNumber": "150620260109913273710012001002000010002123456781",
+    "subtotal": 45.00,
+    "iva": 6.75,
+    "total": 51.75,
+    "type": "COMPRA",
+    "format": "XML",
+    "taxpayerId": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101"
+  }
+]
+Example — Response
+{
+  "success": true,
+  "message": "Successfully uploaded 1 electronic invoices to user portfolio."
+}
+
+GET /invoices/user/{userId}/summary
+Calculates high-level statistical indices and volume ratios over all registered invoices in the taxpayer portfolio for KPI analytical cards.
+GET /invoices/user/{userId}/summary
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• success: Boolean flag.
+• data: Object detailing aggregated financial metrics across all historical transaction records.
+
+POST /invoices/compress-xml
+High-speed memory processing utility that parses raw XML strings, extracts official 49-digit access keys (`<claveAcceso>`) to name each document properly (`<claveAcceso>.xml`), and packages them into a compressed ZIP file directly in RAM without disk write latency.
+POST /invoices/compress-xml
+Parameters
+• xmlContents (required): An array of non-empty strings representing valid raw XML invoice contents.
+Response
+• HTTP 200 OK with headers: Content-Type: application/zip and Content-Disposition: attachment; filename=facturas_comprimidas.zip containing the binary ZIP archive buffer.
+• Error code 400 Bad Request if array is missing or empty.
+Example — Request
+POST /invoices/compress-xml
+{
+  "xmlContents": [
+    "<factura id=\"comprobante\"><infoTributaria><claveAcceso>150620260117900169190012001002000010001123456781</claveAcceso></infoTributaria></factura>",
+    "<factura id=\"comprobante\"><infoTributaria><claveAcceso>150620260109900041960012001002000010002123456781</claveAcceso></infoTributaria></factura>"
+  ]
+}
+Example — Response (Error case when invalid payload sent)
+{
+  "error": "Debe enviar un arreglo no vacío de cadenas XML."
+}
+
+POST /invoices/generate-pdfs
+Processes raw XML electronic invoice records through our embedded PDF transformation engine (`PdfCreatorService` and `RideDocument.service.tsx`) to generate official printable representation documents (RIDE) complying with Ecuadorian legal presentation formats.
+POST /invoices/generate-pdfs
+Parameters
+• invoiceIds (optional): Array of UUIDs of invoices currently residing in persistence layer.
+• xmlContents (optional): Array of raw XML strings for instantaneous dynamic document conversion without prior persistence.
+Response
+• HTTP 200 OK returning transformed document streams or encoded printable binary output arrays.
+Example — Request
+POST /invoices/generate-pdfs
+{
+  "invoiceIds": ["90a1b2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c"]
+}
+Example — Response
+{
+  "success": true,
+  "message": "RIDE PDF representations generated successfully.",
+  "data": [
+    {
+      "invoiceId": "90a1b2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+      "pdfBuffer": "JVBERi0xLjQKJWM...\n[Binary Base64 PDF Stream]"
+    }
+  ]
+}
+
+
+----------------------------------------------------------------------------------------------------
+7. ATS ENGINE & EXPORT MODULE (/ats)
+----------------------------------------------------------------------------------------------------
+All endpoints require valid authentication header: Authorization: Bearer <token>
+
+GET /ats/user/{userId}
+Retrieves historical metadata inventories of all ATS declaration reports produced by the user over all tax periods.
+GET /ats/user/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• success: Boolean evaluation flag.
+• data: Array of ATS compilation summaries detailing month, year, invoice counts, and syntax compliance scores.
+
+POST /ats/user/{userId}
+Saves a finalized ATS declaration record and associated metadata into the user's permanent reporting history.
+POST /ats/user/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+• name (required): Filename of the generated file (e.g., "ATS_FAVORITA_06_2026.xml").
+• format (required): File extension typology ("XML" or "XLSM").
+• periodMonth (required): Calendar month integer.
+• periodYear (required): Calendar year integer.
+• invoiceCount (required): Number of processed invoices contained.
+• workspaceId (optional): Associated workspace UUID.
+Response
+• success: Boolean status indicator.
+• message: Operation confirmation statement.
+Example — Request
+POST /ats/user/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+{
+  "name": "ATS_FAVORITA_06_2026.xml",
+  "format": "XML",
+  "periodMonth": 6,
+  "periodYear": 2026,
+  "invoiceCount": 12,
+  "validationErrors": 0,
+  "workspaceId": "e441a8fb-099b-4e11-9a11-88f1c7128320"
+}
+Example — Response
+{
+  "success": true,
+  "message": "ATS report saved to user history successfully"
+}
+
+GET /ats/user/{userId}/export-csv
+Transforms stored commercial transactions belonging to the taxpayer into plain comma-separated values (CSV) format suitable for ERP integration and auditing spreadsheets.
+GET /ats/user/{userId}/export-csv
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• HTTP 200 OK returning formatted CSV plaintext stream with header Content-Disposition: attachment; filename=invoices_export.csv.
+
+POST /ats/user/{userId}/validate-csv
+Ingests accounting data tables from CSV formatted templates and verifies structural integrity, VAT rates, and vendor RUC validity against government rules prior to XML conversion.
+POST /ats/user/{userId}/validate-csv
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+• csvPayload (required): String representation or file payload of CSV tax rows.
+Response
+• success: Boolean flag evaluation.
+• errorsFound: Integer counting discovered discrepancies.
+• data: Detailed line-by-line inspection outcome object.
+
+POST /ats/user/{userId}/convert-xml
+Converts verified tabular accounting datasets and transaction arrays directly into the official tiered hierarchical XML node tree required by the Ecuadorian Internal Revenue Service for formal ATS filings.
+POST /ats/user/{userId}/convert-xml
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+• data (required): JSON array representing verified purchase, sales, and withholding records.
+Response
+• success: Boolean operation confirmation.
+• xmlString: Full well-formed XML declaration code string ready for digital signing and submission.
+
+
+----------------------------------------------------------------------------------------------------
+8. TRACEABILITY & AUDIT MODULE (/traceability)
+----------------------------------------------------------------------------------------------------
+All endpoints require valid authentication header: Authorization: Bearer <token>
+
+GET /traceability/audit
+Retrieves the application audit log documenting user actions, logins, file transformations, and workspace modifications.
+GET /traceability/audit
+Parameters
+• limit (optional query parameter): Maximum records to retrieve per pagination page.
+Response
+• success: Boolean status indicator.
+• data: Array of audit record entities sorted in descending chronological order.
+
+POST /traceability/audit
+Writes an immutable tracking event into the platform audit log to maintain strict accountability and historical transparency.
+POST /traceability/audit
+Parameters
+• action (required): Identifier label of the operational event (e.g., "EXPORT_ZIP", "WORKSPACE_CREATE").
+• module (required): Software component origin (e.g., "INVOICES", "SRI_EXTENSION", "AUTH").
+• details (required): Explicit descriptive explanation of the performed operation.
+• taxpayerId (required): UUID of the acting taxpayer account.
+Response
+• success: Boolean confirmation of log persistence.
+Example — Request
+POST /traceability/audit
+{
+  "action": "EXPORT_ZIP",
+  "module": "INVOICES",
+  "details": "Successful compression and download of 12 XML invoices in RAM ZIP archive.",
+  "taxpayerId": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101"
+}
+Example — Response
+{
+  "success": true,
+  "message": "Audit event recorded successfully"
+}
+
+GET /traceability/process/{userId}
+Monitors real-time status and completion metrics for automated processing steps assigned to the user's active workspaces.
+GET /traceability/process/{userId}
+Parameters
+• userId (required): Taxpayer profile UUID passed in path.
+Response
+• success: Boolean operational summary.
+• data: Array of process pipeline milestones and timestamped execution status markers.
+
+PUT /traceability/process/{stepId}
+Updates the execution completion timestamp and operational status of a discrete pipeline step (such as marking an automated SRI synchronization step as complete).
+PUT /traceability/process/{stepId}
+Parameters
+• stepId (required): ProcessStep UUID passed in path.
+• status (required): New lifecycle status text ("completed", "in_progress", or "failed").
+• completedAt (optional): Timestamp string of operational completion.
+Response
+• success: Boolean evaluation flag.
+• message: Status notice text.
+Example — Request
+PUT /traceability/process/77a88b99-00c1-22d3-44e5-66f77a88b99c
+{
+  "status": "completed",
+  "completedAt": "2026-07-26T14:05:00.000Z"
+}
+Example — Response
+{
+  "success": true,
+  "message": "Process step status updated successfully"
+}
+
+
+----------------------------------------------------------------------------------------------------
+9. CENTRAL ADMIN CONTROL PANEL MODULE (/admin)
+----------------------------------------------------------------------------------------------------
+All endpoints require authentication header: Authorization: Bearer <token> AND administrative role privileges (role: "admin")
+
+GET /admin/users
+Delivers a consolidated inventory of all registered taxpayers, corporate entities, and staff user accounts for administrative oversight and profile supervision.
+GET /admin/users
+Parameters
+None.
+Response
+• success: Boolean execution flag.
+• data: Complete array of user objects including identification metadata and operational status.
+Example — Request
+GET /admin/users
+Example — Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101",
+      "ruc": "1790016919001",
+      "firstName": "Esteban",
+      "lastName": "Quiroga",
+      "email": "esteban.quiroga@empresa.com.ec",
+      "role": "admin"
+    },
+    {
+      "id": "2d948ee1-77a8-42cc-b690-33a55e7d1882",
+      "ruc": "0990004196001",
+      "firstName": "Maria",
+      "lastName": "Palacios",
+      "email": "mf.palacios@corporativos.ec",
+      "role": "user"
+    }
+  ]
+}
+
+PATCH /admin/users/{userId}/status
+Allows system administrators to modify operational roles, elevate privileges, or temporarily suspend access for any targeted account.
+PATCH /admin/users/{userId}/status
+Parameters
+• userId (required): Target user account UUID passed in path.
+• role (optional): New administrative hierarchy role ("admin" or "user").
+• active (optional): Boolean status indicating whether account access is enabled or locked.
+Response
+• success: Boolean operation outcome flag.
+• message: Status explanation statement.
+
+DELETE /admin/users/{userId}
+Permanently purges a user profile from the platform, triggering automated cascade deletion across all associated workspaces, invoices, ATS files, support tickets, and audit trails.
+DELETE /admin/users/{userId}
+Parameters
+• userId (required): Target taxpayer account UUID passed in path.
+Response
+• success: Boolean confirmation of cascade deletion completion.
+• message: Execution outcome statement.
+Example — Request
+DELETE /admin/users/2d948ee1-77a8-42cc-b690-33a55e7d1882
+Example — Response
+{
+  "success": true,
+  "message": "User and associated resources deleted successfully"
+}
+
+GET /admin/audit
+Exposes the global server-wide audit ledger displaying real-time traffic logs, system events, and data interactions across all user organizations for security monitoring.
+GET /admin/audit
+Parameters
+None.
+Response
+• success: Boolean operational flag.
+• data: Comprehensive chronological sequence of all system audit entities.
+
+PUT /admin/settings
+Updates global application thresholds, Circuit Breaker retry timing limits, and database connection pools across the active software cluster.
+PUT /admin/settings
+Parameters
+• maxConcurrentDownloads (optional): Integer threshold for parallel SRI extraction workers.
+• timeoutMs (optional): Circuit breaker network tolerance milliseconds.
+Response
+• success: Boolean configuration confirmation flag.
+
+GET /admin/tickets
+Lists the complete helpdesk inbox containing technical incidents, bug notifications, and accounting support inquiries submitted by all platform users for engineering attention.
+GET /admin/tickets
+Parameters
+None.
+Response
+• success: Boolean status indicator.
+• data: Array of helpdesk Ticket domain objects with sender relational mappings.
+Example — Request
+GET /admin/tickets
+Example — Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "55c33d44-22e1-44a8-99b0-11e55c33d44a",
+      "subject": "Actualizacion de firma electronica P12",
+      "category": "SOPORTE_TECNICO",
+      "priority": "ALTA",
+      "description": "Necesitamos reemplazar nuestro archivo P12 antes del 30 del mes por caducidad.",
+      "status": "open",
+      "taxpayerId": "c1f7a83d-82d2-43fa-a6e5-22d78a8f1101",
+      "createdAt": "2026-07-26T12:00:00.000Z"
+    }
+  ]
+}
+
+PATCH /admin/tickets/{ticketId}/status
+Modifies the operational workflow status of a customer support ticket once technical engineers resolve or investigate the reported incident.
+PATCH /admin/tickets/{ticketId}/status
+Parameters
+• ticketId (required): Support Ticket UUID passed in path.
+• status (required): Replacement state identifier ("open", "in_progress", or "closed").
+Response
+• success: Boolean execution outcome indicator.
+• message: Confirmation statement.
+Example — Request
+PATCH /admin/tickets/55c33d44-22e1-44a8-99b0-11e55c33d44a/status
+{
+  "status": "closed"
+}
+Example — Response
+{
+  "success": true,
+  "message": "Ticket status updated to closed successfully"
+}
+
+
+----------------------------------------------------------------------------------------------------
+10. TECHNICAL SUPPORT & HELPDESK MODULE (/support)
+----------------------------------------------------------------------------------------------------
+All endpoints require valid authentication header: Authorization: Bearer <token>
+
+POST /support/tickets
+Allows taxpayers to generate technical incident tickets, report bugs, or submit tax consultancy inquiries directly to system engineers and support personnel.
+POST /support/tickets
+Parameters
+• subject (required): Brief summary headline of the technical request.
+• category (required): Classification tag ("SOPORTE_TECNICO", "BUG", "CONSULTA_TRIBUTARIA", or "CAPACITACION").
+• priority (required): Assigned urgency flag ("BAJA", "MEDIA", or "ALTA").
+• description (required): Complete explanation of the problem or assistance required.
+Response
+• success: Boolean ticket submission confirmation flag.
+• data: Newly created Ticket object including assignment ID.
+• message: Status notice text.
+Example — Request
+POST /support/tickets
+{
+  "subject": "Error al exportar reporte XLSM para ATS",
+  "category": "BUG",
+  "priority": "MEDIA",
+  "description": "En Excel 2016 aparece advertencia de macros deshabilitadas al procesar retenciones contables."
+}
+Example — Response
+{
+  "success": true,
+  "data": {
+    "id": "77d44e55-33f2-55b9-00c1-22f66d44e55b",
+    "subject": "Error al exportar reporte XLSM para ATS",
+    "status": "open"
+  },
+  "message": "Ticket submitted successfully"
+}
+
+GET /support/tickets
+Retrieves all support tickets previously originated by the authenticated taxpayer along with current engineering response status markers.
+GET /support/tickets
+Parameters
+None (User identity inferred from JWT Authorization header).
+Response
+• success: Boolean evaluation flag.
+• data: Array of support tickets owned by the active user account.
+
+
+----------------------------------------------------------------------------------------------------
+11. DASHBOARD SUMMARY MODULE (/dashboard)
+----------------------------------------------------------------------------------------------------
+All endpoints require valid authentication header: Authorization: Bearer <token>
+
+GET /dashboard/{userId}
+Aggregates summary KPI numbers, active workspace tallies, processed electronic invoice counts, and recent alert messages to render user main control panel interfaces upon login.
+GET /dashboard/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• success: Boolean execution flag.
+• data: Object containing financial KPI summaries and recent notification arrays.
+Example — Request
+GET /dashboard/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+Example — Response
+{
+  "success": true,
+  "data": {
+    "activeWorkspaces": 4,
+    "invoicesDownloaded": 35,
+    "atsReportsReady": 5,
+    "systemStatus": "Optimal",
+    "recentNotifications": [
+      {
+        "id": 1,
+        "title": "SRI Synchronization Ready",
+        "message": "Your Chrome extension is successfully linked with SRI En Linea portal.",
+        "type": "info"
+      }
+    ]
+  }
+}
+
+
+----------------------------------------------------------------------------------------------------
+Error Codes (Business Logic API — Part 1)
+----------------------------------------------------------------------------------------------------
+This API uses the following standard HTTP communication error codes:
+HTTP Code    Description
+400 Bad Request           The request was malformed, missing required parameters, or failed business syntax validation (e.g., empty XML array during ZIP compression).
+401 Unauthorized          The authorization credentials or JWT bearer token provided were invalid, missing, or expired.
+403 Forbidden             The authenticated user does not possess administrative privileges required for this endpoint.
+404 Not Found             The targeted taxpayer profile, invoice UUID, workspace, or ticket entity does not exist in our database.
+500 Internal Server Error An unexpected unhandled exception occurred during application server execution.
+503 Service Unavailable   The secondary database persistence service is offline; the Circuit Breaker has opened to preserve cluster integrity and prevent cascading failure.
+
+
+====================================================================================================
+PART 2
+CRUD Persistence & Repository API Endpoints
+Server-side routes · JSON responses · https://ats-crud-service-angel-czefcghef8c3bcca.eastus2-01.azurewebsites.net
+====================================================================================================
+Overview
+The CRUD Persistence Service deployed on Microsoft Azure directly manages database communication with our Supabase PostgreSQL relational instance via the Prisma Object-Relational Mapper (ORM). This layer implements an explicit Strict Repository Pattern: no external frontend application or user interface is permitted to invoke these endpoints directly. Only internal cluster calls originating from our Business Logic Service bearing an authorized `X-API-Key` header are accepted.
+
+Base URL
+The primary production base URL for all CRUD Repository API requests is:
+https://ats-crud-service-angel-czefcghef8c3bcca.eastus2-01.azurewebsites.net
+
+Mandatory Security Protection for Repository Routes (/repo/*)
+• Required HTTP Header: X-API-Key
+• Expected Header Value: Internal application secret matching environment variable INTERNAL_API_KEY.
+• If this key is missing or incorrect, our API Key middleware immediately aborts processing and rejects the request with HTTP 401 Unauthorized or HTTP 403 Forbidden.
+
+
+----------------------------------------------------------------------------------------------------
+1. DIAGNOSTICS & INFRASTRUCTURE MODULE (PUBLIC)
+----------------------------------------------------------------------------------------------------
+
+GET /health
+Public latency checkpoint used by the Opossum Circuit Breaker framework in the Business Logic Service to confirm persistence database connectivity before routing transactional queries.
+GET /health
+Parameters
+None.
+Response
+• status: String availability status indicator.
+• service: Identification title of the persistence server.
+• timestamp: Current server execution timestamp.
+Example — Request
+GET /health
+Example — Response
+{
+  "status": "OK",
+  "service": "CRUD Persistence Service",
+  "timestamp": "2026-07-26T14:00:00.000Z"
+}
+
+
+----------------------------------------------------------------------------------------------------
+2. USERS REPOSITORY MODULE (/repo/users)
+----------------------------------------------------------------------------------------------------
+All endpoints require security header: X-API-Key: <internal_key>
+
+GET /repo/users/{id}
+Performs a primary key lookup in PostgreSQL for an individual Taxpayer model record using its unique UUID identifier.
+GET /repo/users/{id}
+Parameters
+• id (required): Target taxpayer UUID passed in path.
+Response
+• Complete taxpayer profile object as structured in Prisma database models.
+
+GET /repo/users/ruc/{ruc}
+Performs an exact indexed lookup on the `@unique` RUC column to identify commercial partners or verify tax number duplication during registration procedures.
+GET /repo/users/ruc/{ruc}
+Parameters
+• ruc (required): 13 numeric digits passed in path.
+Response
+• Matching taxpayer account entity or null if non-existent.
+
+GET /repo/users
+Executes a relational SELECT query over the full Taxpayer database table ordered by registration date for supervisory reporting.
+GET /repo/users
+Parameters
+None.
+Response
+• Array containing all stored taxpayer rows.
+
+POST /repo/users/find
+High-speed multi-criteria lookup endpoint designed specifically for login authentication; checks whether the submitted identifier matches either the `@unique` email or `@unique` RUC column and returns password hashes for cryptographic verification.
+POST /repo/users/find
+Parameters
+• identifier (required): Either registered email address or 13-digit RUC number string.
+Response
+• Taxpayer database entity including stored bcrypt password hash string.
+Example — Request
+POST /repo/users/find
+{
+  "identifier": "esteban.quiroga@empresa.com.ec"
+}
+
+POST /repo/users
+Executes `prisma.taxpayer.create()` within a transactional constraint to insert a newly validated user profile into PostgreSQL tables.
+POST /repo/users
+Parameters
+• ruc (required): Unique 13-digit RUC number.
+• firstName (required): Official legal first name.
+• lastName (required): Official legal last name.
+• email (required): Unique electronic mail address.
+• password (optional): Hashed password secret string.
+• role (optional): Role designator default to "user".
+Response
+• Confirmed database entity record as inserted into Supabase storage.
+
+PUT /repo/users/{id}
+Updates mutable demographic attributes of an existing taxpayer record and automatically updates the `updatedAt` database timestamp.
+PUT /repo/users/{id}
+Parameters
+• id (required): Target user UUID passed in path.
+• firstName, lastName, email (optional): Fields targeted for modification.
+Response
+• Updated taxpayer profile record.
+
+PUT /repo/users/{id}/password
+Specialized secure repository operation designed exclusively to overwrite an account password hash following successful verification of reset tokens.
+PUT /repo/users/{id}/password
+Parameters
+• id (required): Target user UUID passed in path.
+• password (required): Replacement bcrypt hash string.
+Response
+• Success confirmation object.
+
+DELETE /repo/users/{id}
+Permanently removes a taxpayer profile from relational persistence. Executes database-level cascading deletion across all connected workspaces, invoices, ATS reports, tickets, and audit trails.
+DELETE /repo/users/{id}
+Parameters
+• id (required): Target taxpayer UUID passed in path.
+Response
+• Confirmation of successful cascading removal.
+
+
+----------------------------------------------------------------------------------------------------
+3. INVOICES REPOSITORY MODULE (/repo/invoices)
+----------------------------------------------------------------------------------------------------
+All endpoints require security header: X-API-Key: <internal_key>
+
+GET /repo/invoices/{userId}
+Queries all electronic invoices stored under a taxpayer's foreign key relationship across both purchase and sales categories.
+GET /repo/invoices/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• Array of complete invoice records including JSON product breakdown arrays.
+
+GET /repo/invoices/filter/by
+Executes dynamic conditional SQL queries to retrieve targeted subsets of electronic invoices without loading unnecessary records into application RAM.
+GET /repo/invoices/filter/by
+Parameters (Query String Parameters)
+• ruc (optional): Filter by commercial issuer tax ID.
+• month (optional): Filter by fiscal calendar month integer.
+• year (optional): Filter by reporting fiscal year integer.
+• type (optional): Filter by transaction category ("COMPRA" or "VENTA").
+Response
+• Array of invoice entities conforming exactly to provided filtering criteria.
+
+GET /repo/invoices/count/{userId}
+Invokes rapid database counting aggregation `prisma.invoice.count()` to return instantaneous transaction total figures in milliseconds for dashboard performance optimization.
+GET /repo/invoices/count/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• success: Boolean evaluation flag.
+• count: Integer representing total recorded electronic invoices.
+Example — Request
+GET /repo/invoices/count/c1f7a83d-82d2-43fa-a6e5-22d78a8f1101
+Example — Response
+{
+  "success": true,
+  "count": 35
+}
+
+POST /repo/invoices
+Utilizes high-speed `prisma.invoice.createMany()` atomic batch transactions to import dozens or hundreds of synchronized SRI invoices simultaneously while minimizing network round-trips to Supabase.
+POST /repo/invoices
+Parameters
+• Array of invoice data objects complete with 49-digit authorization access keys, IVA calculations, and taxpayer foreign keys.
+Response
+• Database count of newly inserted transaction rows.
+
+
+----------------------------------------------------------------------------------------------------
+4. ATS FILES REPOSITORY MODULE (/repo/ats)
+----------------------------------------------------------------------------------------------------
+All endpoints require security header: X-API-Key: <internal_key>
+
+GET /repo/ats/{userId}
+Retrieves historical records of all ATS XML and XLSM macro files linked to a taxpayer profile in persistence storage.
+GET /repo/ats/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• Array of stored ATS file metadata entities.
+
+GET /repo/ats/errors/count/{userId}
+Performs SQL sum aggregations over the `validationErrors` column in the AtsFile table to warn users on their main dashboard if current declarations contain unresolved accounting discrepancies.
+GET /repo/ats/errors/count/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• Object containing cumulative validation error sum figure.
+
+POST /repo/ats
+Inserts a new AtsFile entity row representing a successfully compiled tax report, establishing relational mapping to the taxpayer and targeted workspace.
+POST /repo/ats
+Parameters
+• name (required): File label string.
+• format (required): Format designator ("XML" or "XLSM").
+• periodMonth (required): Calendar month integer.
+• periodYear (required): Fiscal year integer.
+• invoiceCount (required): Total bundled invoices.
+• validationErrors (required): Integer error tally.
+• taxpayerId (required): Owner taxpayer UUID.
+• workspaceId (optional): Associated workspace UUID.
+Response
+• Newly generated AtsFile database entity record.
+
+
+----------------------------------------------------------------------------------------------------
+5. WORKSPACES REPOSITORY MODULE (/repo/workspaces)
+----------------------------------------------------------------------------------------------------
+All endpoints require security header: X-API-Key: <internal_key>
+
+GET /repo/workspaces/{userId}
+Retrieves all workspace entities configured by an identified user, exposing filesystem storage mapping paths and current SRI connection verification flags.
+GET /repo/workspaces/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• Array of workspace domain entities.
+
+GET /repo/workspaces/detail/{id}
+Performs a primary key lookup for a workspace and validates ownership constraints before allowing financial computation operations.
+GET /repo/workspaces/detail/{id}
+Parameters
+• id (required): Workspace UUID passed in path.
+Response
+• Complete workspace configuration entity record.
+
+GET /repo/workspaces/invoices/{id}
+Executes relational join queries in Prisma to extract electronic invoices specifically linked to an identified workspace container.
+GET /repo/workspaces/invoices/{id}
+Parameters
+• id (required): Workspace UUID passed in path.
+Response
+• Array of associated electronic invoices.
+
+GET /repo/workspaces/ats-files/{id}
+Retrieves all generated ATS reports and Excel spreadsheets stored under this workspace's foreign key relationship.
+GET /repo/workspaces/ats-files/{id}
+Parameters
+• id (required): Workspace UUID passed in path.
+Response
+• Array of associated AtsFile entities.
+
+GET /repo/workspaces/process-steps/{id}
+Retrieves stored automated pipeline step milestones registered for a workspace session.
+GET /repo/workspaces/process-steps/{id}
+Parameters
+• id (required): Workspace UUID passed in path.
+Response
+• Array of process step records.
+
+GET /repo/workspaces/logs/{id}
+Extracts chronological audit logs and execution incident records restricted exclusively to events occurring within this workspace.
+GET /repo/workspaces/logs/{id}
+Parameters
+• id (required): Workspace UUID passed in path.
+Response
+• Array of matching AuditEvent domain rows.
+
+POST /repo/workspaces
+Creates a new Workspace entity record in PostgreSQL and assigns local filesystem storage directories for automated file processing.
+POST /repo/workspaces
+Parameters
+• name (required): Workspace label.
+• description (optional): Project overview text.
+• periodMonth (optional): Calendar month integer.
+• periodYear (required): Tax fiscal year integer.
+• periodType (required): Cadence identifier ("monthly" or "semesterly").
+• workspaceLocation (required): Local directory disk path.
+• sriConnectionStatus (optional): Default connection flag.
+• taxpayerId (required): Owner taxpayer profile UUID.
+Response
+• Newly inserted workspace entity record.
+
+DELETE /repo/workspaces/{id}
+Removes a workspace row from PostgreSQL relational storage in Supabase.
+DELETE /repo/workspaces/{id}
+Parameters
+• id (required): Workspace UUID passed in path.
+Response
+• Success confirmation text.
+
+
+----------------------------------------------------------------------------------------------------
+6. AUDIT & TRACEABILITY REPOSITORY MODULE (/repo/audit)
+----------------------------------------------------------------------------------------------------
+All endpoints require security header: X-API-Key: <internal_key>
+
+GET /repo/audit/{userId}
+Retrieves historical AuditEvent entity records assigned to a target taxpayer profile sorted in descending chronological sequence.
+GET /repo/audit/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• Array of audit history entities.
+
+GET /repo/audit/all/logs
+Executes a full system-wide collection query across all stored events for central administrator monitoring and diagnostic security audits.
+GET /repo/audit/all/logs
+Parameters
+None.
+Response
+• Array containing global server audit trails.
+
+GET /repo/audit/action/{userId}/{action}
+Filters audit records to locate explicit operational actions performed by a taxpayer (e.g., verifying if "INVOICES_DOWNLOAD" occurred during a specific shift).
+GET /repo/audit/action/{userId}/{action}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+• action (required): Targeted action identifier string passed in path.
+Response
+• Array of matching historical audit entries.
+
+GET /repo/audit/module/{userId}/{module}
+Retrieves audit records categorized under a specific software functional module (e.g., isolating events within "SRI_EXTENSION" or "ATS_ENGINE").
+GET /repo/audit/module/{userId}/{module}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+• module (required): Software component tag passed in path.
+Response
+• Array of matching functional module audit entries.
+
+POST /repo/audit
+Inserts an immutable tracking event into the AuditEvent entity table, stamping exact creation date and time via the Prisma `@default(now())` attribute.
+POST /repo/audit
+Parameters
+• action (required): Action tag string.
+• module (required): Module designator string.
+• details (required): Explicit descriptive statement.
+• taxpayerId (required): Target user account UUID.
+Response
+• Newly inserted audit record entity.
+
+
+----------------------------------------------------------------------------------------------------
+7. TECHNICAL SUPPORT TICKETS REPOSITORY MODULE (/repo/tickets)
+----------------------------------------------------------------------------------------------------
+All endpoints require security header: X-API-Key: <internal_key>
+
+GET /repo/tickets
+Queries the Ticket database entity across all accounts and includes taxpayer relationship mapping (`include: { taxpayer: true }`) to present all customer support requests to administrative engineers.
+GET /repo/tickets
+Parameters
+None.
+Response
+• Comprehensive array of stored support ticket entities.
+
+GET /repo/tickets/{userId}
+Filters and returns only support inquiries and bug notifications created by the designated taxpayer profile.
+GET /repo/tickets/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• Array of user-owned ticket records.
+
+POST /repo/tickets
+Persists a new Ticket entity row in PostgreSQL with initial default status set to "open" to enqueue the technical inquiry for engineering assistance.
+POST /repo/tickets
+Parameters
+• subject (required): Summary headline text.
+• category (required): Category identifier string.
+• priority (required): Priority tag string ("ALTA", "MEDIA", "BAJA").
+• description (required): Complete problem definition text.
+• status (optional): State flag default to "open".
+• taxpayerId (required): Sender taxpayer profile UUID.
+Response
+• Newly created Ticket entity record.
+
+PUT /repo/tickets/{id}/status
+Modifies the lifecycle status string of an existing ticket record (e.g., transitioning from "open" to "closed" following successful customer guidance).
+PUT /repo/tickets/{id}/status
+Parameters
+• id (required): Ticket entity UUID passed in path.
+• status (required): New status string identifier.
+Response
+• Updated Ticket domain record.
+
+
+----------------------------------------------------------------------------------------------------
+8. PROCESS STEPS REPOSITORY MODULE (/repo/process-steps)
+----------------------------------------------------------------------------------------------------
+All endpoints require security header: X-API-Key: <internal_key>
+
+GET /repo/process-steps/{userId}
+Retrieves all ProcessStep database records showing real-time automation progress across a taxpayer's active tax projects.
+GET /repo/process-steps/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• Array of process step milestones.
+
+PUT /repo/process-steps/{id}
+Updates operational progression and timestamps for an individual automated pipeline step in the ProcessStep table.
+PUT /repo/process-steps/{id}
+Parameters
+• id (required): ProcessStep UUID passed in path.
+• status (required): Replacement status string ("completed", "in_progress", "failed").
+• completedAt (optional): Completion timestamp.
+Response
+• Updated process step database entity.
+
+
+----------------------------------------------------------------------------------------------------
+9. SRI SYNCHRONIZATION REPOSITORY MODULE (/repo/sri)
+----------------------------------------------------------------------------------------------------
+All endpoints require security header: X-API-Key: <internal_key>
+
+GET /repo/sri/status/{userId}
+Analyses stored authentication events to determine if an unexpired verification handshake with SRI En Línea occurred within a 24-hour operational window.
+GET /repo/sri/status/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• Latest matching SRI connection status evaluation entity.
+
+GET /repo/sri/history/{userId}
+Delivers the historical sequence of all governmental authentication tokens and synchronizations recorded between Chrome plugins and official tax servers.
+GET /repo/sri/history/{userId}
+Parameters
+• userId (required): Taxpayer UUID passed in path.
+Response
+• Array of historical SRI connection entries.
+
+POST /repo/sri/connect
+Inserts a connection timestamp confirming that an account authenticated successfully on the governmental tax portal and is cleared for automated XML harvesting.
+POST /repo/sri/connect
+Parameters
+• userId (required): Taxpayer UUID.
+• status (required): Connection state ("connected" or "disconnected").
+• details (optional): Supplemental explanatory logging string.
+Response
+• Successfully persisted SRI synchronization event record.
+
+
+----------------------------------------------------------------------------------------------------
+Error Codes (CRUD Repository API — Part 2)
+----------------------------------------------------------------------------------------------------
+This persistence API uses the following repository error codes:
+HTTP Code    Description
+400 Bad Request           The repository received malformed JSON payloads or missing required primary database insertion fields.
+401 Unauthorized          The request attempted to access repository routes without providing the mandatory X-API-Key HTTP header.
+403 Forbidden             The X-API-Key secret provided in the request header did not match our internal server security environment variable.
+404 Not Found             A specific UUID primary key targeted for update, reading, or deletion was not found in our relational PostgreSQL tables.
+500 Internal Server Error An unexpected Supabase database constraint violation or network communication breakdown occurred during query execution.
+
+
+====================================================================================================
+PART 3
+Frontend Page URIs
+Client-side routes · Browser pages · https://ats-frontend-service-angel-czefcghef8c3bcca.eastus2-01.azurewebsites.net
+====================================================================================================
+Overview
+These represent our client-side single-page application (SPA) routes built with React, Vite, and modern visual styling deployed on Microsoft Azure. When accessed via a web browser, they render dynamic user graphical interfaces without exposing direct JSON server payloads to ordinary end-users.
+
+Base URL
+The application interfaces are accessed directly in production via our Azure Static Web Apps frontend domain:
+https://ats-frontend-service-angel-czefcghef8c3bcca.eastus2-01.azurewebsites.net
+
+Public Pages
+No Authentication or Session Required
+Route                 Component            Description
+GET /                 LandingPage          The main promotional landing page showcasing features and pricing to prospective taxpayers.
+GET /login            LoginPage            Authentication screen supporting both standard RUC/email credentials and Google OAuth SSO.
+GET /register         RegisterPage         Registration onboarding interface for new taxpayer profiles and accounts.
+GET /forgotpassword   ForgotPasswordPage   Credential recovery and secure password reset request interface.
+
+Protected Pages
+Valid Taxpayer Session (JWT Token) Required
+Route                 Component            Description
+GET /dashboard        DashboardPage        User main control panel featuring 3-column action cards, financial KPIs, and direct links to SRI download extensions in Chrome Web Store.
+GET /sri-connection   SriConnectionPage    Form and instructional guidance interface to synchronize user credentials with SRI En Línea portal web services via Chrome plugins.
+GET /invoices/download InvoicesDownloadPage Dedicated interface allowing users to trigger automated mass invoice file gathering from government servers.
+GET /invoices/manage  InvoicesManagePage   Data table displaying received and issued invoices with interactive filtering, sorting, and editing options.
+GET /ats/generate     AtsGeneratePage      Automated compilation screen where users select workspaces and trigger production of ATS reports in XLSM macro formats.
+GET /ats/validate     AtsValidatePage      Validation interface that inspects local transaction data against SRI thresholds and alerts users to possible tax reporting discrepancies.
+GET /ats/export       AtsExportPage        Final export screen where approved statements are transformed into official XML formats for immediate government submission.
+GET /traceability     TraceabilityPage     Audit and tracking history interface where users inspect log records of downloads, file compressions, and system actions.
+GET /support          SupportPage          Helpdesk support ticket submission screen to communicate with engineering technicians and tax consultants.
+GET /profile          ProfilePage          User account configuration screen allowing modifications to taxonomic details and RUC structures.
+
+Admin Protected Pages
+Administrative Elevation Required (Role: "admin")
+Route                 Component            Description
+GET /admin/dashboard  AdminDashboardPage   Executive global control center presenting system-wide statistics, active user volumes, and ticket counts for administrators.
+GET /admin/users      AdminUsersPage       Comprehensive user management table connected directly to our backend API allowing administrators to view, search, alter roles, or cascade delete taxpayer accounts.
+GET /admin/audit      AdminAuditPage       Global security audit trail displaying operational traffic, logins, and API events across all organizations in the platform.
+GET /admin/settings   AdminSettingsPage    Global configuration panel for managing Circuit Breaker tolerances, connection limits, and network clustering parameters.
+GET /admin/tickets    AdminTicketsPage     Central engineering helpdesk inbox where administrators review, process, and resolve technical support incidents submitted by platform users.
+
+====================================================================================================
+END OF FULL SYSTEM DOCUMENTATION — ATS EXPRESS ARCHITECTURE 2026
+====================================================================================================
