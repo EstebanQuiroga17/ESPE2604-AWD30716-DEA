@@ -3,6 +3,7 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import AdmZip from 'adm-zip';
 import { parseSRIXML } from './xmlParser.service';
 import { RideDocument } from './RideDocument.service';
+import { UsersReportDocument } from './UsersReportDocument.service';
 
 interface PdfResult {
   buffer: Buffer;
@@ -107,5 +108,14 @@ export class PdfCreatorService {
       zipBuffer: zip.toBuffer(),
       errors,
     };
+  }
+
+  /**
+   * Genera un PDF con el reporte de los usuarios registrados.
+   */
+  public async generateUsersReportPdf(users: any[]): Promise<Buffer> {
+    const element = React.createElement(UsersReportDocument, { users });
+    const buffer = await renderToBuffer(element as any);
+    return Buffer.from(buffer);
   }
 }

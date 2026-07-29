@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { crudClient } from '../http-client/crud.client';
+import { PdfCreatorService } from '../services/pdfCreator.service';
 
 export class TaxpayerController {
   public async getAllTaxpayers(req: Request, res: Response): Promise<void> {
@@ -57,5 +58,22 @@ export class TaxpayerController {
       const u = result.data;
       res.status(200).json({ success: true, data: { id: u.id, ruc: u.ruc, firstName: u.firstName, lastName: u.lastName, email: u.email } });
     } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
+  }
+
+  public async getUsersReport(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await crudClient.get('/repo/users');
+      const users = result.data || [];
+      
+      const pdfService = new PdfCreatorService();
+      const pdfBuffer = await pdfService.generateUsersReportPdf(users);
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="usuarios_registrados.pdf"');
+      res.send(pdfBuffer);
+    } catch (error) { 
+      console.error('Error generating users report:', error);
+      res.status(500).json({ success: false, message: 'Internal server error generating report' }); 
+    }
   }
 }

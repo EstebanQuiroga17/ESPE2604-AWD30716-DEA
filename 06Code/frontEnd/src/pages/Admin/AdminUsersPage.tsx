@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Search, Edit2, Trash2, Plus, Shield, UserCheck, X, AlertCircle } from 'lucide-react';
+import { Users, Search, Edit2, Trash2, Plus, Shield, UserCheck, X, AlertCircle, FileText } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
 import type { TaxPayer } from '../../types';
 import axios from 'axios';
@@ -19,6 +19,7 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState<TaxPayer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -166,6 +167,30 @@ export default function AdminUsersPage() {
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleDownloadReport = async () => {
+    try {
+      setIsDownloading(true);
+      const response = await axios.get(`${BUSINESS_SERVICE_URL}/taxpayer/report/users`, {
+        responseType: 'blob', // Important for downloading files
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'usuarios_registrados.pdf');
+      document.body.appendChild(link);
+      link.click();
+      
+      window.URL.revokeObjectURL(url);
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading report:', error);
+      alert('Error al descargar el reporte de usuarios.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="animate-fade-in">
@@ -184,9 +209,14 @@ export default function AdminUsersPage() {
               onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
-          <button id="add-user-btn" className="btn btn-primary" onClick={openCreateModal}>
-            <Plus size={16} />Agregar Usuario
-          </button>
+          <div className="flex gap-12">
+            <button className="btn btn-secondary" onClick={handleDownloadReport} disabled={isDownloading}>
+              <FileText size={16} />{isDownloading ? 'Descargando...' : 'Descargar PDF'}
+            </button>
+            <button id="add-user-btn" className="btn btn-primary" onClick={openCreateModal}>
+              <Plus size={16} />Agregar Usuario
+            </button>
+          </div>
         </div>
 
         <div className="card">
