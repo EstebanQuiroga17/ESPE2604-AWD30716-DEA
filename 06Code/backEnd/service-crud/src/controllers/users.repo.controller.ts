@@ -27,7 +27,7 @@ export class UsersRepoController {
   public async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
       const users = await prisma.taxpayer.findMany({
-        select: { id: true, ruc: true, firstName: true, lastName: true, email: true, role: true, createdAt: true }
+        select: { id: true, ruc: true, businessName: true, email: true, role: true, createdAt: true }
       });
       res.json({ success: true, data: users });
     } catch (e) {
@@ -80,11 +80,9 @@ export class UsersRepoController {
     try {
       const userId = req.params.id as string;
       await prisma.$transaction([
-        prisma.invoice.deleteMany({ where: { taxpayerId: userId } }),
         prisma.atsFile.deleteMany({ where: { taxpayerId: userId } }),
         prisma.processStep.deleteMany({ where: { taxpayerId: userId } }),
         prisma.auditEvent.deleteMany({ where: { taxpayerId: userId } }),
-        prisma.ticket.deleteMany({ where: { taxpayerId: userId } }),
         prisma.workspace.deleteMany({ where: { taxpayerId: userId } }),
         prisma.taxpayer.delete({ where: { id: userId } })
       ]);

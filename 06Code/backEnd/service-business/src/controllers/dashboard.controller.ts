@@ -5,15 +5,14 @@ export class DashboardController {
   public async getSummary(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.userId;
-      const [invoicesResult, atsErrorsResult] = await Promise.all([
-        crudClient.get(`/repo/invoices/count/${userId}`),
+      const [atsErrorsResult] = await Promise.all([
         crudClient.get(`/repo/ats/errors/count/${userId}`)
       ]);
 
       res.status(200).json({
         success: true,
         data: {
-          invoicesDownloaded: invoicesResult.data?.count ?? 0,
+          invoicesDownloaded: 0,
           invoicesDownloadedChange: 5,
           errorsDetected: atsErrorsResult.data?.count ?? 0,
           lastSync: new Date().toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' }),

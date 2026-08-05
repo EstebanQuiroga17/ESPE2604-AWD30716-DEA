@@ -10,8 +10,7 @@ router.get('/:userId', (req, res) => workspacesController.getUserWorkspaces(req,
 // GET /repo/workspaces/detail/:id — get single workspace (with ownership check)
 router.get('/detail/:id', (req, res) => workspacesController.getWorkspaceDetail(req, res));
 
-// GET /repo/workspaces/invoices/:id — invoices in a workspace
-router.get('/invoices/:id', (req, res) => workspacesController.getWorkspaceInvoices(req, res));
+
 
 // GET /repo/workspaces/ats-files/:id — ATS files in a workspace
 router.get('/ats-files/:id', (req, res) => workspacesController.getWorkspaceAtsFiles(req, res));

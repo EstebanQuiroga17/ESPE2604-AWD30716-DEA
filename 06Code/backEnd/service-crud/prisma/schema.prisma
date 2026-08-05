@@ -11,10 +11,6 @@ datasource db {
 model Taxpayer {
   id               String        @id @default(uuid())
   ruc              String        @unique
-  firstName        String
-  middleName       String?
-  lastName         String
-  secondLastName   String?
   email            String        @unique
   password         String?
   birthDate        DateTime?
@@ -22,11 +18,10 @@ model Taxpayer {
   profileCompleted Boolean       @default(true)
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
+  businessName     String?
   atsFiles         AtsFile[]
   auditEvents      AuditEvent[]
-  invoices         Invoice[]
   processSteps     ProcessStep[]
-  tickets          Ticket[]
   workspaces       Workspace[]
 
   @@map("Taxpayer")
@@ -46,38 +41,8 @@ model Workspace {
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   atsFiles            AtsFile[]
-  invoices            Invoice[]
   processSteps        ProcessStep[]
   taxpayer            Taxpayer      @relation(fields: [taxpayerId], references: [id])
-}
-
-model Invoice {
-  id                   String     @id @default(uuid())
-  issuerName           String
-  issuerCommercialName String?
-  issuerAddress        String?
-  issuerRuc            String
-  number               String
-  authorizationNumber  String
-  emissionType         String     @default("Normal")
-  accessKey            String
-  customerName         String
-  customerId           String
-  customerDate         String
-  customerAddress      String?
-  customerPhone        String?
-  customerEmail        String?
-  products             Json
-  subtotal             Float
-  iva                  Float
-  total                Float
-  type                 String     @default("COMPRA")
-  format               String     @default("XML")
-  taxpayerId           String
-  workspaceId          String?
-  createdAt            DateTime   @default(now())
-  taxpayer             Taxpayer   @relation(fields: [taxpayerId], references: [id])
-  workspace            Workspace? @relation(fields: [workspaceId], references: [id])
 }
 
 model AtsFile {
@@ -117,17 +82,4 @@ model AuditEvent {
   timestamp  DateTime @default(now())
   taxpayerId String
   taxpayer   Taxpayer @relation(fields: [taxpayerId], references: [id])
-}
-
-model Ticket {
-  id          String   @id @default(uuid())
-  subject     String
-  category    String
-  priority    String
-  description String
-  status      String   @default("open")
-  taxpayerId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  taxpayer    Taxpayer @relation(fields: [taxpayerId], references: [id])
 }

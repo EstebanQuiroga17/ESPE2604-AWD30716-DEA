@@ -22,24 +22,6 @@ export class AtsController {
     } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
   }
 
-  public async exportInvoices(req: Request, res: Response): Promise<void> {
-    try {
-      const { userId } = req.params;
-      // 1. Fetch invoices from Servicio B
-      const invoicesResult = await crudClient.get(`/repo/invoices/${userId}`);
-      const invoices = invoicesResult.data || [];
-
-      // 2. Business logic: generate CSV from invoices (pure function, no DB)
-      const csvContent = this.atsBusinessService.generateInvoiceCsv(invoices);
-
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename=invoices_${userId}.csv`);
-      res.status(200).send(csvContent);
-    } catch (error) {
-      console.error('Export CSV error:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-  }
 
   public async validateCsv(req: Request, res: Response): Promise<void> {
     try {

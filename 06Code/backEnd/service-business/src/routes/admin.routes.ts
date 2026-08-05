@@ -13,7 +13,4 @@ router.delete('/users/:userId', (req, res) => adminController.deleteUser(req, re
 router.get('/audit', (req, res) => adminController.getAuditLogs(req, res));
 router.put('/settings', (req, res) => adminController.updateSettings(req, res));
 
-router.get('/tickets', (req, res) => adminController.getTickets(req, res));
-router.patch('/tickets/:ticketId/status', (req, res) => adminController.updateTicketStatus(req, res));
-
 export default router;

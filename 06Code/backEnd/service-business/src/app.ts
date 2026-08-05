@@ -9,7 +9,6 @@ import atsRoutes from './routes/ats.routes';
 import traceabilityRoutes from './routes/traceability.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
-import supportRoutes from './routes/support.routes';
 import { authMiddleware } from './middlewares/auth.middleware';
 import { InvoiceController } from './controllers/invoice.controller';
 
@@ -34,7 +33,6 @@ class App {
     this.app.use('/sri', authMiddleware, sriRoutes);
     this.app.use('/workspaces', authMiddleware, workspaceRoutes);
     this.app.use('/admin', authMiddleware, adminRoutes);
-    this.app.use('/support', authMiddleware, supportRoutes);
     this.app.use('/invoices', authMiddleware, invoiceRoutes);
     this.app.use('/ats', authMiddleware, atsRoutes);
     this.app.use('/traceability', authMiddleware, traceabilityRoutes);
