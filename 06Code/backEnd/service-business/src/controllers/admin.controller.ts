@@ -43,26 +43,4 @@ export class AdminController {
     } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
   }
 
-  public async getTickets(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await crudClient.get('/repo/tickets');
-      res.status(200).json(result);
-    } catch (error) {
-      console.error('Error fetching global tickets:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-  }
-
-  public async updateTicketStatus(req: Request, res: Response): Promise<void> {
-    try {
-      const { ticketId } = req.params;
-      const { status } = req.body;
-      if (!status) { res.status(400).json({ success: false, message: 'Status is required' }); return; }
-      const result = await crudClient.put(`/repo/tickets/${ticketId}/status`, { status });
-      res.status(200).json({ success: true, message: `Ticket status updated to ${status}`, data: result.data });
-    } catch (error) {
-      console.error('Error updating ticket status:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-  }
 }

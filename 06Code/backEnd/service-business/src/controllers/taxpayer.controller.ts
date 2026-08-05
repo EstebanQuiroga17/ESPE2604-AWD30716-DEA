@@ -15,7 +15,7 @@ export class TaxpayerController {
       const result = await crudClient.get(`/repo/users/${req.params.userId}`);
       if (!result.data) { res.status(404).json({ success: false, message: 'User not found' }); return; }
       const u = result.data;
-      res.status(200).json({ success: true, data: { id: u.id, ruc: u.ruc, firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role, createdAt: u.createdAt } });
+      res.status(200).json({ success: true, data: { id: u.id, ruc: u.ruc, businessName: u.businessName, email: u.email, role: u.role, createdAt: u.createdAt } });
     } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
   }
 
@@ -25,9 +25,8 @@ export class TaxpayerController {
       if (!userResult.data) { res.status(404).json({ success: false, message: 'User not found' }); return; }
 
       const userId = req.params.userId;
-      const [workspacesResult, invoicesResult, lastSyncResult] = await Promise.all([
+      const [workspacesResult, lastSyncResult] = await Promise.all([
         crudClient.get(`/repo/workspaces/${userId}`),
-        crudClient.get(`/repo/invoices/count/${userId}`),
         crudClient.get(`/repo/audit/action/${userId}/INVOICES_DOWNLOAD`)
       ]);
 
@@ -35,7 +34,7 @@ export class TaxpayerController {
         success: true,
         data: {
           workspacesCount: workspacesResult.data?.length ?? 0,
-          totalInvoices: invoicesResult.data?.count ?? 0,
+          totalInvoices: 0,
           lastSriSync: lastSyncResult.data?.timestamp ?? null
         }
       });
@@ -53,10 +52,10 @@ export class TaxpayerController {
 
   public async updateProfile(req: Request, res: Response): Promise<void> {
     try {
-      const { firstName, lastName } = req.body;
-      const result = await crudClient.put(`/repo/users/${req.params.userId}`, { firstName, lastName });
+      const { businessName } = req.body;
+      const result = await crudClient.put(`/repo/users/${req.params.userId}`, { businessName });
       const u = result.data;
-      res.status(200).json({ success: true, data: { id: u.id, ruc: u.ruc, firstName: u.firstName, lastName: u.lastName, email: u.email } });
+      res.status(200).json({ success: true, data: { id: u.id, ruc: u.ruc, businessName: u.businessName, email: u.email } });
     } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
   }
 
