@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { FileSpreadsheet, Play, Download, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import AppLayout from '../../components/layout/AppLayout';
+import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 import type { AtsFile } from '../../types';
 import '../../styles/AtsModule.css';
+
+const BUSINESS_SERVICE_URL = import.meta.env.VITE_BUSINESS_SERVICE_DEPLOY_URL || import.meta.env.VITE_BUSINESS_SERVICE_DEV_URL;
 
 type GenerationStatus = 'idle' | 'processing' | 'done' | 'error';
 
@@ -11,32 +15,54 @@ const MockInvoices: any[] = [];
 const MockAtsFiles: any[] = [];
 
 export default function AtsGeneratePage() {
+  const { currentUser } = useAuth();
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>('idle');
   const [generatedFile, setGeneratedFile] = useState<AtsFile | null>(null);
   const [progress, setProgress] = useState(0);
 
-  const simulateGeneration = async () => {
+  const handleGenerate = async () => {
+    if (!currentUser) return;
     setGenerationStatus('processing');
-    setProgress(0);
-    const intervals = [20, 40, 60, 80, 100];
-    for (const target of intervals) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setProgress(target);
-    }
-    setGeneratedFile(null);
-    setGenerationStatus('done');
-  };
+    setProgress(30);
 
-  const handleGenerate = () => {
-    simulateGeneration();
+    try {
+      const response = await axios.get(`${BUSINESS_SERVICE_URL}/ats/user/${currentUser.id}/export-csv`, {
+        responseType: 'blob'
+      });
+      setProgress(80);
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoices_${currentUser.id}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      setProgress(100);
+      setGeneratedFile({
+        id: 'generated',
+        name: `invoices_${currentUser.id}.csv`,
+        period: { type: 'monthly', month: 11, year: 2025 },
+        invoiceCount: MockInvoices.length,
+        validationErrors: 0,
+        createdAt: new Date().toISOString(),
+        downloadUrl: url,
+        taxpayerId: currentUser.id
+      });
+      setGenerationStatus('done');
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+      setGenerationStatus('error');
+    }
   };
 
   return (
     <AppLayout>
       <div className="animate-fade-in">
-        <h1 className="page-title">Generar ATS en Formato XLSM</h1>
+        <h1 className="page-title">Generar ATS en Formato CSV</h1>
         <p className="page-subtitle">
-          Crea automáticamente el Anexo Transaccional Simplificado en formato Excel Macro a partir de las facturas cargadas
+          Crea automáticamente el Anexo Transaccional Simplificado en formato CSV a partir de las facturas cargadas
         </p>
 
         <div className="ats-layout">
@@ -80,7 +106,7 @@ export default function AtsGeneratePage() {
                       className="btn btn-primary"
                       onClick={handleGenerate}
                     >
-                      <Play size={16} />Generar ATS XLSM
+                      <Play size={16} />Generar ATS CSV
                     </button>
                   </div>
                 )}
@@ -90,8 +116,8 @@ export default function AtsGeneratePage() {
                     <div className="processing-animation">
                       <FileSpreadsheet size={36} />
                     </div>
-                    <h3>Generando ATS XLSM...</h3>
-                    <p className="text-muted">Transcribiendo facturas al formato ATS del SRI</p>
+                    <h3>Generando ATS CSV...</h3>
+                    <p className="text-muted">Extrayendo facturas de la base de datos</p>
                     <div className="processing-progress">
                       <div className="flex justify-between mb-8">
                         <span className="text-sm text-muted">Progreso</span>
@@ -101,7 +127,7 @@ export default function AtsGeneratePage() {
                         <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
                       </div>
                       <p className="text-xs text-muted mt-8">
-                        {progress < 40 ? 'Leyendo facturas XML...' : progress < 70 ? 'Validando campos ATS...' : 'Generando archivo XLSM...'}
+                        {progress < 40 ? 'Obteniendo comprobantes...' : progress < 70 ? 'Generando CSV...' : 'Descargando archivo...'}
                       </p>
                     </div>
                   </div>
@@ -112,7 +138,7 @@ export default function AtsGeneratePage() {
                     <div className="done-icon">
                       <CheckCircle2 size={40} />
                     </div>
-                    <h3>¡ATS XLSM generado exitosamente!</h3>
+                    <h3>¡ATS CSV generado exitosamente!</h3>
                     <p className="text-muted">
                       El archivo ha sido creado con {generatedFile.invoiceCount} facturas en {generatedFile.validationErrors} errores detectados.
                     </p>
@@ -131,7 +157,7 @@ export default function AtsGeneratePage() {
                     {generatedFile.validationErrors > 0 && (
                       <div className="alert alert-warning mt-16">
                         <AlertCircle size={16} />
-                        <span>{generatedFile.validationErrors} advertencias detectadas. Se recomienda validar el XLSM antes de generar el XML.</span>
+                        <span>{generatedFile.validationErrors} advertencias detectadas. Se recomienda validar el CSV antes de enviarlo.</span>
                       </div>
                     )}
                   </div>
@@ -197,7 +223,7 @@ export default function AtsGeneratePage() {
                   { done: true, label: 'Conectado con SRI' },
                   { done: true, label: 'Facturas descargadas' },
                   { done: true, label: 'Directorio cargado y validado' },
-                  { done: generationStatus === 'done', label: 'ATS XLSM generado' },
+                  { done: generationStatus === 'done', label: 'ATS CSV generado' },
                 ].map((req) => (
                   <div key={req.label} className="requirement-item">
                     {req.done
@@ -213,7 +239,7 @@ export default function AtsGeneratePage() {
               <div className="card-header"><h3 className="card-title">Información del proceso</h3></div>
               <div className="card-body flex flex-col gap-12">
                 {[
-                  { label: 'Formato de salida', value: 'XLSM (Excel Macro)' },
+                  { label: 'Formato de salida', value: 'CSV (Valores separados por comas)' },
                   { label: 'Validación', value: 'Campos RN-03' },
                   { label: 'Singularidad', value: 'Un solo RUC (RN-02)' },
                   { label: 'Tiempo máximo', value: '5 segundos (RNF-03)' },

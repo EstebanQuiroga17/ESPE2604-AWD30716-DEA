@@ -43,6 +43,7 @@ export class UsersRepoController {
       });
       res.json({ success: true, data: user });
     } catch (e) {
+      console.error('[UsersRepoController] findUser error:', e);
       res.status(500).json({ success: false, message: 'Internal server error' });
     }
   }

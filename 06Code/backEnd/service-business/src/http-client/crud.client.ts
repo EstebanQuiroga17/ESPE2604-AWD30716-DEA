@@ -31,20 +31,25 @@ export class CrudClient {
   }
 
   private async executeRequest(method: string, path: string, body?: any): Promise<any> {
-    const response = await fetch(`${this.baseUrl}${path}`, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'x-internal-api-key': this.apiKey || ''
-      },
-      body: body ? JSON.stringify(body) : undefined
-    });
+    try {
+      const response = await fetch(`${this.baseUrl}${path}`, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-internal-api-key': this.apiKey || ''
+        },
+        body: body ? JSON.stringify(body) : undefined
+      });
 
-    if (!response.ok) {
-      throw new Error(`Servicio B respondió con ${response.status}: ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Servicio B respondió con ${response.status}: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error: any) {
+      console.error(`[CrudClient] executeRequest Failed - URL: ${this.baseUrl}${path} | Error:`, error.message || error);
+      throw error;
     }
-
-    return response.json();
   }
 
   async get(path: string): Promise<any> {
