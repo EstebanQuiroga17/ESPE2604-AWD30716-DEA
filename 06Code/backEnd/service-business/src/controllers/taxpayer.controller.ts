@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { crudClient } from '../http-client/crud.client';
-import { PdfCreatorService } from '../services/pdfCreator.service';
+import { UserReportService } from '../services/userReport.service';
 
 export class TaxpayerController {
   public async getAllTaxpayers(req: Request, res: Response): Promise<void> {
@@ -65,7 +65,7 @@ export class TaxpayerController {
       const result = await crudClient.get('/repo/users');
       const users = result.data || [];
       
-      const pdfService = new PdfCreatorService();
+      const pdfService = new UserReportService();
       const pdfBuffer = await pdfService.generateUsersReportPdf(users);
 
       res.setHeader('Content-Type', 'application/pdf');
