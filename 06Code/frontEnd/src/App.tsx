@@ -19,7 +19,7 @@ import AtsGeneratePage from './pages/ATS/AtsGeneratePage';
 import AtsValidatePage from './pages/ATS/AtsValidatePage';
 import AtsExportPage from './pages/ATS/AtsExportPage';
 import TraceabilityPage from './pages/Traceability/TraceabilityPage';
-import SupportPage from './pages/Support/SupportPage';
+
 import ProfilePage from './pages/Profile/ProfilePage';
 import AdminDashboardPage from './pages/Admin/AdminDashboardPage';
 import AdminUsersPage from './pages/Admin/AdminUsersPage';
@@ -48,7 +48,7 @@ export default function App() {
             <Route path="/ats/generate" element={<ProtectedRoute><AtsGeneratePage /></ProtectedRoute>} />
             <Route path="/ats/validate" element={<ProtectedRoute><AtsValidatePage /></ProtectedRoute>} />
             <Route path="/ats/export" element={<ProtectedRoute><AtsExportPage /></ProtectedRoute>} />
-            <Route path="/support" element={<ProtectedRoute><SupportPage /></ProtectedRoute>} />
+
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/no-session" element={<NoSessionPage />} />
 

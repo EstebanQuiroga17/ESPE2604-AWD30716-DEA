@@ -295,7 +295,7 @@ export default function LandingPage() {
           <div className="footer-links">
             <a href="#" className="footer-link">Términos</a>
             <a href="#" className="footer-link">Privacidad</a>
-            <Link to="/support" className="footer-link">Soporte</Link>
+
           </div>
         </div>
       </footer>

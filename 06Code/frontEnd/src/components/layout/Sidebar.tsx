@@ -34,7 +34,7 @@ const userNavigationItems: NavigationItem[] = [
   { path: '/ats/validate', icon: <CheckSquare size={20} />, label: 'Validar ATS' },
   { path: '/ats/export', icon: <FileCode2 size={20} />, label: 'Exportar XML' },
   { path: '/traceability', icon: <History size={20} />, label: 'Trazabilidad' },
-  { path: '/support', icon: <LifeBuoy size={20} />, label: 'Soporte' },
+
 ];
 
 const adminNavigationItems: NavigationItem[] = [
