@@ -12,8 +12,7 @@ router.get('/detail/:id', (req, res) => workspacesController.getWorkspaceDetail(
 
 
 
-// GET /repo/workspaces/ats-files/:id — ATS files in a workspace
-router.get('/ats-files/:id', (req, res) => workspacesController.getWorkspaceAtsFiles(req, res));
+
 
 // GET /repo/workspaces/process-steps/:id — process steps for a workspace
 router.get('/process-steps/:id', (req, res) => workspacesController.getWorkspaceProcessSteps(req, res));

@@ -28,7 +28,7 @@ interface NavigationItem {
 
 const userNavigationItems: NavigationItem[] = [
   { path: '/dashboard', icon: <LayoutDashboard size={20} />, label: 'Inicio' },
-  { path: '/invoices/download', icon: <Download size={20} />, label: 'Descargar Facturas' },
+
   { path: '/invoices/manage', icon: <FolderOpen size={20} />, label: 'Gestionar Facturas' },
   { path: '/ats/generate', icon: <FileSpreadsheet size={20} />, label: 'Generar ATS XLSM' },
   { path: '/ats/validate', icon: <CheckSquare size={20} />, label: 'Validar ATS' },

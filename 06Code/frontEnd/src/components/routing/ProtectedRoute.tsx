@@ -33,10 +33,6 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     return <>{children}</>;
   }
 
-  // Allow access to SRI connection page globally (independent of workspace)
-  if (location.pathname === '/sri-connection') {
-    return <>{children}</>;
-  }
 
   // For other pages, require workspace selection
   if (!currentWorkspace) {

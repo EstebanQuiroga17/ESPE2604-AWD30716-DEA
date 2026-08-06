@@ -178,15 +178,7 @@
   opacity: 0.5;
 }
 
-.sri-status-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-gray-100);
-}
 
-.sri-status-row:last-of-type { border-bottom: none; }
 
 .notification-feed {
   display: flex;

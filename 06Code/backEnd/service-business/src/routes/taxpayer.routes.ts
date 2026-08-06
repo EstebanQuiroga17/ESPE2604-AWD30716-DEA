@@ -8,7 +8,7 @@ const taxpayerController = new TaxpayerController();
 router.get('/', (req, res) => taxpayerController.getAllTaxpayers(req, res));
 router.get('/report/users', (req, res) => taxpayerController.getUsersReport(req, res));
 router.get('/profile/:userId', (req, res) => taxpayerController.getProfile(req, res));
-router.get('/stats/:userId', (req, res) => taxpayerController.getStats(req, res));
+
 router.get('/validate-ruc/:ruc', (req, res) => taxpayerController.validateRuc(req, res));
 router.put('/profile/:userId', (req, res) => taxpayerController.updateProfile(req, res));
 

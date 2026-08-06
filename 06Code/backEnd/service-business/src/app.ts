@@ -2,10 +2,9 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes';
 import taxpayerRoutes from './routes/taxpayer.routes';
-import sriRoutes from './routes/sri.routes';
 import workspaceRoutes from './routes/workspace.routes';
 import invoiceRoutes from './routes/invoice.routes';
-import atsRoutes from './routes/ats.routes';
+
 import traceabilityRoutes from './routes/traceability.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
@@ -30,11 +29,10 @@ class App {
   private configureRoutes(): void {
     this.app.use('/auth', authRoutes);
     this.app.use('/taxpayer', authMiddleware, taxpayerRoutes);
-    this.app.use('/sri', authMiddleware, sriRoutes);
     this.app.use('/workspaces', authMiddleware, workspaceRoutes);
     this.app.use('/admin', authMiddleware, adminRoutes);
     this.app.use('/invoices', authMiddleware, invoiceRoutes);
-    this.app.use('/ats', authMiddleware, atsRoutes);
+
     this.app.use('/traceability', authMiddleware, traceabilityRoutes);
     this.app.use('/dashboard', authMiddleware, dashboardRoutes);
     

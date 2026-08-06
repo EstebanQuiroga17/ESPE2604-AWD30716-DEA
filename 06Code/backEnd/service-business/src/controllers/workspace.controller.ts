@@ -20,23 +20,7 @@ export class WorkspaceController {
     } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
   }
 
-  public async getInvoices(req: Request, res: Response): Promise<void> {
-    try {
-      const { workspaceId } = req.params;
-      const userId = (req as any).currentUser.id;
-      const result = await crudClient.get(`/repo/workspaces/invoices/${workspaceId}?userId=${userId}`);
-      res.status(200).json(result);
-    } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
-  }
 
-  public async getAtsFiles(req: Request, res: Response): Promise<void> {
-    try {
-      const { workspaceId } = req.params;
-      const userId = (req as any).currentUser.id;
-      const result = await crudClient.get(`/repo/workspaces/ats-files/${workspaceId}?userId=${userId}`);
-      res.status(200).json(result);
-    } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
-  }
 
   public async getSummary(req: Request, res: Response): Promise<void> {
     try {
@@ -84,38 +68,7 @@ export class WorkspaceController {
     } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
   }
 
-  public async exportInvoices(req: Request, res: Response): Promise<void> {
-    try {
-      const { workspaceId } = req.params;
-      const mockZip = Buffer.from([0x50, 0x4b, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-      res.setHeader('Content-Type', 'application/zip');
-      res.setHeader('Content-Disposition', `attachment; filename=invoices_${workspaceId}.zip`);
-      res.status(200).send(mockZip);
-    } catch (error) { res.status(500).send('Internal server error'); }
-  }
 
-  public async downloadAtsXml(req: Request, res: Response): Promise<void> {
-    try {
-      const { workspaceId } = req.params;
-      const userId = (req as any).currentUser.id;
-      const userResult = await crudClient.get(`/repo/users/${userId}`);
-      const ruc = userResult.data?.ruc || '1790011223002';
-      const mockXml = `<?xml version="1.0" encoding="UTF-8"?>\n<ats>\n  <idInformante>${ruc}</idInformante>\n  <workspaceId>${workspaceId}</workspaceId>\n  <info>Reporte ATS generado para fines academicos</info>\n</ats>`;
-      res.setHeader('Content-Type', 'application/xml');
-      res.setHeader('Content-Disposition', `attachment; filename=ats_${workspaceId}.xml`);
-      res.status(200).send(mockXml);
-    } catch (error) { res.status(500).send('Internal server error'); }
-  }
-
-  public async downloadAtsXlsm(req: Request, res: Response): Promise<void> {
-    try {
-      const { workspaceId } = req.params;
-      const mockExcel = Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x14, 0x00, 0x08, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-      res.setHeader('Content-Type', 'application/vnd.ms-excel.sheet.macroEnabled.12');
-      res.setHeader('Content-Disposition', `attachment; filename=ats_${workspaceId}.xlsm`);
-      res.status(200).send(mockExcel);
-    } catch (error) { res.status(500).send('Internal server error'); }
-  }
 
   public async createWorkspace(req: Request, res: Response): Promise<void> {
     try {
@@ -130,17 +83,7 @@ export class WorkspaceController {
     }
   }
 
-  public async downloadInvoicesAsync(req: Request, res: Response): Promise<void> {
-    try {
-      res.status(202).json({ success: true, message: 'Invoice download triggered', data: { invoiceDownloadStatus: false } });
-    } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
-  }
 
-  public async generateAtsAsync(req: Request, res: Response): Promise<void> {
-    try {
-      res.status(202).json({ success: true, message: 'ATS generation triggered' });
-    } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
-  }
 
   public async deleteWorkspace(req: Request, res: Response): Promise<void> {
     try {

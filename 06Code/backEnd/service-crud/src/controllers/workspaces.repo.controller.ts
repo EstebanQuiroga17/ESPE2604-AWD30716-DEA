@@ -28,17 +28,7 @@ export class WorkspacesRepoController {
 
 
 
-  public async getWorkspaceAtsFiles(req: Request, res: Response): Promise<void> {
-    try {
-      const { userId } = req.query;
-      const atsFiles = await prisma.atsFile.findMany({
-        where: { workspaceId: req.params.id as string, ...(userId ? { taxpayerId: userId as string } : {}) }
-      });
-      res.json({ success: true, data: atsFiles });
-    } catch (e) {
-      res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-  }
+
 
   public async getWorkspaceProcessSteps(req: Request, res: Response): Promise<void> {
     try {

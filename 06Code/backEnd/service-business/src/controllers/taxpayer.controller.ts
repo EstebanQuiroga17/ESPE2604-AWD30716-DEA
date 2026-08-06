@@ -19,28 +19,6 @@ export class TaxpayerController {
     } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
   }
 
-  public async getStats(req: Request, res: Response): Promise<void> {
-    try {
-      const userResult = await crudClient.get(`/repo/users/${req.params.userId}`);
-      if (!userResult.data) { res.status(404).json({ success: false, message: 'User not found' }); return; }
-
-      const userId = req.params.userId;
-      const [workspacesResult, lastSyncResult] = await Promise.all([
-        crudClient.get(`/repo/workspaces/${userId}`),
-        crudClient.get(`/repo/audit/action/${userId}/INVOICES_DOWNLOAD`)
-      ]);
-
-      res.status(200).json({
-        success: true,
-        data: {
-          workspacesCount: workspacesResult.data?.length ?? 0,
-          totalInvoices: 0,
-          lastSriSync: lastSyncResult.data?.timestamp ?? null
-        }
-      });
-    } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
-  }
-
   public async validateRuc(req: Request, res: Response): Promise<void> {
     try {
       const ruc = req.params.ruc;

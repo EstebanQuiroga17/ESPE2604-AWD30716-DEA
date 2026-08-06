@@ -13,7 +13,7 @@ import NoSessionPage from './pages/NoSession/NoSessionPage';
 import WorkspaceManagementPage from './pages/Workspaces/WorkspaceManagementPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 
-import InvoicesDownloadPage from './pages/Invoices/InvoicesDownloadPage';
+
 import InvoicesManagePage from './pages/Invoices/InvoicesManagePage';
 import AtsGeneratePage from './pages/ATS/AtsGeneratePage';
 import AtsValidatePage from './pages/ATS/AtsValidatePage';
@@ -43,7 +43,7 @@ export default function App() {
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/traceability" element={<ProtectedRoute><TraceabilityPage /></ProtectedRoute>} />
 
-            <Route path="/invoices/download" element={<ProtectedRoute><InvoicesDownloadPage /></ProtectedRoute>} />
+
             <Route path="/invoices/manage" element={<ProtectedRoute><InvoicesManagePage /></ProtectedRoute>} />
             <Route path="/ats/generate" element={<ProtectedRoute><AtsGeneratePage /></ProtectedRoute>} />
             <Route path="/ats/validate" element={<ProtectedRoute><AtsValidatePage /></ProtectedRoute>} />

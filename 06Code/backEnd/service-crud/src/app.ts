@@ -2,11 +2,10 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import { apiKeyMiddleware } from './middlewares/api-key.middleware';
 import usersRoutes from './routes/users.repo.routes';
-import atsRoutes from './routes/ats.repo.routes';
+
 import workspacesRoutes from './routes/workspaces.repo.routes';
 import auditRoutes from './routes/audit.repo.routes';
 import processStepsRoutes from './routes/process-steps.repo.routes';
-import sriRoutes from './routes/sri.repo.routes';
 
 class App {
   public app: Application;
@@ -33,11 +32,10 @@ class App {
 
     // Repository routes (all protected by apiKeyMiddleware)
     this.app.use('/repo/users', usersRoutes);
-    this.app.use('/repo/ats', atsRoutes);
+
     this.app.use('/repo/workspaces', workspacesRoutes);
     this.app.use('/repo/audit', auditRoutes);
     this.app.use('/repo/process-steps', processStepsRoutes);
-    this.app.use('/repo/sri', sriRoutes);
   }
 }
 
