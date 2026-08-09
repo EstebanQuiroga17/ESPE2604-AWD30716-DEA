@@ -29,12 +29,7 @@ export class AdminController {
     }
   }
 
-  public async getAuditLogs(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await crudClient.get('/repo/audit/all/logs');
-      res.status(200).json(result);
-    } catch (error) { res.status(500).json({ success: false, message: 'Internal server error' }); }
-  }
+
 
 
 

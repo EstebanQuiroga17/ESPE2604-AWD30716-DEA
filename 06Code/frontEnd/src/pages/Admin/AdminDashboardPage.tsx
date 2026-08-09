@@ -15,58 +15,28 @@ interface AdminStat {
   color: string;
 }
 
-interface Notification {
-  title: string;
-  message: string;
-  time: string;
-  type: string;
-}
 
 export default function AdminDashboardPage() {
   const [usersCount, setUsersCount] = useState<number>(0);
   const [ticketsCount, setTicketsCount] = useState<number>(0);
-  const [auditLogs, setAuditLogs] = useState<Notification[]>([]);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        const [usersRes, ticketsRes, auditRes] = await Promise.all([
+        const [usersRes, ticketsRes] = await Promise.all([
           axios.get(`${BUSINESS_SERVICE_URL}/admin/users`).catch(() => ({ data: { data: [] } })),
-          axios.get(`${BUSINESS_SERVICE_URL}/admin/tickets`).catch(() => ({ data: { data: [] } })),
-          axios.get(`${BUSINESS_SERVICE_URL}/admin/audit`).catch(() => ({ data: { data: [] } }))
+          axios.get(`${BUSINESS_SERVICE_URL}/admin/tickets`).catch(() => ({ data: { data: [] } }))
         ]);
 
         const fetchedUsers = Array.isArray(usersRes.data?.data) ? usersRes.data.data.length : 0;
         const fetchedTickets = Array.isArray(ticketsRes.data?.data) ? ticketsRes.data.data.length : 0;
 
-        let fetchedAudits: Notification[] = [];
-        if (Array.isArray(auditRes.data?.data) && auditRes.data.data.length > 0) {
-          fetchedAudits = auditRes.data.data.slice(0, 4).map((log: any) => ({
-            title: log.action || 'Actividad de sistema',
-            message: log.details || 'Evento registrado',
-            time: log.createdAt ? new Date(log.createdAt).toLocaleDateString() : 'Reciente',
-            type: 'info'
-          }));
-        } else {
-          fetchedAudits = [
-            { title: 'Nuevo usuario registrado', message: 'test2@test.com se unió a la plataforma', time: 'Hace 5 min', type: 'info' },
-            { title: 'Generación ATS completada', message: 'Empresa A completó su anexo exitosamente', time: 'Hace 1 hora', type: 'success' },
-            { title: 'Alerta de sistema', message: 'Se detectó latencia en el servidor SRI', time: 'Hace 3 horas', type: 'warning' },
-            { title: 'Error de descarga', message: 'Falló la descarga masiva para el usuario admin', time: 'Ayer', type: 'error' }
-          ];
-        }
-
         setUsersCount(fetchedUsers);
         setTicketsCount(fetchedTickets);
-        setAuditLogs(fetchedAudits);
       } catch (error) {
-        setAuditLogs([
-          { title: 'Nuevo usuario registrado', message: 'test2@test.com se unió a la plataforma', time: 'Hace 5 min', type: 'info' },
-          { title: 'Generación ATS completada', message: 'Empresa A completó su anexo exitosamente', time: 'Hace 1 hora', type: 'success' },
-          { title: 'Alerta de sistema', message: 'Se detectó latencia en el servidor SRI', time: 'Hace 3 horas', type: 'warning' },
-          { title: 'Error de descarga', message: 'Falló la descarga masiva para el usuario admin', time: 'Ayer', type: 'error' }
-        ]);
+        console.error('Error fetching admin data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -107,7 +77,7 @@ export default function AdminDashboardPage() {
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', width: '100%' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', width: '100%' }}>
           <div className="card">
             <div className="card-header">
               <h2 className="card-title">Estado de Módulos</h2>
@@ -138,27 +108,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="card">
-            <div className="card-header">
-              <h2 className="card-title">Reportes Rápidos (Actividad)</h2>
-            </div>
-            <div className="card-body">
-              <div className="notification-feed">
-                {auditLogs.map((notif, index) => (
-                  <div key={index} className="notification-feed-item">
-                    <div className={`notif-icon-wrapper notif-${notif.type}`}>
-                      <AlertTriangle size={16} />
-                    </div>
-                    <div className="notif-content">
-                      <p className="notif-title">{notif.title}</p>
-                      <p className="notif-message">{notif.message}</p>
-                      <span className="notif-time">{notif.time}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </AppLayout>

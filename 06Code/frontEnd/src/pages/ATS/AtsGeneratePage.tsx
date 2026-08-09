@@ -43,12 +43,12 @@ export default function AtsGeneratePage() {
       setGeneratedFile({
         id: 'generated',
         name: `invoices_${currentUser.id}.csv`,
+        format: 'XML',
         period: { type: 'monthly', month: 11, year: 2025 },
         invoiceCount: MockInvoices.length,
         validationErrors: 0,
         createdAt: new Date().toISOString(),
-        downloadUrl: url,
-        taxpayerId: currentUser.id
+        downloadUrl: url
       });
       setGenerationStatus('done');
     } catch (error) {

@@ -30,3 +30,7 @@ dist-ssr
 
 # Graphify
 graphify-out/
+
+# otros
+Catalogo_ATS.json
+Tablas_Referenciales_ATS.json

@@ -19,9 +19,6 @@ model Taxpayer {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   businessName     String?
-  atsFiles         AtsFile[]
-  auditEvents      AuditEvent[]
-  processSteps     ProcessStep[]
   workspaces       Workspace[]
 
   @@map("Taxpayer")
@@ -35,29 +32,13 @@ model Workspace {
   periodYear          Int
   periodType          String        @default("monthly")
   periodSemester      Int?
-  workspaceLocation   String
-  sriConnectionStatus String        @default("disconnected")
   taxpayerId          String
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
-  atsFiles            AtsFile[]
+  sriConnectionStatus String        @default("disconnected")
+  workspaceLocation   String        @default("Local")
   processSteps        ProcessStep[]
   taxpayer            Taxpayer      @relation(fields: [taxpayerId], references: [id])
-}
-
-model AtsFile {
-  id               String     @id @default(uuid())
-  name             String
-  format           String
-  periodMonth      Int
-  periodYear       Int
-  invoiceCount     Int
-  validationErrors Int
-  taxpayerId       String
-  workspaceId      String?
-  createdAt        DateTime   @default(now())
-  taxpayer         Taxpayer   @relation(fields: [taxpayerId], references: [id])
-  workspace        Workspace? @relation(fields: [workspaceId], references: [id])
 }
 
 model ProcessStep {
@@ -67,19 +48,7 @@ model ProcessStep {
   status      String
   module      String
   completedAt DateTime?
-  taxpayerId  String
   workspaceId String?
   createdAt   DateTime   @default(now())
-  taxpayer    Taxpayer   @relation(fields: [taxpayerId], references: [id])
   workspace   Workspace? @relation(fields: [workspaceId], references: [id])
-}
-
-model AuditEvent {
-  id         String   @id @default(uuid())
-  action     String
-  module     String
-  details    String
-  timestamp  DateTime @default(now())
-  taxpayerId String
-  taxpayer   Taxpayer @relation(fields: [taxpayerId], references: [id])
 }

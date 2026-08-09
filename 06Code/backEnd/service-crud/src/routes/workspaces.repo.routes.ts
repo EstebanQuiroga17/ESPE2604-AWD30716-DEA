@@ -17,8 +17,7 @@ router.get('/detail/:id', (req, res) => workspacesController.getWorkspaceDetail(
 // GET /repo/workspaces/process-steps/:id — process steps for a workspace
 router.get('/process-steps/:id', (req, res) => workspacesController.getWorkspaceProcessSteps(req, res));
 
-// GET /repo/workspaces/logs/:id — audit logs for a workspace
-router.get('/logs/:id', (req, res) => workspacesController.getWorkspaceLogs(req, res));
+
 
 // POST /repo/workspaces — create workspace
 router.post('/', (req, res) => workspacesController.createWorkspace(req, res));

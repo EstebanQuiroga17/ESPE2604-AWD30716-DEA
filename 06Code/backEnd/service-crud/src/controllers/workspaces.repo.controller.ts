@@ -43,19 +43,7 @@ export class WorkspacesRepoController {
     }
   }
 
-  public async getWorkspaceLogs(req: Request, res: Response): Promise<void> {
-    try {
-      const { userId } = req.query;
-      const whereClause: any = {
-        OR: [{ details: { contains: req.params.id as string } }, { module: { contains: 'Workspace' } }]
-      };
-      if (userId) whereClause.taxpayerId = userId;
-      const events = await prisma.auditEvent.findMany({ where: whereClause, orderBy: { timestamp: 'desc' }, take: 50 });
-      res.json({ success: true, data: events });
-    } catch (e) {
-      res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-  }
+
 
   public async createWorkspace(req: Request, res: Response): Promise<void> {
     try {

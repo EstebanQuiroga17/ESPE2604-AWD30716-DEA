@@ -108,50 +108,7 @@
   flex-wrap: wrap;
 }
 
-.audit-event-list {
-  display: flex;
-  flex-direction: column;
-}
 
-.audit-event-item {
-  display: flex;
-  gap: 12px;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--color-gray-100);
-  position: relative;
-}
-
-.audit-event-item:last-child { border-bottom: none; }
-
-.audit-event-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--color-primary-400);
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 6px;
-}
-
-.audit-event-content { flex: 1; }
-
-.audit-event-action {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-gray-800);
-  font-family: 'Consolas', monospace;
-}
-
-.audit-event-details {
-  font-size: 0.78rem;
-  color: var(--color-gray-500);
-  margin: 4px 0;
-  line-height: 1.4;
-}
-
-.audit-event-time {
-  font-size: 0.72rem;
-  color: var(--color-gray-400);
-}
 
 @media (max-width: 1024px) {
   .traceability-layout { grid-template-columns: 1fr; }

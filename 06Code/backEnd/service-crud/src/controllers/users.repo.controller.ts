@@ -81,8 +81,7 @@ export class UsersRepoController {
       const userId = req.params.id as string;
       await prisma.$transaction([
         prisma.atsFile.deleteMany({ where: { taxpayerId: userId } }),
-        prisma.processStep.deleteMany({ where: { taxpayerId: userId } }),
-        prisma.auditEvent.deleteMany({ where: { taxpayerId: userId } }),
+
         prisma.workspace.deleteMany({ where: { taxpayerId: userId } }),
         prisma.taxpayer.delete({ where: { id: userId } })
       ]);
