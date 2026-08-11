@@ -1,5 +1,36 @@
+import { ITotalImpuesto, IRetencion, IPago, IReembolsoDetalle } from './sri-factura.interface';
+
 export interface ICompraInput {
-  // TODO: Definir campos estrictos basados en el XML de origen
+  // --- Datos extraídos del XML del Proveedor (Factura de Compra) ---
+  infoTributaria: {
+    ruc: string; // RUC del Proveedor
+    codDoc: string; // Tipo de comprobante (ej. '01' para factura)
+    estab: string;
+    ptoEmi: string;
+    secuencial: string;
+    claveAcceso: string; // Autorización
+  };
+  infoFactura: {
+    fechaEmision: string;
+    totalConImpuestos: {
+      totalImpuesto: ITotalImpuesto | ITotalImpuesto[];
+    };
+    pagos?: {
+      pago: IPago | IPago[];
+    };
+  };
+  reembolsos?: {
+    reembolsoDetalle: IReembolsoDetalle | IReembolsoDetalle[];
+  };
+  retenciones?: {
+    retencion: IRetencion | IRetencion[];
+  };
+
+  // --- Datos de Contexto (Ingresados por el usuario o DB) ---
+  codSustento: string; // Sustento Tributario (ej. '01')
+  fechaRegistroContable: string;
+  parteRelacionada: string; // 'SI' o 'NO'
+  pagoLocExt: string; // '01' (Residente) o '02' (No Residente)
 }
 
 export interface ICompraAts {
