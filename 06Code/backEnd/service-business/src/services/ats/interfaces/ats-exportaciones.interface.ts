@@ -1,5 +1,19 @@
+import { IFacturaXml } from './sri-factura.interface';
+
 export interface IExportacionInput {
-  // TODO: Definir campos estrictos basados en el XML de origen
+  // Campos extraídos del XML que sí se mapean al ATS
+  codDoc?: string;
+  estab?: string;
+  ptoEmi?: string;
+  secuencial?: string;
+  claveAcceso?: string;
+  fechaEmision?: string;
+  paisOrigen?: string;
+  paisDestino?: string;
+  tipoldentificacionComprador?: string;
+  razonSocialComprador?: string;
+  identificacionComprador?: string;
+  totalSinImpuestos?: string;
 }
 
 export interface IExportacionAts {

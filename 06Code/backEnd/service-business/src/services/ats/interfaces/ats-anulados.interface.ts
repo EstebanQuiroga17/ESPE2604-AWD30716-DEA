@@ -1,5 +1,10 @@
 export interface IAnuladoInput {
-  // TODO: Definir campos estrictos basados en el XML de origen
+  tipoComprobante: string;
+  establecimiento: string;
+  puntoEmision: string;
+  secuencialInicio: string;
+  secuencialFin: string;
+  autorizacion: string;
 }
 
 export interface IAnuladoAts {
@@ -9,7 +14,7 @@ export interface IAnuladoAts {
     puntoEmision: string;
     secuencialInicio: string;
     secuencialFin: string;
-    autorización: string;
+    autorizacion: string;
   };
   tipo1?: {
 
