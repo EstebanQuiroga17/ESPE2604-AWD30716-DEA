@@ -1,0 +1,644 @@
+[
+  {
+    "ETIQUETAS O TAGS": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "-<factura id=\"comprobante\" version=\"1.1.0\">[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "- <infoTributaria>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<ambiente>1 </ambiente>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 4[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "1[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<tipoEmision>1 </tipoEmision>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 2[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "1[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<razonSocial>EMPRESA PUBLICA DE HIDROCARBUROS DEL ECUADOR EP PETROECUADOR</razonSocial>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<nombreComercial>EMPRESA PUBLICA DE HIDROCARBUROS DEL ECUADOR EP PETROECUADOR</nombre Comercial >[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<ruc>1768153530001</ruc>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "13[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<claveAcceso>0403201301176815353000110015010000000081234567816</claveAcce so>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 1[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "49[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<codDoc>01</codDoc>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 3[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "2[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<estab>001</estab>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "3[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<ptoEmi>501</ptoEmi>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "3[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<secuencial>000000008</secuencial>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "9[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<dirMatriz>Alpallana</dirMatriz>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "</infoTributaria>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<infoFactura>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<fechaEmision>04/03/2013</fechaEmision>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Fecha[cite: 1]",
+    "LONGITUD / FORMATO": "dd/mm/aaaa[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<dirEstablecimiento>Alpallana</dirEstablecimiento >[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<contribuyente Especial>5368</contribuyente Especial>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Min 3 Max 13[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<obligadoContabilidad>SI</obligadoContabilidad >[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Texto[cite: 1]",
+    "LONGITUD / FORMATO": "SI/NO[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<comercioExterior>EXPORTADOR</comercio Exterior>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Texto, Mayúsculas, siempre es EXPORTADOR[cite: 1]",
+    "LONGITUD / FORMATO": "10[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<IncoTerm Factura>FOB</IncoTerm Factura>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Texto, Mayúsculas[cite: 1]",
+    "LONGITUD / FORMATO": "Max 10[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<lugarincoTerm>GUAYAQUIL</lugarincoTerm>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<paisOrigen>593</paisOrigen>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 25[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "3[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<puertoEmbarque>GUAYAQUIL</puerto Embarque>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<puertoDestino>CHINA</puertoDestino>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<paisDestino>593</pais Destino>[cite: 1]",
+    "CARACTER": "Opcional, conforme tabla 25[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "3[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<paisAdquisicion>593</paisAdquisicion>[cite: 1]",
+    "CARACTER": "Opcional, conforme tabla 25[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "3[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<tipoldentificacionComprador>04</tipoldentificacionComprador >[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 6[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "2[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<guiaRemision>001-001-000000001</guiaRemision>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "15[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<razonSocial Comprador>PRUEBAS SERVICIO DE RENTAS INTERNAS</razonSocialComprador>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<identificacionComprador>1760013210001</identificacionComprador >[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 20[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<direccionComprador>salinas y santiago</direccionComprador>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<totalSinImpuestos>64.94</totalSinImpuestos>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<incoTermTotalSinImpuestos>FOB</incoTermTotalSinImpuestos>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Texto, Mayúsculas[cite: 1]",
+    "LONGITUD / FORMATO": "Max 10[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<totalDescuento>0.00</totalDescuento>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<totalConImpuestos>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<totallmpuesto>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<codigo>2</codigo >[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 16[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "1[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<codigoPorcentaje>0</codigoPorcentaje>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 17[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Min 1 Max 4[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<descuentoAdicional>0.00</descuentoAdicional>[cite: 1]",
+    "CARACTER": "Opcional, aplica para código impuesto 2.[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<baselmponible>64.94</ baselmponible >[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<valor>0.00</valor >[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "</totallmpuesto >[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "</totalConImpuestos >[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<propina>0.00</propina>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<fleteInternacional>0.00<fleteInternacional>[cite: 1]",
+    "CARACTER": "Obligatorio, cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<segurolnternacional>0.00<segurolnternacional>[cite: 1]",
+    "CARACTER": "Obligatorio, cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<gastosAduaneros>0.00<gastosAduaneros>[cite: 1]",
+    "CARACTER": "Obligatorio, cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<gastosTransporteOtros>0.00<gastosTransporteOtros>[cite: 1]",
+    "CARACTER": "Obligatorio, cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<importe Total>65.07</importe Total>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<moneda>DOLAR</moneda>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 15[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<pagos>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<pago>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<formaPago>16</formaPago>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 24[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "2[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<total>30.00</total>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<plazo>90<plazo>[cite: 1]",
+    "CARACTER": "Obligatorio, cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<unidadTiempo>dias</unidad Tiempo>[cite: 1]",
+    "CARACTER": "Obligatorio, cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Texto[cite: 1]",
+    "LONGITUD / FORMATO": "Max 10[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "</pago>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<pago>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<formaPago>19</formaPago>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 24[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "2[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<total>34.94</total>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<plazo>90<plazo>[cite: 1]",
+    "CARACTER": "Obligatorio, cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<unidadTiempo>dias</unidadTiempo>[cite: 1]",
+    "CARACTER": "Obligatorio, cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Texto[cite: 1]",
+    "LONGITUD / FORMATO": "Max 10[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "</pago>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "</pagos>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<valorRetiva>0.00</valorRetlva>[cite: 1]",
+    "CARACTER": "Opcional[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<valorRetRenta>0.00</valorRetRenta>[cite: 1]",
+    "CARACTER": "Opcional[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "</infoFactura>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "- <detalles>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "- <detalle>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "< codigoPrincipal>003</codigoPrincipal >[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 25[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<codigoAuxiliar>001</codigoAuxiliar>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 25[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<descripcion> FROZEN MOONFISH WR </descripcion>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<cantidad>2.542563</cantidad>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 18, hasta 6 decimales[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<precioUnitario>25.542365</precioUnitario>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 18, hasta 6 decimales[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<descuento>0.00</descuento>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<precio TotalSinImpuesto>64.94</ precio TotalSinImpuesto>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<detallesAdicionales>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<detAdicional nombre =\"KILOS\" valor=\"PESO NETO\"/>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<detAdicional nombre=\"KILOS \" valor=\"PESO BRUTO\"/>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<detAdicional nombre=\"0303.89.00.90\" valor=\"PARTIDA ARANCELARIA\"/>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "</detallesAdicionales>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<impuestos>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<impuesto>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<codigo>2</codigo>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 16[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "1[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<codigoPorcentaje>0</codigoPorcentaje>[cite: 1]",
+    "CARACTER": "Obligatorio, conforme tabla 17[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Min 1 Max 4[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<tarifa>0</tarifa>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Min 1 Max 4 / 2 enteros, 2 decimales[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<baselmponible>64.94</baselmponible>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<valor>0.00</valor>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "</impuesto>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "</impuestos>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "</detalle>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "</detalles>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<retenciones>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda. Aplica para comercializadores de Derivados de Petróleo y Retención presuntiva de IVA a los Editores, Distribuidores y Voceadores que participan en la comercialización de periódicos y/o revistas.[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "-<retencion>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<codigo>4</codigo>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda conforme tabla 22[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "1[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<codigoPorcentaje>327</codigoPorcentaje>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda conforme tabla 23[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Min 1 Max 3[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<tarifa>0.20</tarifa>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Min 1 Max 5/ 3 enteros, dos decimales[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<valor>0.13</valor>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Numérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 14/12 enteros, 2 decimales[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "</retencion>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "</retenciones>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<infoAdicional>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "<campoAdicional nombre=\" DESCRIPCION DE CARGA \"> CAJAS DE 10 KILOS </campoAdicional>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "<campoAdicionalnombre=\" INFORMACION BANCARIA \"> NUMERO DE CUENTA DE BANCO 1243546</campoAdicional>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "Alfanumérico[cite: 1]",
+    "LONGITUD / FORMATO": "Max 300[cite: 1]"
+  },
+  {
+    "ETIQUETAS O TAGS": "</infoAdicional>[cite: 1]",
+    "CARACTER": "Obligatorio cuando corresponda[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  },
+  {
+    "ETIQUETAS O TAGS": "</factura>[cite: 1]",
+    "CARACTER": "Obligatorio[cite: 1]",
+    "TIPO DE CAMPO": "",
+    "LONGITUD / FORMATO": ""
+  }
+]
