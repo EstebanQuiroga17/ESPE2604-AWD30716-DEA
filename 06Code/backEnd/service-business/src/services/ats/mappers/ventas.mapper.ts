@@ -57,8 +57,7 @@ export class VentaMapper implements IMapper<IVentaInput, IVentaAts> {
         montoIce: this.formatCurrency(montoIce),
         
         // Compensaciones
-        tipoCompe: input.tipoCompe || "",
-        monto: "0.00", // Monto de compensación
+        compensaciones: this.getCompensaciones(input),
         
         // Retenciones que nos hizo el cliente
         valorRetIva: this.formatCurrency(Number(input.infoFactura.valorRetIva || 0)),
@@ -95,5 +94,16 @@ export class VentaMapper implements IMapper<IVentaInput, IVentaAts> {
       return pagos[0].formaPago.toString().padStart(2, '0');
     }
     return "01";
+  }
+
+  private getCompensaciones(input: IVentaInput): { tipoCompe: string; monto: string }[] {
+    const compRaw = input.infoFactura.compensaciones?.compensacion;
+    if (!compRaw) return [];
+    
+    const comps = Array.isArray(compRaw) ? compRaw : [compRaw];
+    return comps.map(c => ({
+      tipoCompe: c.codigo ? c.codigo.toString().padStart(2, '0') : (input.tipoCompe || "01"),
+      monto: this.formatCurrency(Number(c.valor || 0))
+    }));
   }
 }

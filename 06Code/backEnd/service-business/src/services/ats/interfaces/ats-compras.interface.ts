@@ -105,6 +105,9 @@ export interface ICompraAts {
     totbasesImpReemb: string;
     montoIceReemb: string;
     montoIvaRemb: string;
+    pagos?: { pago: any };
+    retenciones?: { retencion: any };
+    reembolsos?: { reembolsoDetalle: any };
   };
   tipo1?: {
 
