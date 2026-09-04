@@ -6,6 +6,8 @@ export class InvoiceController {
 
 
 
+
+
   public async compressXmlInvoices(req: Request, res: Response): Promise<void> {
     try {
       let xmlList: any = null;

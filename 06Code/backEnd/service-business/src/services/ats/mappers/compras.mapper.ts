@@ -38,7 +38,7 @@ export class CompraMapper implements IMapper<ICompraInput, ICompraAts> {
       }
     }
 
-    const rucProv = input.infoTributaria.ruc || "";
+    const rucProv = String(input.infoTributaria.ruc || "");
 
     const result: ICompraAts = {
       tipo1_y_2: {

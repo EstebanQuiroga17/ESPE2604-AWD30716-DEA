@@ -28,28 +28,8 @@ export class AtsXlsmBuilder {
     return this;
   }
 
-  public buildCompras(data: ICompraAts[]): AtsXlsmBuilder {
-    this.compras = data;
-    return this;
-  }
-
   public buildVentas(data: IVentaAts[]): AtsXlsmBuilder {
     this.ventas = data;
-    return this;
-  }
-
-  public buildExportaciones(data: any[]): AtsXlsmBuilder {
-    this.exportaciones = data;
-    return this;
-  }
-
-  public buildRecap(data: any[]): AtsXlsmBuilder {
-    this.recap = data;
-    return this;
-  }
-
-  public buildFideicomisos(data: any[]): AtsXlsmBuilder {
-    this.fideicomisos = data;
     return this;
   }
 
@@ -60,11 +40,6 @@ export class AtsXlsmBuilder {
 
   public buildAnulados(data: IAnuladoAts[]): AtsXlsmBuilder {
     this.anulados = data;
-    return this;
-  }
-
-  public buildRendimientos(data: any[]): AtsXlsmBuilder {
-    this.rendimientos = data;
     return this;
   }
 
@@ -83,7 +58,7 @@ export class AtsXlsmBuilder {
 
     // Retornar el archivo procesado
     const buffer = await workbook.xlsx.writeBuffer();
-    return buffer as Buffer;
+    return buffer as unknown as Buffer;
   }
 
   private writeInformante(workbook: ExcelJS.Workbook): void {
@@ -302,27 +277,27 @@ export class AtsXlsmBuilder {
       row.getCell(24).value = c.valRetServ50;
       row.getCell(25).value = c.valorRetServicios;
       row.getCell(26).value = c.valRetServ100;
-      row.getCell(27).value = c.valorRetencionNcNd;
+      row.getCell(27).value = c.valorRetencionNc;
       row.getCell(28).value = c.totbasesImpReemb;
       row.getCell(29).value = c.pagoLocExt;
       row.getCell(30).value = c.tipoRegi;
       row.getCell(31).value = c.paisEfecPagoGen;
       row.getCell(32).value = c.paisEfecPagoParFis;
-      row.getCell(33).value = c.denopagoRegFis;
+      row.getCell(33).value = c.pagoRegFis;
       row.getCell(34).value = c.paisEfecPago;
       row.getCell(35).value = c.aplicConvDobTrib;
       row.getCell(36).value = c.pagExtSujRetNorLeg;
       
-      if (compra.tipo1) {
-        row.getCell(37).value = compra.tipo1.pagoRegFis;
+      if (c.pagoRegFis) {
+        row.getCell(37).value = c.pagoRegFis;
       }
 
-      if (compra.tipo1 && compra.tipo1.docModificado) {
-        row.getCell(38).value = compra.tipo1.docModificado;
-        row.getCell(39).value = compra.tipo1.estabModificado;
-        row.getCell(40).value = compra.tipo1.ptoEmiModificado;
-        row.getCell(41).value = compra.tipo1.secModificado;
-        row.getCell(42).value = compra.tipo1.autModificado;
+      if (c.docModificado) {
+        row.getCell(38).value = c.docModificado;
+        row.getCell(39).value = c.estabModificado;
+        row.getCell(40).value = c.ptoEmiModificado;
+        row.getCell(41).value = c.secModificado;
+        row.getCell(42).value = c.autModificado;
       }
       
       row.commit();

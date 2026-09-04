@@ -3,6 +3,7 @@ import { ITotalImpuesto, IRetencion, IPago, IReembolsoDetalle } from './sri-fact
 export interface ICompraInput {
   // --- Datos extraídos del XML del Proveedor (Factura de Compra) ---
   infoTributaria: {
+    razonSocial?: string;
     ruc: string; // RUC del Proveedor
     codDoc: string; // Tipo de comprobante (ej. '01' para factura)
     estab: string;
