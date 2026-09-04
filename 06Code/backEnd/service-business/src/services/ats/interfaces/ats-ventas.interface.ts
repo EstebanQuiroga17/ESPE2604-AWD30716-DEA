@@ -47,8 +47,7 @@ export interface IVentaAts {
     baseImponible: string;
     baseImpGrav: string;
     montoIva: string;
-    tipoCompe: string;
-    monto: string;
+    compensaciones: { tipoCompe: string; monto: string }[];
     montoIce: string;
     valorRetIva: string;
     valorRetRenta: string;

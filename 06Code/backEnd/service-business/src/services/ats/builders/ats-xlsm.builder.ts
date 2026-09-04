@@ -90,14 +90,21 @@ export class AtsXlsmBuilder {
     if (!this.informante) return;
     const sheetInfo = workbook.getWorksheet('Informante');
     if (sheetInfo) {
+      // Limpiar filas residuales que la plantilla pueda tener debajo de la fila 2
+      try {
+        sheetInfo.spliceRows(3, 100);
+      } catch (e) {
+        // Ignorar si hay algún problema eliminando filas
+      }
+
       const row = sheetInfo.getRow(2);
-      row.getCell(2).value = this.informante.IdInformante || "";
-      row.getCell(3).value = this.informante.razonSocial || "";
-      row.getCell(4).value = this.informante.anio || "";
-      row.getCell(5).value = this.informante.mes || "";
-      row.getCell(6).value = ""; // Micro Empresas (opcional)
-      row.getCell(7).value = this.informante.numEstabRuc || "001";
-      row.getCell(8).value = this.informante.totalVentas || 0;
+      row.getCell(1).value = this.informante.IdInformante || "";
+      row.getCell(2).value = this.informante.razonSocial || "";
+      row.getCell(3).value = this.informante.anio || "";
+      row.getCell(4).value = this.informante.mes || "";
+      row.getCell(5).value = ""; // Micro Empresas (opcional)
+      row.getCell(6).value = this.informante.numEstabRuc || "001";
+      row.getCell(7).value = this.informante.totalVentas || 0;
       row.commit();
     }
   }
@@ -106,11 +113,13 @@ export class AtsXlsmBuilder {
     if (this.ventas.length === 0) return;
     
     const sheetVentasCli = workbook.getWorksheet('Ventas Cliente');
+    const sheetCompensaciones = workbook.getWorksheet('Compensaciones Ventas');
     const sheetFormasCobro = workbook.getWorksheet('Formas de Cobro');
     const sheetVentasEstab = workbook.getWorksheet('Ventas Establecimiento');
 
     let ventasRowIndex = 2; // Empezamos a llenar desde la fila 2
     let cobrosRowIndex = 2;
+    let compRowIndex = 2;
     
     const estabTotals = new Map<string, number>();
 
@@ -149,6 +158,18 @@ export class AtsXlsmBuilder {
         cobrosRowIndex++;
       }
 
+      // Llenar "Compensaciones Ventas"
+      if (sheetCompensaciones && v.compensaciones && v.compensaciones.length > 0) {
+        v.compensaciones.forEach(comp => {
+          const compRow = sheetCompensaciones.getRow(compRowIndex);
+          compRow.getCell(1).value = codVenta;
+          compRow.getCell(2).value = comp.tipoCompe;
+          compRow.getCell(3).value = comp.monto;
+          compRow.commit();
+          compRowIndex++;
+        });
+      }
+
       // Acumular totales para "Ventas Establecimiento"
       const estab = v.codEstab || "001";
       const currentTotal = estabTotals.get(estab) || 0;
@@ -162,9 +183,9 @@ export class AtsXlsmBuilder {
       let estabRowIndex = 2;
       estabTotals.forEach((total, estabId) => {
         const eRow = sheetVentasEstab.getRow(estabRowIndex);
-        eRow.getCell(2).value = estabId;
-        eRow.getCell(3).value = total;
-        eRow.getCell(4).value = 0; // ivaComp
+        eRow.getCell(1).value = estabId;
+        eRow.getCell(2).value = total;
+        eRow.getCell(3).value = 0; // ivaComp
         eRow.commit();
         estabRowIndex++;
       });
@@ -179,12 +200,12 @@ export class AtsXlsmBuilder {
       this.anulados.forEach(anulado => {
         const a = anulado.tipo1_y_2;
         const row = sheetAnulados.getRow(anuladosRowIndex);
-        row.getCell(2).value = a.tipoComprobante;
-        row.getCell(3).value = a.establecimiento;
-        row.getCell(4).value = a.puntoEmision;
-        row.getCell(5).value = a.secuencialInicio;
-        row.getCell(6).value = a.secuencialFin;
-        row.getCell(7).value = a.autorizacion;
+        row.getCell(1).value = a.tipoComprobante;
+        row.getCell(2).value = a.establecimiento;
+        row.getCell(3).value = a.puntoEmision;
+        row.getCell(4).value = a.secuencialInicio;
+        row.getCell(5).value = a.secuencialFin;
+        row.getCell(6).value = a.autorizacion;
         row.commit();
         anuladosRowIndex++;
       });
@@ -199,36 +220,36 @@ export class AtsXlsmBuilder {
       this.exportaciones.forEach(exp => {
         const e = exp.tipo1_y_2;
         const row = sheet.getRow(rowIndex);
-        row.getCell(2).value = e.tpIdClienteEx;
-        row.getCell(3).value = e.idClienteEx;
-        row.getCell(4).value = e.parteRel;
-        row.getCell(5).value = e.tipoCli;
-        row.getCell(6).value = e.denoExpCli;
-        row.getCell(7).value = e.tipoRegi;
-        row.getCell(8).value = e.paisEfecPagoGen;
-        row.getCell(9).value = e.paisEfecPagoParFis;
-        row.getCell(10).value = e.denopagoRegFis;
-        row.getCell(11).value = e.paisEfecExp;
-        row.getCell(12).value = e.exportacionDe;
-        row.getCell(13).value = e.tipIngExt;
-        row.getCell(14).value = e.ingextgravotropaís;
-        row.getCell(15).value = e.impuestootropaís;
-        row.getCell(16).value = e.tipoComprobante;
-        row.getCell(17).value = e.distAduanero;
-        row.getCell(18).value = e.anio;
-        row.getCell(19).value = e.regimen;
-        row.getCell(20).value = e.correlativo;
-        row.getCell(21).value = e.verificador;
-        row.getCell(22).value = e.docTransp;
-        row.getCell(23).value = e.fechaEmbarque;
-        row.getCell(24).value = e.fue;
-        row.getCell(25).value = e.valorFOB;
-        row.getCell(26).value = e.valorFOBComprobante;
-        row.getCell(27).value = e.establecimiento;
-        row.getCell(28).value = e.puntoEmision;
-        row.getCell(29).value = e.secuencial;
-        row.getCell(30).value = e.autorizacion;
-        row.getCell(31).value = e.fechaEmision;
+        row.getCell(1).value = e.tpIdClienteEx;
+        row.getCell(2).value = e.idClienteEx;
+        row.getCell(3).value = e.parteRel;
+        row.getCell(4).value = e.tipoCli;
+        row.getCell(5).value = e.denoExpCli;
+        row.getCell(6).value = e.tipoRegi;
+        row.getCell(7).value = e.paisEfecPagoGen;
+        row.getCell(8).value = e.paisEfecPagoParFis;
+        row.getCell(9).value = e.denopagoRegFis;
+        row.getCell(10).value = e.paisEfecExp;
+        row.getCell(11).value = e.exportacionDe;
+        row.getCell(12).value = e.tipIngExt;
+        row.getCell(13).value = e.ingextgravotropaís;
+        row.getCell(14).value = e.impuestootropaís;
+        row.getCell(15).value = e.tipoComprobante;
+        row.getCell(16).value = e.distAduanero;
+        row.getCell(17).value = e.anio;
+        row.getCell(18).value = e.regimen;
+        row.getCell(19).value = e.correlativo;
+        row.getCell(20).value = e.verificador;
+        row.getCell(21).value = e.docTransp;
+        row.getCell(22).value = e.fechaEmbarque;
+        row.getCell(23).value = e.fue;
+        row.getCell(24).value = e.valorFOB;
+        row.getCell(25).value = e.valorFOBComprobante;
+        row.getCell(26).value = e.establecimiento;
+        row.getCell(27).value = e.puntoEmision;
+        row.getCell(28).value = e.secuencial;
+        row.getCell(29).value = e.autorizacion;
+        row.getCell(30).value = e.fechaEmision;
         
         row.commit();
         rowIndex++;
@@ -249,59 +270,59 @@ export class AtsXlsmBuilder {
     const sCompras = workbook.getWorksheet('Compras Detalladas');
     if (!sCompras) return;
 
-    let idxCompras = 2;
+    let idxCompras = 3;
     this.compras.forEach((compra, index) => {
       const codigoCompra = index + 1;
       const c = compra.tipo1_y_2;
 
       const row = sCompras.getRow(idxCompras);
-      row.getCell(2).value = codigoCompra;
-      row.getCell(3).value = c.codSustento;
-      row.getCell(4).value = c.tpIdProv;
-      row.getCell(5).value = c.idProv;
-      row.getCell(6).value = c.tipoComprobante;
-      row.getCell(7).value = c.tipoProv;
-      row.getCell(8).value = c.denopr;
-      row.getCell(9).value = c.parteRel;
-      row.getCell(10).value = c.fechaRegistro;
-      row.getCell(11).value = c.establecimiento;
-      row.getCell(12).value = c.puntoEmision;
-      row.getCell(13).value = c.secuencial;
-      row.getCell(14).value = c.fechaEmision;
-      row.getCell(15).value = c.autorizacion;
-      row.getCell(16).value = c.baseNoGraIva;
-      row.getCell(17).value = c.baseImponible;
-      row.getCell(18).value = c.baseImpGrav;
-      row.getCell(19).value = c.baseImpExe;
-      row.getCell(20).value = c.montoIce;
-      row.getCell(21).value = c.montoIva;
-      row.getCell(22).value = c.valRetBien10;
-      row.getCell(23).value = c.valRetServ20;
-      row.getCell(24).value = c.valorRetBienes;
-      row.getCell(25).value = c.valRetServ50;
-      row.getCell(26).value = c.valorRetServicios;
-      row.getCell(27).value = c.valRetServ100;
-      row.getCell(28).value = c.valorRetencionNcNd;
-      row.getCell(29).value = c.totbasesImpReemb;
-      row.getCell(30).value = c.pagoLocExt;
-      row.getCell(31).value = c.tipoRegi;
-      row.getCell(32).value = c.paisEfecPagoGen;
-      row.getCell(33).value = c.paisEfecPagoParFis;
-      row.getCell(34).value = c.denopagoRegFis;
-      row.getCell(35).value = c.paisEfecPago;
-      row.getCell(36).value = c.aplicConvDobTrib;
-      row.getCell(37).value = c.pagExtSujRetNorLeg;
+      row.getCell(1).value = codigoCompra;
+      row.getCell(2).value = c.codSustento;
+      row.getCell(3).value = c.tpIdProv;
+      row.getCell(4).value = c.idProv;
+      row.getCell(5).value = c.tipoComprobante;
+      row.getCell(6).value = c.tipoProv;
+      row.getCell(7).value = c.denopr;
+      row.getCell(8).value = c.parteRel;
+      row.getCell(9).value = c.fechaRegistro;
+      row.getCell(10).value = c.establecimiento;
+      row.getCell(11).value = c.puntoEmision;
+      row.getCell(12).value = c.secuencial;
+      row.getCell(13).value = c.fechaEmision;
+      row.getCell(14).value = c.autorizacion;
+      row.getCell(15).value = c.baseNoGraIva;
+      row.getCell(16).value = c.baseImponible;
+      row.getCell(17).value = c.baseImpGrav;
+      row.getCell(18).value = c.baseImpExe;
+      row.getCell(19).value = c.montoIce;
+      row.getCell(20).value = c.montoIva;
+      row.getCell(21).value = c.valRetBien10;
+      row.getCell(22).value = c.valRetServ20;
+      row.getCell(23).value = c.valorRetBienes;
+      row.getCell(24).value = c.valRetServ50;
+      row.getCell(25).value = c.valorRetServicios;
+      row.getCell(26).value = c.valRetServ100;
+      row.getCell(27).value = c.valorRetencionNcNd;
+      row.getCell(28).value = c.totbasesImpReemb;
+      row.getCell(29).value = c.pagoLocExt;
+      row.getCell(30).value = c.tipoRegi;
+      row.getCell(31).value = c.paisEfecPagoGen;
+      row.getCell(32).value = c.paisEfecPagoParFis;
+      row.getCell(33).value = c.denopagoRegFis;
+      row.getCell(34).value = c.paisEfecPago;
+      row.getCell(35).value = c.aplicConvDobTrib;
+      row.getCell(36).value = c.pagExtSujRetNorLeg;
       
       if (compra.tipo1) {
-        row.getCell(38).value = compra.tipo1.pagoRegFis;
+        row.getCell(37).value = compra.tipo1.pagoRegFis;
       }
 
       if (compra.tipo1 && compra.tipo1.docModificado) {
-        row.getCell(39).value = compra.tipo1.docModificado;
-        row.getCell(40).value = compra.tipo1.estabModificado;
-        row.getCell(41).value = compra.tipo1.ptoEmiModificado;
-        row.getCell(42).value = compra.tipo1.secModificado;
-        row.getCell(43).value = compra.tipo1.autModificado;
+        row.getCell(38).value = compra.tipo1.docModificado;
+        row.getCell(39).value = compra.tipo1.estabModificado;
+        row.getCell(40).value = compra.tipo1.ptoEmiModificado;
+        row.getCell(41).value = compra.tipo1.secModificado;
+        row.getCell(42).value = compra.tipo1.autModificado;
       }
       
       row.commit();
@@ -313,15 +334,15 @@ export class AtsXlsmBuilder {
     const sFormasPago = workbook.getWorksheet('Compras Formas Pago');
     if (!sFormasPago) return;
 
-    let idxFormasPago = 2;
+    let idxFormasPago = 3;
     this.compras.forEach((compra, index) => {
       const codigoCompra = index + 1;
       if (compra.tipo1_y_2.pagos && compra.tipo1_y_2.pagos.pago) {
         const pagos = Array.isArray(compra.tipo1_y_2.pagos.pago) ? compra.tipo1_y_2.pagos.pago : [compra.tipo1_y_2.pagos.pago];
         pagos.forEach(p => {
           const row = sFormasPago.getRow(idxFormasPago);
-          row.getCell(2).value = codigoCompra;
-          row.getCell(3).value = p.formaPago;
+          row.getCell(1).value = codigoCompra;
+          row.getCell(2).value = p.formaPago;
           row.commit();
           idxFormasPago++;
         });
@@ -340,16 +361,16 @@ export class AtsXlsmBuilder {
         const retenciones = Array.isArray(compra.tipo1_y_2.retenciones.retencion) ? compra.tipo1_y_2.retenciones.retencion : [compra.tipo1_y_2.retenciones.retencion];
         retenciones.forEach(r => {
           const row = sRetenciones.getRow(idxRetenciones);
-          row.getCell(2).value = codigoCompra;
-          row.getCell(3).value = r.codigoRetencion;
-          row.getCell(4).value = r.baseImponible;
-          row.getCell(5).value = r.porcentajeRetener;
-          row.getCell(6).value = r.valorRetenido;
-          row.getCell(7).value = r.fechaPagoDiv;
-          row.getCell(8).value = r.imRentaSoc;
-          row.getCell(9).value = r.anioUtDiv;
-          row.getCell(10).value = r.numCajBan;
-          row.getCell(11).value = r.precCajBan;
+          row.getCell(1).value = codigoCompra;
+          row.getCell(2).value = r.codigoRetencion;
+          row.getCell(3).value = r.baseImponible;
+          row.getCell(4).value = r.porcentajeRetener;
+          row.getCell(5).value = r.valorRetenido;
+          row.getCell(6).value = r.fechaPagoDiv;
+          row.getCell(7).value = r.imRentaSoc;
+          row.getCell(8).value = r.anioUtDiv;
+          row.getCell(9).value = r.numCajBan;
+          row.getCell(10).value = r.precCajBan;
           row.commit();
           idxRetenciones++;
         });
@@ -361,28 +382,28 @@ export class AtsXlsmBuilder {
     const sReembolsos = workbook.getWorksheet('Compras Reembolsos');
     if (!sReembolsos) return;
 
-    let idxReembolsos = 2;
+    let idxReembolsos = 3;
     this.compras.forEach((compra, index) => {
       const codigoCompra = index + 1;
       if (compra.tipo1_y_2.reembolsos && compra.tipo1_y_2.reembolsos.reembolsoDetalle) {
         const reembolsos = Array.isArray(compra.tipo1_y_2.reembolsos.reembolsoDetalle) ? compra.tipo1_y_2.reembolsos.reembolsoDetalle : [compra.tipo1_y_2.reembolsos.reembolsoDetalle];
         reembolsos.forEach(r => {
           const row = sReembolsos.getRow(idxReembolsos);
-          row.getCell(2).value = codigoCompra;
-          row.getCell(3).value = r.tipoComprobanteReemb;
-          row.getCell(4).value = r.tpIdProvReemb;
-          row.getCell(5).value = r.idProvReemb;
-          row.getCell(6).value = r.establecimientoReemb;
-          row.getCell(7).value = r.puntoEmisionReemb;
-          row.getCell(8).value = r.secuencialReemb;
-          row.getCell(9).value = r.fechaEmisionReemb;
-          row.getCell(10).value = r.autorizacionReemb;
-          row.getCell(11).value = r.baseImponibleReemb;
-          row.getCell(12).value = r.baseImpGravReemb;
-          row.getCell(13).value = r.baseNoGraIvaReemb;
-          row.getCell(14).value = r.baseImpExeReemb;
-          row.getCell(15).value = r.montoIceRemb;
-          row.getCell(16).value = r.montoIvaRemb;
+          row.getCell(1).value = codigoCompra;
+          row.getCell(2).value = r.tipoComprobanteReemb;
+          row.getCell(3).value = r.tpIdProvReemb;
+          row.getCell(4).value = r.idProvReemb;
+          row.getCell(5).value = r.establecimientoReemb;
+          row.getCell(6).value = r.puntoEmisionReemb;
+          row.getCell(7).value = r.secuencialReemb;
+          row.getCell(8).value = r.fechaEmisionReemb;
+          row.getCell(9).value = r.autorizacionReemb;
+          row.getCell(10).value = r.baseImponibleReemb;
+          row.getCell(11).value = r.baseImpGravReemb;
+          row.getCell(12).value = r.baseNoGraIvaReemb;
+          row.getCell(13).value = r.baseImpExeReemb;
+          row.getCell(14).value = r.montoIceRemb;
+          row.getCell(15).value = r.montoIvaRemb;
           row.commit();
           idxReembolsos++;
         });

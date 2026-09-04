@@ -2,17 +2,15 @@ const ExcelJS = require('exceljs');
 const path = require('path');
 
 async function inspectSheets() {
-  const filePath = path.join(__dirname, '..', '..', '..', '..', '..', '..', '..', '07Other', 'Ejemplo_PlantillaATS2020_Mensual.xlsx');
+  const filePath = path.join(__dirname, '..', '..', '..', '..', '..', '..', '..', '07Other', 'PlantillaATS.xlsx');
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(filePath);
   
-  const sheets = ['Compras Detalladas', 'Compras Formas Pago', 'Compras Retenciones', 'Compras Reembolsos'];
-  
-  for (const s of sheets) {
-    const sheet = workbook.getWorksheet(s);
-    if (sheet) {
-      console.log(`\nHeaders para ${s} (Fila 2):`);
-      console.log(JSON.stringify(sheet.getRow(2).values));
+  const sheet = workbook.getWorksheet('Compensaciones Ventas');
+  if (sheet) {
+    console.log(`\n--- Compensaciones Ventas ---`);
+    for (let i = 1; i <= 3; i++) {
+      console.log(`Fila ${i}:`, JSON.stringify(sheet.getRow(i).values));
     }
   }
 }

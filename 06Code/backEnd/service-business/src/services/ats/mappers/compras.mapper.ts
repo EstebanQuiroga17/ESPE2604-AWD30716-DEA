@@ -48,7 +48,7 @@ export class CompraMapper implements IMapper<ICompraInput, ICompraAts> {
         tipoComprobante: input.infoTributaria.codDoc || "01",
         parteRel: input.parteRelacionada || "NO",
         tipoProv: "", // Opcional según tabla
-        denopr: "", // Denominación (opcional si es pasaporte)
+        denopr: input.infoTributaria.razonSocial || "", // Denominación
         fechaRegistro: input.fechaRegistroContable || input.infoFactura.fechaEmision,
         establecimiento: input.infoTributaria.estab,
         puntoEmision: input.infoTributaria.ptoEmi,
@@ -126,6 +126,10 @@ export class CompraMapper implements IMapper<ICompraInput, ICompraAts> {
         totbasesImpReemb: "0.00",
         montoIceReemb: "0.00",
         montoIvaRemb: "0.00",
+        
+        pagos: input.infoFactura.pagos as any,
+        retenciones: input.retenciones as any,
+        reembolsos: input.reembolsos as any
       }
     };
 
